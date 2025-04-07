@@ -3,8 +3,12 @@ _default:
 
 # builds the program
 build:
-    gcc main.c -o main
+    gcc -g -o main main.c src/mmap_allocator.c
 
 # builds and runs the program
 run: build
     ./main
+
+# deletes all build artifacts
+clean:
+    rm main
