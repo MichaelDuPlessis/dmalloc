@@ -3,7 +3,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-MmapAllocation mmap_malloc(size_t num_pages) {
+MmapAllocation mmap_alloc(size_t num_pages) {
   // getting the page size
   size_t page_size = sysconf(_SC_PAGESIZE);
   // calculating how much memory will be allocated

@@ -1,11 +1,10 @@
+#include "src/distributer.h"
 #include <stdio.h>
-#include "src/mmap_allocator.h"
 
 int main() {
-  // int *x = mmap_malloc(sizeof(x));
-  // *x = 42;
+  init_distributer();
 
-  // printf("The answer to life the universe and everything is %d\n", *x);
+  printf("Hello World\n");
 
-  // mmap_free(x);
+  deinit_distributer();
 }

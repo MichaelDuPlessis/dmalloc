@@ -3,7 +3,7 @@ _default:
 
 # builds the program
 build:
-    gcc -g -o main main.c src/mmap_allocator.c
+    gcc -g -o main main.c src/*.c
 
 # builds and runs the program
 run: build
