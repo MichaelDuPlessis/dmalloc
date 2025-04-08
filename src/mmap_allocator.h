@@ -3,8 +3,18 @@
 
 #include <stddef.h>
 
-void* mmap_malloc(size_t size);
+// The memory from a mmap allocation
+typedef struct {
+  // the amount of memory allocated
+  size_t size;
+  // the pointer to the memory
+  void* ptr;
+} MmapAllocation;
 
-void mmap_free(void *ptr);
+// allocates memory using mmap
+MmapAllocation mmap_alloc(size_t size);
+
+// deallocates memory using mmap
+void mmap_free(MmapAllocation alloc);
 
 #endif

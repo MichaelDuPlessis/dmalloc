@@ -2,10 +2,10 @@
 #include "src/mmap_allocator.h"
 
 int main() {
-  int *x = mmap_malloc(sizeof(x));
-  *x = 42;
+  // int *x = mmap_malloc(sizeof(x));
+  // *x = 42;
 
-  printf("The answer to life the universe and everything is %d\n", *x);
+  // printf("The answer to life the universe and everything is %d\n", *x);
 
-  mmap_free(x);
+  // mmap_free(x);
 }
