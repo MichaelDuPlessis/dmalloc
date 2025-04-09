@@ -34,7 +34,7 @@ void init_distributer() {
   };
 
   // creating chunk head
-  size_t available_memory =size - sizeof(Chunk); 
+  size_t available_memory = size - sizeof(Chunk);
   Chunk *chunk_head = (Chunk *)ptr;
   *chunk_head = (Chunk){
       .next = NULL,
@@ -102,7 +102,8 @@ void *request_block(size_t size) {
           // assigning new head
           curr_chunk->block_head = new_head;
         } else {
-          // if there is not enough memory to create a new block use all the memory for the allocation
+          // if there is not enough memory to create a new block use all the
+          // memory for the allocation
           curr_chunk->block_head = next;
           size = curr_block_node->size;
         }
@@ -129,4 +130,44 @@ void *request_block(size_t size) {
 
   // this means we are out of memory
   return NULL;
+}
+
+// checks if a pointer belongs to a chunk
+bool pointer_belongs_to_chunk(void *ptr, Chunk *chunk) {
+  return (ptr >= chunk->mmap_allocation.ptr) &&
+         (ptr < (void *)((char *)chunk->mmap_allocation.ptr +
+                         chunk->mmap_allocation.size));
+}
+
+// frees the memory from a chunk
+void free_memory_from_chunk(void *ptr, Chunk *chunk) {
+  // get the amount of memory used by the header and the allocation
+  BlockHeader *header = (BlockHeader *)ptr - 1;
+  size_t total_memory_used = header->size + sizeof(BlockHeader);
+
+  // replacing the header with a node
+  BlockNode *node = (BlockNode *)header;
+  *node = (BlockNode){
+    .next = chunk->block_head,
+    .size = total_memory_used,
+  };
+
+  // making the node the new head of the free list
+  chunk->block_head = node;
+  chunk->free_bytes += node->size;
+}
+
+void return_block(void *ptr) {
+  // first check if the memory was allocated by this allocator
+  Chunk *curr_chunk = distributer.chunk_head;
+
+  while (curr_chunk) {
+    if (pointer_belongs_to_chunk(ptr, curr_chunk)) {
+      free_memory_from_chunk(ptr, curr_chunk);
+      return;
+    }
+  }
+
+  // if memory was not allocated by this allocator exit the program 
+  exit(EXIT_FAILURE);
 }

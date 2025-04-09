@@ -13,7 +13,7 @@ typedef struct BlockHeader {
 typedef struct BlockNode {
   // the next spot for a block in the list
   struct BlockNode *next;
-  // the amount of memory used by the allocation
+  // the amount of memory available to the block
   size_t size;
 } BlockNode;
 
