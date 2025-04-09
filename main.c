@@ -1,10 +1,8 @@
-#include "src/distributer.h"
+#include "src/allocator.h"
 #include <stdio.h>
 
 int main() {
-  init_distributer();
+  int *x = malloc(sizeof(int));
 
-  printf("Hello World\n");
-
-  deinit_distributer();
+  free(x);
 }
