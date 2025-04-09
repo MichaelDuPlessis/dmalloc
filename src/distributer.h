@@ -10,7 +10,7 @@ typedef struct Chunk {
   // the next chunk of memory
   struct Chunk* next;
   // where the chunk starts
-  BlockNode* ptr;
+  BlockNode* block_head;
   // the amount of memory the chunk has left after the header
   size_t size;
   // the original allocation
@@ -22,5 +22,12 @@ void init_distributer();
 
 // deinitializes the distributer
 void deinit_distributer();
+
+// requests a block of memory
+// the amount of memory requested is in bytes
+void *request_block(size_t size);
+
+// returns a block of memory
+void return_block(void *ptr);
 
 #endif
