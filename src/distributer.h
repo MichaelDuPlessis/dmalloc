@@ -13,8 +13,10 @@ typedef struct Chunk {
   BlockNode* block_head;
   // the amount of memory the chunk has left after the header
   size_t size;
+  // the amount of memory that is free
+  size_t free_bytes;
   // the original allocation
-  MmapAllocation allocation;
+  MmapAllocation mmap_allocation;
 } Chunk;
 
 // initializes the distributer

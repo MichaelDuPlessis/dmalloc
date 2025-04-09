@@ -1,10 +1,10 @@
 #include "distributer.h"
 #include "block.h"
 #include "mmap_allocator.h"
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 
 // specifies how many pages to start with
 const size_t INITIAL_NUM_PAGES = 1;
@@ -34,12 +34,14 @@ void init_distributer() {
   };
 
   // creating chunk head
-  Chunk* chunk_head = (Chunk *)ptr;
+  size_t available_memory =size - sizeof(Chunk); 
+  Chunk *chunk_head = (Chunk *)ptr;
   *chunk_head = (Chunk){
       .next = NULL,
       .block_head = block_head,
-      size = size - sizeof(Chunk),
-      .allocation = allocation,
+      size = available_memory,
+      .mmap_allocation = allocation,
+      .free_bytes = available_memory,
   };
 
   distributer.chunk_head = chunk_head;
@@ -51,8 +53,8 @@ void deinit_distributer() {
   Chunk *current = distributer.chunk_head;
 
   while (current) {
-    Chunk* next = current->next;
-    mmap_free(current->allocation);
+    Chunk *next = current->next;
+    mmap_free(current->mmap_allocation);
 
     current = next;
   }
@@ -68,9 +70,11 @@ void *request_block(size_t size) {
   }
 
   Chunk *curr_chunk = distributer.chunk_head;
+  // the amount of memory the header and the allocation takes
+  size_t total_allocation_size = sizeof(BlockHeader) + size;
 
   // iterating over chunks
-  while (curr_chunk) {
+  while (curr_chunk && curr_chunk->free_bytes >= total_allocation_size) {
     // iterating over block nodes
     BlockNode *curr_block_node = curr_chunk->block_head;
 
@@ -81,31 +85,48 @@ void *request_block(size_t size) {
         // setting the next node
         // getting the next pointer
         BlockNode *next = curr_block_node->next;
-        // the amount of memory the header and the allocation takes
-        size_t total_allocation_size = sizeof(BlockHeader) + size;
-        BlockNode new_head = {
-            // convert to char since it is gaurenteed to be 1 byte
-            .next = next,
-            .size = curr_block_node->size - total_allocation_size,
-        };
 
-        // saving the new head to memory
-        curr_chunk->block_head =
-            (BlockNode *)((char *)curr_block_node + total_allocation_size);
+        // the amount of memory left in the node after the allocation
+        size_t memory_left = curr_block_node->size - total_allocation_size;
+
+        // checking if there is enough space to create a new block node
+        if (memory_left >= sizeof(BlockNode)) {
+          // convert to char since it is gaurenteed to be 1 byte
+          BlockNode *new_head =
+              (BlockNode *)((char *)curr_block_node + total_allocation_size);
+          *new_head = (BlockNode){
+              .next = next,
+              .size = curr_block_node->size - total_allocation_size,
+          };
+
+          // assigning new head
+          curr_chunk->block_head = new_head;
+        } else {
+          // if there is not enough memory to create a new block use all the memory for the allocation
+          curr_chunk->block_head = next;
+          size = curr_block_node->size;
+        }
 
         // creating header for the memory to be allocated
-        BlockHeader header = {
+        BlockHeader *header = (BlockHeader *)curr_block_node;
+        *header = (BlockHeader){
             .size = size,
         };
 
-        // assigning the block header
-        BlockHeader *ptr = (BlockHeader *)curr_block_node;
-        *ptr = header;
-        // returning a pointer to the data
-        return (void *)(ptr + 1);
+        // keeping track of how much has been allocated
+        curr_chunk->free_bytes += total_allocation_size;
+        // returning a pointer to the data which will just be after the header
+        return (void *)(header + 1);
       }
+
+      // if this block does not have enough space go to the next one
+      curr_block_node = curr_block_node->next;
     }
+
+    // if this chunk cannot satisfy the request go to the next one
+    curr_chunk = curr_chunk->next;
   }
 
+  // this means we are out of memory
   return NULL;
 }
