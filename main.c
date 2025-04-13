@@ -5,7 +5,7 @@ int main() {
   int *x = malloc(sizeof(int));
   *x = 42;
 
-  printf("The answer to the life, the universe and everythign is %d\n", *x);
+  printf("The answer to the life, the universe and everything is %d.\n", *x);
 
   free(x);
 }
