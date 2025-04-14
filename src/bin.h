@@ -3,8 +3,10 @@
 
 #include <stddef.h>
 
-// this type is used to represent 8 bytes
+// this type is used to represent the free spots in the region of memory
 #define BITMASK unsigned long
+// this is the max size of the type used to reprsent the bitmask
+#define BITMASK_MAX (BITMASK)0 - 1
 
 // A bin and all its metadata
 typedef struct Bin {

@@ -19,11 +19,13 @@ struct {
 
 // finding which bin an allocation belongs to
 size_t bin_index(size_t size) {
-  // TODO: Maybe don't use size_t it isn't necessary
+  // TODO: maybe don't use size_t it may not be necessary
   size_t bin = 0;
-  size--;
-  while (size >>= 1)
+  size_t power = 1;
+  while (power < size) {
+    power <<= 1;
     bin++;
+  }
   return bin;
 }
 
@@ -37,7 +39,10 @@ void *malloc(size_t size) {
   // getting the bin index for the allocation
   size_t index = bin_index(size);
   // allocating from bin
-  return bin_alloc(&allocator.bins[index], 1 << index);
+  return bin_alloc(&allocator.bins[index], size);
 }
 
-void free(void *ptr) { return_block(ptr); }
+void free(void *ptr) {
+  // determining if the memory was allocated from a free list or from a bin
+  return_block(ptr);
+}
