@@ -6,6 +6,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// This type is used to represent a byte
+#define BYTE char
+
 // specifies how many pages to start with
 const size_t INITIAL_NUM_PAGES = 1;
 
@@ -93,7 +96,7 @@ void *request_block(size_t size) {
         if (memory_left >= sizeof(BlockNode)) {
           // convert to char since it is gaurenteed to be 1 byte
           BlockNode *new_head =
-              (BlockNode *)((char *)curr_block_node + total_allocation_size);
+              (BlockNode *)((BYTE *)curr_block_node + total_allocation_size);
           *new_head = (BlockNode){
               .next = next,
               .size = curr_block_node->size - total_allocation_size,
@@ -128,6 +131,8 @@ void *request_block(size_t size) {
     curr_chunk = curr_chunk->next;
   }
 
+  // TODO: Add logic to allocate more memory from mmap
+
   // this means we are out of memory
   return NULL;
 }
@@ -135,7 +140,7 @@ void *request_block(size_t size) {
 // checks if a pointer belongs to a chunk
 bool pointer_belongs_to_chunk(void *ptr, Chunk *chunk) {
   return (ptr >= chunk->mmap_allocation.ptr) &&
-         (ptr < (void *)((char *)chunk->mmap_allocation.ptr +
+         (ptr < (void *)((BYTE *)chunk->mmap_allocation.ptr +
                          chunk->mmap_allocation.size));
 }
 
