@@ -71,3 +71,7 @@ void *bin_alloc(BinManager *bin_manager, size_t bin_size) {
   // memory is being allocated multiplied by the size each object takes
   return (void *)((char *)current->ptr + spot * bin_size);
 }
+
+// void *bin_free(BinManager *bin_manager, size_t bin_size) {
+  // finding bin that stored the memory
+// }

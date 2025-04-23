@@ -11,7 +11,7 @@ typedef struct {
   void* ptr;
 } MmapAllocation;
 
-// allocates memory using mmap
+// allocates memory using mmap. It takes the number of pages to allocate
 MmapAllocation mmap_alloc(size_t size);
 
 // deallocates memory using mmap
