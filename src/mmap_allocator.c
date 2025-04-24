@@ -12,12 +12,16 @@ MmapAllocation mmap_alloc(size_t num_pages) {
                    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
   return (MmapAllocation){
-    .size = alloc_size,
-    .ptr = ptr,
+      .size = alloc_size,
+      .ptr = ptr,
   };
 }
 
 void mmap_free(MmapAllocation alloc) {
   // deallocating memory
   munmap(alloc.ptr, alloc.size);
+}
+
+size_t calculate_num_pages(size_t size) {
+  return (size + PAGE_SIZE - 1) / PAGE_SIZE;
 }
