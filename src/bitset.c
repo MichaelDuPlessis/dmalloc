@@ -28,7 +28,7 @@ void init_bitset(BitSet *bitset, size_t num_bits) {
   }
 }
 
-void bitset_set(BitSet *bitset, size_t index) {
+void set_bit(BitSet *bitset, size_t index, bool val) {
   if (index >= bitset->num_bits)
     return;
 
@@ -45,5 +45,13 @@ void bitset_set(BitSet *bitset, size_t index) {
       return;
   }
 
-  bitset->words[word_idx] |= ((size_t)1 << bit_idx);
+  bitset->words[word_idx] |= ((size_t)val << bit_idx);
+}
+
+void mark_bit(BitSet *bitset, size_t index) {
+  set_bit(bitset, index, true);
+}
+
+void clear_bit(BitSet *bitset, size_t index) {
+  set_bit(bitset, index, false);
 }
