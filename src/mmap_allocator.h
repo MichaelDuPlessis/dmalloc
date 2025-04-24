@@ -2,6 +2,10 @@
 #define MMAP_ALLOCATOR_H
 
 #include <stddef.h>
+#include <unistd.h>
+
+// the size of the page on the os
+#define PAGE_SIZE sysconf(_SC_PAGESIZE)
 
 // The memory from a mmap allocation
 typedef struct {

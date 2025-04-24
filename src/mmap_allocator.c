@@ -1,11 +1,9 @@
 #include "mmap_allocator.h"
-#include <stdio.h>
 #include <sys/mman.h>
-#include <unistd.h>
 
 MmapAllocation mmap_alloc(size_t num_pages) {
   // getting the page size
-  size_t page_size = sysconf(_SC_PAGESIZE);
+  size_t page_size = PAGE_SIZE;
   // calculating how much memory will be allocated
   size_t alloc_size = num_pages * page_size;
 
