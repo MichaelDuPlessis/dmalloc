@@ -14,6 +14,8 @@ typedef struct {
   // The number number of bits in the last word that are used
   size_t last_word_bits;
   // The words in the bitset
+  // TODO: This currently wastes memory since realistically the array could start here
+  // find a way to fix it
   WORD *words;
 } BitSet;
 
@@ -22,9 +24,6 @@ size_t size_of_bitset(size_t num_bits);
 
 // Initializes a bitset from a region of memory. Unused bits are marked (set to 1)
 void init_bitset(BitSet *bitset, size_t num_bits);
-
-// Sets a bit to the specified value
-void set_bit(BitSet *bitset, size_t index, bool val);
 
 // Marks the bit (sets it to 1)
 void mark_bit(BitSet *bitset, size_t index);

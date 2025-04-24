@@ -29,7 +29,7 @@ size_t bin_index(size_t size) {
   return bin;
 }
 
-void *malloc(size_t size) {
+void *dmalloc(size_t size) {
   // seeing if there is a valid bin for the allocation
   if (size > MAX_BIN_SIZE) {
     // if not valid just allocate from the free list
@@ -42,7 +42,7 @@ void *malloc(size_t size) {
   return bin_alloc(&allocator.bins[index], size);
 }
 
-void free(void *ptr) {
+void dfree(void *ptr) {
   // determining if the memory was allocated from a free list or from a bin
   return_block(ptr);
 }

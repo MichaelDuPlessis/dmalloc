@@ -19,7 +19,8 @@ static size_t calculate_word_idx(size_t index) { return index / BITS_PER_WORD; }
 static size_t calculate_bit_idx(size_t index) { return index % BITS_PER_WORD; }
 
 size_t size_of_bitset(size_t num_bits) {
-  return sizeof(BitSet) + calculate_num_words(num_bits);
+  // the -1 is because the pointer is the first available spot in memory
+  return sizeof(BitSet) + calculate_num_words(num_bits) * sizeof(WORD);
 }
 
 void init_bitset(BitSet *bitset, size_t num_bits) {
@@ -32,6 +33,11 @@ void init_bitset(BitSet *bitset, size_t num_bits) {
 
   // getting the number of words
   size_t num_words = calculate_num_words(num_bits);
+
+  // pointing the words pointer to the corred memory location
+  // adding two for the first two members in the struct
+  bitset->words = (WORD *)((size_t *)bitset + 2) + 1;
+
   // zeroing out buffer
   // go until the second last one as there may be unused bits
   for (size_t i = 0; i < num_words - 1; i++) {
@@ -39,11 +45,15 @@ void init_bitset(BitSet *bitset, size_t num_bits) {
   }
 
   // setting unused bits to 1 in the last word
-  bitset->words[num_words - 1] =
-      ((WORD)1 << (BITS_PER_WORD - bitset->last_word_bits)) - 1;
+  // TODO: Find a way to get rid of this if statement
+  if (bitset->last_word_bits == 0) {
+    bitset->words[num_words - 1] = 0;
+  } else {
+    bitset->words[num_words - 1] = ~(((WORD)1 << (bitset->last_word_bits)) - 1);
+  }
 }
 
-void set_bit(BitSet *bitset, size_t index, bool val) {
+void mark_bit(BitSet *bitset, size_t index) {
   if (index >= bitset->num_bits)
     return;
 
@@ -60,14 +70,29 @@ void set_bit(BitSet *bitset, size_t index, bool val) {
       return;
   }
 
-  bitset->words[word_idx] |= ((size_t)val << bit_idx);
+  bitset->words[word_idx] |= ((WORD) true << bit_idx);
 }
 
-void mark_bit(BitSet *bitset, size_t index) { set_bit(bitset, index, true); }
+void clear_bit(BitSet *bitset, size_t index) {
+  if (index >= bitset->num_bits)
+    return;
 
-void clear_bit(BitSet *bitset, size_t index) { set_bit(bitset, index, false); }
+  // figuring out what word contains the bit to flip
+  size_t word_idx = calculate_word_idx(index);
+  // the index within the word that needs to be changed
+  size_t bit_idx = calculate_bit_idx(index);
 
-// sadly this code is copied and pasted from set_bit
+  // checking if index is in the last word and if there are any unused bits
+  if (word_idx == (bitset->num_bits / BITS_PER_WORD) &&
+      bitset->last_word_bits != 0) {
+    // makign sure that we are not trying to set one of the last invalid bits
+    if (bit_idx >= bitset->last_word_bits)
+      return;
+  }
+
+  bitset->words[word_idx] &= ~((WORD) true << bit_idx);
+}
+
 void flip_bit(BitSet *bitset, size_t index) {
   if (index >= bitset->num_bits)
     return;
@@ -85,7 +110,7 @@ void flip_bit(BitSet *bitset, size_t index) {
       return;
   }
 
-  bitset->words[word_idx] ^= ((size_t)1 << bit_idx);
+  bitset->words[word_idx] ^= ((WORD)1 << bit_idx);
 }
 
 bool check_bit(BitSet *bitset, size_t index) {
@@ -128,13 +153,9 @@ ssize_t first_unmarked_bit(BitSet *bitset) {
 
 void print_bitset(BitSet *bitset) {
   // iterate through all the bits
-  for (size_t i = 0; i < bitset->num_bits; i++) {
-    // get the word index and bit index within that word
-    size_t word_idx = calculate_word_idx(i);
-    size_t bit_idx = calculate_bit_idx(i);
-
+  for (size_t i = 0; i < 128; i++) {
     // check if the bit is set or not
-    bool bit_value = (bitset->words[word_idx] >> bit_idx) & 1;
+    bool bit_value = check_bit(bitset, i);
 
     // print the bit value
     printf("%d", bit_value);
