@@ -7,6 +7,13 @@
 
 #define TESTING_TYPE int
 
+
+void* get_page_start(void* ptr) {
+    size_t page_size = sysconf(_SC_PAGESIZE);  // typically 4096
+    uintptr_t addr = (uintptr_t)ptr;
+    return (void*)(addr & ~(page_size - 1));
+}
+
 int main() {
   size_t page_size = sysconf(_SC_PAGESIZE);
   MmapAllocation m = mmap_alloc(1);
@@ -14,6 +21,7 @@ int main() {
   printf("Memory address of m: %p.\n", m.ptr);
   printf("Memory address of m: %lu.\n", (uintptr_t)m.ptr);
   printf("Memory address divisable by page size: %d.\n", (uintptr_t)m.ptr % page_size == 0);
+  printf("Memory address start: %lu.\n", (uintptr_t)get_page_start((void*) ((char *)m.ptr + 147)));
   mmap_free(m);
   // TESTING_TYPE *x = malloc(sizeof(TESTING_TYPE));
   // TESTING_TYPE *y = malloc(sizeof(TESTING_TYPE));
