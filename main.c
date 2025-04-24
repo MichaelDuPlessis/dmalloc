@@ -1,7 +1,6 @@
 #include "src/allocator.h"
 #include "src/mmap_allocator.h"
 #include <stdio.h>
-#include <stdio.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
@@ -15,14 +14,14 @@ void* get_page_start(void* ptr) {
 }
 
 int main() {
-  size_t page_size = sysconf(_SC_PAGESIZE);
-  MmapAllocation m = mmap_alloc(1);
-  printf("Size of page: %ld\n", page_size);
-  printf("Memory address of m: %p.\n", m.ptr);
-  printf("Memory address of m: %lu.\n", (uintptr_t)m.ptr);
-  printf("Memory address divisable by page size: %d.\n", (uintptr_t)m.ptr % page_size == 0);
-  printf("Memory address start: %lu.\n", (uintptr_t)get_page_start((void*) ((char *)m.ptr + 147)));
-  mmap_free(m);
+  // size_t page_size = sysconf(_SC_PAGESIZE);
+  // MmapAllocation m = mmap_alloc(1);
+  // printf("Size of page: %ld\n", page_size);
+  // printf("Memory address of m: %p.\n", m.ptr);
+  // printf("Memory address of m: %lu.\n", (uintptr_t)m.ptr);
+  // printf("Memory address divisable by page size: %d.\n", (uintptr_t)m.ptr % page_size == 0);
+  // printf("Memory address start: %lu.\n", (uintptr_t)get_page_start((void*) ((char *)m.ptr + 147)));
+  // mmap_free(m);
   // TESTING_TYPE *x = malloc(sizeof(TESTING_TYPE));
   // TESTING_TYPE *y = malloc(sizeof(TESTING_TYPE));
 

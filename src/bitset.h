@@ -2,34 +2,47 @@
 #define BITSET_H
 
 #include <stdbool.h>
-#include <stddef.h>
+#include <sys/types.h>
 
-// the type to use for a word
+// The type to use for a word
 #define WORD size_t
 
-// the BitSet struct
+// The BitSet struct
 typedef struct {
-  // number of bits
+  // Number of bits
   size_t num_bits;
-  // the number number of bits in the last word that are used
+  // The number number of bits in the last word that are used
   size_t last_word_bits;
-  // the words in the bitset
+  // The words in the bitset
   WORD *words;
 } BitSet;
 
-// calculates the amount of memory needed for a bitset with num_bits
+// Calculates the amount of memory needed for a bitset with num_bits
 size_t size_of_bitset(size_t num_bits);
 
-// initializes a bitset from a region of memory
+// Initializes a bitset from a region of memory. Unused bits are marked (set to 1)
 void init_bitset(BitSet *bitset, size_t num_bits);
 
-// sets a bit to the specified value
+// Sets a bit to the specified value
 void set_bit(BitSet *bitset, size_t index, bool val);
 
-// marks the bit (sets it to 1)
+// Marks the bit (sets it to 1)
 void mark_bit(BitSet *bitset, size_t index);
 
-// clears the bit (sets it to 0)
+// Clears the bit (sets it to 0)
 void clear_bit(BitSet* bitset, size_t index);
+
+// Flips the bit at the specified location
+void flip_bit(BitSet *bitset, size_t index);
+
+// Checks whether the bit is marked or not
+// Unused bits will always return true
+bool check_bit(BitSet *bitset, size_t index);
+
+// Finds the first occurence of an unmarked bit or -1 if none are found
+ssize_t first_unmarked_bit(BitSet *bitset);
+
+// prints the bitset to stdout
+void print_bitset(BitSet *bitset);
 
 #endif
