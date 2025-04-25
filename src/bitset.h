@@ -16,7 +16,7 @@ typedef struct {
   // The words in the bitset
   // TODO: This currently wastes memory since realistically the array could start here
   // find a way to fix it
-  WORD *words;
+  WORD words[];
 } BitSet;
 
 // Calculates the amount of memory needed for a bitset with num_bits

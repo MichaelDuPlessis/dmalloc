@@ -10,8 +10,12 @@
 
 void test_bitset_operations() {
   const size_t num_bits = 64;
+  const size_t bitset_size = size_of_bitset(num_bits);
+
+  printf("Size of BitSet: %zu\n", bitset_size);
+
   // Initialize a bitset with 64 bits
-  BitSet *bitset = malloc(size_of_bitset(num_bits));
+  BitSet *bitset = malloc(bitset_size);
   init_bitset(bitset, num_bits);
 
   // Test 1: Check that all bits are initially set to 0

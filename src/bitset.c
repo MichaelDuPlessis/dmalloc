@@ -34,10 +34,6 @@ void init_bitset(BitSet *bitset, size_t num_bits) {
   // getting the number of words
   size_t num_words = calculate_num_words(num_bits);
 
-  // pointing the words pointer to the corred memory location
-  // adding two for the first two members in the struct
-  bitset->words = (WORD *)((size_t *)bitset + 2) + 1;
-
   // zeroing out buffer
   // go until the second last one as there may be unused bits
   for (size_t i = 0; i < num_words - 1; i++) {
