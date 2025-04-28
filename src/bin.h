@@ -22,7 +22,4 @@ typedef struct {
   Bin *head;
 } BinManager;
 
-// initializes the bin
-void init_bin(Bin *bin, size_t bin_size);
-
 #endif

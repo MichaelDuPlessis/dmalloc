@@ -41,7 +41,10 @@ bool check_bit(BitSet *bitset, size_t index);
 // Finds the first occurence of an unmarked bit or -1 if none are found
 ssize_t find_first_unmarked_bit(BitSet *bitset);
 
-// prints the bitset to stdout
+// Prints the bitset to stdout
 void print_bitset(BitSet *bitset);
+
+// Checks if all bits in the bitset are marked
+bool all_bits_marked(BitSet *bitset);
 
 #endif

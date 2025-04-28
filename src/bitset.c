@@ -150,6 +150,11 @@ ssize_t find_first_unmarked_bit(BitSet *bitset) {
   return -1;
 }
 
+bool all_bits_marked(BitSet *bitset) {
+ // TODO: Maybe add a size parameter for speed 
+ return find_first_unmarked_bit(bitset) == -1;
+}
+
 void print_bitset(BitSet *bitset) {
   // iterate through all the bits
   for (size_t i = 0; i < 128; i++) {
