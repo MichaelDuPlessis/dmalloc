@@ -29,7 +29,7 @@ void init_bitset(BitSet *bitset, size_t num_bits);
 void mark_bit(BitSet *bitset, size_t index);
 
 // Clears the bit (sets it to 0)
-void clear_bit(BitSet* bitset, size_t index);
+void unmark_bit(BitSet* bitset, size_t index);
 
 // Flips the bit at the specified location
 void flip_bit(BitSet *bitset, size_t index);
@@ -39,7 +39,7 @@ void flip_bit(BitSet *bitset, size_t index);
 bool check_bit(BitSet *bitset, size_t index);
 
 // Finds the first occurence of an unmarked bit or -1 if none are found
-ssize_t first_unmarked_bit(BitSet *bitset);
+ssize_t find_first_unmarked_bit(BitSet *bitset);
 
 // prints the bitset to stdout
 void print_bitset(BitSet *bitset);

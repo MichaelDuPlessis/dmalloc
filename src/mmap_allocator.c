@@ -25,3 +25,8 @@ void mmap_free(MmapAllocation alloc) {
 size_t calculate_num_pages(size_t size) {
   return (size + PAGE_SIZE - 1) / PAGE_SIZE;
 }
+
+void *calculate_page_start(void *ptr) {
+  uintptr_t addr = (uintptr_t)ptr;
+  return (void *)(addr & ~(PAGE_SIZE - 1));
+}

@@ -28,4 +28,9 @@ void mmap_free(MmapAllocation alloc);
 // of pages required for that amount of memory
 size_t calculate_num_pages(size_t size);
 
+// Giving a memory adderess that exist in a region of memory of a page
+// it returns the start address of the page. The page allocations must
+// be allocated in powers of 2 for this function to work
+void *calculate_page_start(void* ptr);
+
 #endif

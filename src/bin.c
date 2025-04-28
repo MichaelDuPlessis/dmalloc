@@ -45,9 +45,49 @@ void init_bin(Bin *bin, size_t bin_size) {
   size_t num_bits = calculate_bitset_size(bin_size);
 
   // initializing bitset
-  // since the bitset has to at the end this is a clever way to get its start
+  // since the bitset has to be at the end this is a clever way to get its start
   init_bitset(((BitSet *)(bin + 1)) - sizeof(BitSet), num_bits);
 
   // Setting where the initial memory used for allocation begins
   bin->ptr = (void *)(sizeof(Bin) + size_of_bitset(num_bits) - sizeof(BitSet));
+}
+
+void *bin_alloc(Bin *bin) {
+  // finding first free available slot
+  size_t index = find_first_unmarked_bit(&bin->bitset);
+
+  // if not index was found return null
+  if (index == -1) {
+    return NULL;
+  }
+
+  // mark block as used
+  mark_bit(&bin->bitset, index);
+
+  // return corresponding block of memory
+  return (void *)((char *)bin->ptr + index * bin->bin_size);
+}
+
+void bin_free(void *ptr) {
+  // pages are aligned to their allocation size
+  // this can be used to figure out where the region
+  // of memory starts and thus get the header information
+
+  // getting page start  
+  void *page_start = calculate_page_start(ptr);
+
+  // now that we have the start of the page the header information
+  // can be extracted
+  Bin *bin = (Bin *)page_start;
+
+  // now the index of the allocation needs to be derived
+  // allocation is done according to this formula
+  // start_ptr + index * bin_size = allocation_ptr
+  // where start_ptr is the begining of the region of memory
+  // hence the calculation to get the index is
+  // (allocation_ptr - start_ptr) / bin_size = index
+  size_t index = ((char *)ptr - (char *)bin->ptr) / bin->bin_size;
+
+  // now that we have the index we can mark the bit as free in the bitlist
+  unmark_bit(&bin->bitset, index);
 }

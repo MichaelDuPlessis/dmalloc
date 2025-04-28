@@ -69,7 +69,7 @@ void mark_bit(BitSet *bitset, size_t index) {
   bitset->words[word_idx] |= ((WORD) true << bit_idx);
 }
 
-void clear_bit(BitSet *bitset, size_t index) {
+void unmark_bit(BitSet *bitset, size_t index) {
   if (index >= bitset->num_bits)
     return;
 
@@ -119,7 +119,7 @@ bool check_bit(BitSet *bitset, size_t index) {
 }
 
 // ssize_t is used because it can reprsent -1 to show no bit found
-ssize_t first_unmarked_bit(BitSet *bitset) {
+ssize_t find_first_unmarked_bit(BitSet *bitset) {
   // getting the number of words in the bitset
   size_t num_words = calculate_num_words(bitset->num_bits);
 
