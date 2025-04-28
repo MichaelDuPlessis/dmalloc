@@ -18,8 +18,11 @@ static size_t calculate_word_idx(size_t index) { return index / BITS_PER_WORD; }
 // Calculates the bit index within a word from an index
 static size_t calculate_bit_idx(size_t index) { return index % BITS_PER_WORD; }
 
+size_t size_of_bitset_words(size_t num_bits) {
+  return calculate_num_words(num_bits) * sizeof(WORD);
+}
+
 size_t size_of_bitset(size_t num_bits) {
-  // the -1 is because the pointer is the first available spot in memory
   return sizeof(BitSet) + calculate_num_words(num_bits) * sizeof(WORD);
 }
 

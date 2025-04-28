@@ -19,7 +19,7 @@ typedef struct {
   WORD words[];
 } BitSet;
 
-// Calculates the amount of memory needed for a bitset with num_bits
+// Calculates the amount of memory needed for a bitset with num_bits in bytes
 size_t size_of_bitset(size_t num_bits);
 
 // Initializes a bitset from a region of memory. Unused bits are marked (set to 1)
