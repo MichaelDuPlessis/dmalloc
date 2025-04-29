@@ -111,6 +111,12 @@ void *manager_alloc(BinManager *manager) {
   // if current is null we are out of memory and a new bin needs to be allocated
   // one page is always allocated
   MmapAllocation allocation = mmap_alloc(1);
+
+  // if the allocation fails return NULL
+  if (allocation.ptr == NULL) {
+    return NULL;
+  }
+
   Bin *bin = (Bin *)allocation.ptr;
   init_bin(bin, manager->bin_size);
   // setting bin as head of manager
