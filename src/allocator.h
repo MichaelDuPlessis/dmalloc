@@ -25,4 +25,6 @@ void *dmalloc(size_t size);
 // Frees memory
 void dfree(void *ptr);
 
+size_t num_bins();
+
 #endif

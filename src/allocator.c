@@ -1,5 +1,6 @@
 #include "allocator.h"
 #include "bin.h"
+#include "bitset.h"
 #include "distributer.h"
 #include "mmap_allocator.h"
 #include <stddef.h>
@@ -37,8 +38,10 @@ void *dmalloc(size_t size) {
     return request_block(size);
   }
 
+
   // getting the bin index for the allocation
   size_t index = bin_index(size);
+
   // allocating from bin
   return manager_alloc(&allocator.bins[index]);
 }
@@ -69,4 +72,19 @@ void free_all_memory() {
   for (size_t i = 0; i < NUM_BINS; i++) {
     manager_free_all(&allocator.bins[i]);
   } 
+}
+
+size_t num_bins() {
+  Bin *current = allocator.bins[2].head;
+  size_t amount = 0;
+  while (current) {
+    // printf("Bin: %zu\n", amount);
+    // print_bitset(&current->bitset);
+    amount++;
+    current = current->next;
+  }
+
+  // free_all_memory();
+  
+  return amount;
 }
