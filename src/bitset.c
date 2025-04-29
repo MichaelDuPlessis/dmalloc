@@ -151,8 +151,8 @@ ssize_t find_first_unmarked_bit(BitSet *bitset) {
 }
 
 bool all_bits_marked(BitSet *bitset) {
- // TODO: Maybe add a size parameter for speed 
- return find_first_unmarked_bit(bitset) == -1;
+  // TODO: Maybe add a size parameter for speed
+  return find_first_unmarked_bit(bitset) == -1;
 }
 
 void print_bitset(BitSet *bitset) {

@@ -5,9 +5,9 @@
 
 
 // allocates memory
-void *malloc(size_t size);
+void *dmalloc(size_t size);
 
 // frees memory
-void free(void *ptr);
+void dfree(void *ptr);
 
 #endif

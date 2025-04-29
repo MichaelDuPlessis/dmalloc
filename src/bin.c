@@ -1,6 +1,7 @@
 #include "bin.h"
 #include "bitset.h"
 #include "mmap_allocator.h"
+#include <stdio.h>
 
 // Calculates the number of blocks that can fit in some amount of memory
 size_t calculate_num_blocks(size_t block_size, size_t total_memory) {
@@ -46,15 +47,16 @@ void init_bin(Bin *bin, size_t bin_size) {
 
   // initializing bitset
   // since the bitset has to be at the end this is a clever way to get its start
-  init_bitset(((BitSet *)(bin + 1)) - sizeof(BitSet), num_bits);
+  init_bitset(((BitSet *)(bin + 1)) - 1, num_bits);
 
   // Setting where the initial memory used for allocation begins
-  bin->ptr = (void *)(sizeof(Bin) + size_of_bitset(num_bits) - sizeof(BitSet));
+  bin->ptr = (void *)((char *)bin + sizeof(Bin) + size_of_bitset(num_bits) - sizeof(BitSet));
 }
 
 void *bin_alloc(Bin *bin) {
   // finding first free available slot
-  size_t index = find_first_unmarked_bit(&bin->bitset);
+  ssize_t index = find_first_unmarked_bit(&bin->bitset);
+  printf("First free bit: %zu\n", index);
 
   // if not index was found return null
   if (index == -1) {
@@ -118,7 +120,8 @@ void *manager_alloc(BinManager *manager) {
 
   // allocating memory to bin
   void *ptr = bin_alloc(bin);
-
+  printf("Address of bin: %lu\n", (uintptr_t)bin);
+  printf("Address of memory: %lu\n", (uintptr_t)bin->ptr);
   return ptr;
 }
 
