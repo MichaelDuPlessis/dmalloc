@@ -1,5 +1,6 @@
 #include "mmap_allocator.h"
 #include <sys/mman.h>
+#include "stdint.h"
 
 MmapAllocation mmap_alloc(size_t num_pages) {
   // getting the page size

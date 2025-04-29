@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "../src/allocator.h"
 #include "assert.h"
+#include "stdint.h"
 
 #define TESTING_TYPE int
 

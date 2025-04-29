@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 // The number of bins that we want
-const size_t NUM_BINS = 4;
+#define NUM_BINS 4
 
 // the maximum sized allocation that can fit into a bin
 const size_t MAX_BIN_SIZE = 1 << NUM_BINS;
