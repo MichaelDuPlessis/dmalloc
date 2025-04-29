@@ -16,10 +16,22 @@ typedef struct Bin {
   BitSet bitset;
 } Bin;
 
-// this struct is responsible for managing a specifically sized bin
+// This struct is responsible for managing a specifically sized bin
 typedef struct {
+  // the size of the blocks for this manages bins
+  size_t bin_size;
   // the firt bin in the list
   Bin *head;
 } BinManager;
+
+// Allocates memory from one of the managers bins
+// The caller must know the size of the bins in the manager
+void *manager_alloc(BinManager *manager);
+
+// Frees memory from one of the managers bins
+void manager_free(void *ptr);
+
+// Frees all memory from the bin manager
+void manager_free_all(BinManager *manager);
 
 #endif

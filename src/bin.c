@@ -73,7 +73,7 @@ void bin_free(void *ptr) {
   // this can be used to figure out where the region
   // of memory starts and thus get the header information
 
-  // getting page start  
+  // getting page start
   void *page_start = calculate_page_start(ptr);
 
   // now that we have the start of the page the header information
@@ -90,4 +90,57 @@ void bin_free(void *ptr) {
 
   // now that we have the index we can mark the bit as free in the bitlist
   unmark_bit(&bin->bitset, index);
+}
+
+void *manager_alloc(BinManager *manager) {
+  // finding the first free bin
+  Bin *current = manager->head;
+
+  while (current) {
+    // if there is free space in the bin allocate memory
+    void *ptr = bin_alloc(current);
+    if (ptr) {
+      return ptr;
+    }
+
+    // otherwise go to next bin
+    current = current->next;
+  }
+
+  // if current is null we are out of memory and a new bin needs to be allocated
+  // one page is always allocated
+  MmapAllocation allocation = mmap_alloc(1);
+  Bin *bin = (Bin *)allocation.ptr;
+  init_bin(bin, manager->bin_size);
+  // setting bin as head of manager
+  bin->next = manager->head;
+  manager->head = bin;
+
+  // allocating memory to bin
+  void *ptr = bin_alloc(bin);
+
+  return ptr;
+}
+
+void manager_free(void *ptr) {
+  // the manager does not know what bin this memory belongs to
+  bin_free(ptr);
+}
+
+void manager_free_all(BinManager *manager) {
+  Bin *current = manager->head;
+  while (current) {
+    Bin *next = current->next;
+
+    // deallocating memory
+    MmapAllocation allocation = {
+      .ptr = (void *)current,
+      .size = 1,
+    };
+    mmap_free(allocation);
+
+    current = next;
+  }
+
+  manager->head = NULL;
 }
