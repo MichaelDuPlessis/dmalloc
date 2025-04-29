@@ -56,7 +56,6 @@ void init_bin(Bin *bin, size_t bin_size) {
 void *bin_alloc(Bin *bin) {
   // finding first free available slot
   ssize_t index = find_first_unmarked_bit(&bin->bitset);
-  printf("First free bit: %zu\n", index);
 
   // if not index was found return null
   if (index == -1) {
@@ -120,8 +119,6 @@ void *manager_alloc(BinManager *manager) {
 
   // allocating memory to bin
   void *ptr = bin_alloc(bin);
-  printf("Address of bin: %lu\n", (uintptr_t)bin);
-  printf("Address of memory: %lu\n", (uintptr_t)bin->ptr);
   return ptr;
 }
 
