@@ -1,6 +1,7 @@
 #include "allocator.h"
 #include "bin.h"
 #include "distributer.h"
+#include "mmap_allocator.h"
 #include <stddef.h>
 #include <stdio.h>
 
@@ -46,7 +47,21 @@ void dfree(void *ptr) {
   // determining if the memory was allocated from a free list or from a bin
   // return_block(ptr);
 
-  manager_free(ptr);
+  // determining what allocator was used to allocate the memory
+  void *page_start = calculate_page_start(ptr);
+  AllocationHeader *header = (AllocationHeader *)page_start;
+
+  switch (header->allocation_type) {
+    case BIN_ALLOCATION_TYPE:
+      manager_free(ptr);
+      break;
+    case FREE_LIST_ALLOCATION_TYPE:
+      return_block(ptr);
+      break;
+    case MMAP_ALLOCATION_TYPE:
+      // mmap_free(ptr);
+      break;
+  }
 }
 
 // frees all memory at program exit

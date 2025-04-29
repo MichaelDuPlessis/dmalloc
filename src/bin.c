@@ -1,4 +1,5 @@
 #include "bin.h"
+#include "allocator.h"
 #include "bitset.h"
 #include "mmap_allocator.h"
 #include <stdio.h>
@@ -38,6 +39,11 @@ size_t calculate_bitset_size(size_t block_size) {
 }
 
 void init_bin(Bin *bin, size_t bin_size) {
+  // setting the type of allocation
+  bin->header = (AllocationHeader){
+    .allocation_type = BIN_ALLOCATION_TYPE
+  };
+
   // setting the size of the bin
   bin->bin_size = bin_size;
   bin->next = NULL;

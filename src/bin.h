@@ -2,10 +2,12 @@
 #define BIN_H
 
 #include <stddef.h>
+#include "allocator.h"
 #include "bitset.h"
 
 // A bin and all its metadata
 typedef struct Bin {
+  AllocationHeader header;
   // the memory where items are allocated
   void *ptr;
   // the next bin
