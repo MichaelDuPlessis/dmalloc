@@ -10,7 +10,7 @@
 void benchmark(void *(*allocator)(size_t), void (*deallocator)(void *),
                const char *allocator_name) {
   const int ALLOCATIONS = 1000000; // Number of allocations and deallocations
-  void *allocations[ALLOCATIONS];
+  int *allocations[ALLOCATIONS];
   clock_t start, end;
 
   // Timing the first allocation cycle

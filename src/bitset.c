@@ -1,5 +1,6 @@
 #include "bitset.h"
 #include <stdio.h>
+#include <string.h>
 
 // The number of bits per word
 #define BITS_PER_WORD (sizeof(WORD) * 8)
@@ -38,10 +39,7 @@ void init_bitset(BitSet *bitset, size_t num_bits) {
   size_t num_words = calculate_num_words(num_bits);
 
   // zeroing out buffer
-  // go until the second last one as there may be unused bits
-  for (size_t i = 0; i < num_words - 1; i++) {
-    bitset->words[i] = 0;
-  }
+  memset(bitset->words, 0, calculate_num_words(num_bits) * sizeof(WORD));
 
   // setting unused bits to 1 in the last word
   // TODO: Find a way to get rid of this if statement
@@ -136,7 +134,7 @@ ssize_t find_first_unmarked_bit(BitSet *bitset) {
       size_t inverted_word = ~word;
 
       // some platforms define things differently
-#if SIZE_MAX == UINT65_MAX
+#if SIZE_MAX == UINT64_MAX
       char bit_pos = __builtin_ctzl(inverted_word);
 #else
       char bit_pos = __builtin_ctz(inverted_word);
@@ -157,7 +155,7 @@ bool all_bits_marked(BitSet *bitset) {
 
 void print_bitset(BitSet *bitset) {
   // iterate through all the bits
-  for (size_t i = 0; i < 128; i++) {
+  for (size_t i = 0; i < bitset->num_bits; i++) {
     // check if the bit is set or not
     bool bit_value = check_bit(bitset, i);
 

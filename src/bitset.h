@@ -14,8 +14,6 @@ typedef struct {
   // The number number of bits in the last word that are used
   size_t last_word_bits;
   // The words in the bitset
-  // TODO: This currently wastes memory since realistically the array could start here
-  // find a way to fix it
   WORD words[];
 } BitSet;
 

@@ -40,9 +40,7 @@ size_t calculate_bitset_size(size_t block_size) {
 
 void init_bin(Bin *bin, size_t bin_size) {
   // setting the type of allocation
-  bin->header = (AllocationHeader){
-    .allocation_type = BIN_ALLOCATION_TYPE
-  };
+  bin->header = (AllocationHeader){.allocation_type = BIN_ALLOCATION_TYPE};
 
   // setting the size of the bin
   bin->bin_size = bin_size;
@@ -56,7 +54,8 @@ void init_bin(Bin *bin, size_t bin_size) {
   init_bitset(((BitSet *)(bin + 1)) - 1, num_bits);
 
   // Setting where the initial memory used for allocation begins
-  bin->ptr = (void *)((char *)bin + sizeof(Bin) + size_of_bitset(num_bits) - sizeof(BitSet));
+  bin->ptr = (void *)((char *)bin + sizeof(Bin) + size_of_bitset(num_bits) -
+                      sizeof(BitSet));
 }
 
 void *bin_alloc(Bin *bin) {
@@ -146,8 +145,8 @@ void manager_free_all(BinManager *manager) {
 
     // deallocating memory
     MmapAllocation allocation = {
-      .ptr = (void *)current,
-      .size = 1,
+        .ptr = (void *)current,
+        .size = 1,
     };
     mmap_free(allocation);
 

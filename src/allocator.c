@@ -78,8 +78,8 @@ size_t num_bins() {
   Bin *current = allocator.bins[2].head;
   size_t amount = 0;
   while (current) {
-    // printf("Bin: %zu\n", amount);
-    // print_bitset(&current->bitset);
+    printf("Bin: %zu\n", amount);
+    print_bitset(&current->bitset);
     amount++;
     current = current->next;
   }
