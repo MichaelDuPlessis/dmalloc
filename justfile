@@ -3,11 +3,11 @@ _default:
 
 # builds the program
 build:
-    gcc -g -o main main.c src/*.c test/*.c
+    clang -g -o main main.c src/*.c test/*.c
 
 # builds the program with optimizations
 buildfast:
-    gcc -O3 -o main main.c src/*.c test/*.c
+    clang -O3 -o main main.c src/*.c test/*.c
 
 # builds and runs the program
 run: build
