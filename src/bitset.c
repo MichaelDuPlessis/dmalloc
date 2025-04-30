@@ -13,6 +13,11 @@ static inline size_t calculate_num_words(size_t num_bits) {
   return (num_bits + BITS_PER_WORD - 1) / BITS_PER_WORD;
 }
 
+// masks the unused bits
+static inline WORD unused_bit_mask(size_t bits) {
+    return ~(((WORD)1 << bits) - 1);
+}
+
 // Calculates the word index from an index
 static inline size_t calculate_word_idx(size_t index) { return index / BITS_PER_WORD; }
 
@@ -24,7 +29,7 @@ static inline size_t size_of_bitset_words(size_t num_bits) {
 }
 
 size_t size_of_bitset(size_t num_bits) {
-  return sizeof(BitSet) + calculate_num_words(num_bits) * sizeof(WORD);
+  return sizeof(BitSet) + size_of_bitset_words(num_bits);
 }
 
 void init_bitset(BitSet *bitset, size_t num_bits) {
@@ -158,7 +163,7 @@ void clear_bitset(BitSet *bitset) {
   // setting unused bits to 1 in the last word
   // TODO: Find a way to get rid of this if statement
   if (bitset->last_word_bits != 0) {
-    bitset->words[num_words - 1] = ~(((WORD)1 << (bitset->last_word_bits)) - 1);
+    bitset->words[num_words - 1] = unused_bit_mask(bitset->last_word_bits);
   }
 }
 
