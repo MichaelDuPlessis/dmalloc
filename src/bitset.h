@@ -34,6 +34,7 @@ void flip_bit(BitSet *bitset, size_t index);
 
 // Checks whether the bit is marked or not
 // Unused bits will always return true
+// If the index is out of range false is returned
 bool check_bit(BitSet *bitset, size_t index);
 
 // Finds the first occurence of an unmarked bit or -1 if none are found
@@ -44,5 +45,8 @@ void print_bitset(BitSet *bitset);
 
 // Checks if all bits in the bitset are marked
 bool all_bits_marked(BitSet *bitset);
+
+// Clears the bitset marking all bits as unused
+void clear_bitset(BitSet *bitset);
 
 #endif
