@@ -36,6 +36,10 @@ void init_bitset(BitSet *bitset, size_t num_bits) {
   // setting the number of bits
   bitset->num_bits = num_bits;
 
+  // since the bitset was just initialized the index of a word
+  // with free bits is the first one
+  bitset->free_word_index = 0;
+
   // setting the number of bits used in the last word of the bitset
   // TODO: I think there is a better way to do this
   bitset->last_word_bits = num_bits % BITS_PER_WORD;
@@ -64,6 +68,12 @@ void mark_bit(BitSet *bitset, size_t index) {
   // }
 
   bitset->words[word_idx] |= ((WORD)1 << bit_idx);
+
+  // if the current index and the last free index are the same
+  // and the current word is full than move to the next one
+  if (word_idx == bitset->free_word_index && bitset->words[word_idx] == MAX_WORD_SIZE) {
+    bitset->free_word_index++;
+  }
 }
 
 void unmark_bit(BitSet *bitset, size_t index) {
@@ -83,6 +93,13 @@ void unmark_bit(BitSet *bitset, size_t index) {
   }
 
   bitset->words[word_idx] &= ~((WORD)1 << bit_idx);
+
+  // setting the index for the word with free bits
+  // only update it if the index is less than the current one
+  // that way all bits to the left are known to be marked
+  if (word_idx < bitset->free_word_index) {
+    bitset->free_word_index = word_idx;
+  }
 }
 
 void flip_bit(BitSet *bitset, size_t index) {
@@ -125,7 +142,7 @@ ssize_t find_first_unmarked_bit(BitSet *bitset) {
   size_t num_words = calculate_num_words(bitset->num_bits);
 
   // looping over all of the words
-  for (size_t word_idx = 0; word_idx < num_words; word_idx++) {
+  for (size_t word_idx = bitset->free_word_index; word_idx < num_words; word_idx++) {
     size_t word = bitset->words[word_idx];
 
     // if the word has all bits marked go to the next word
