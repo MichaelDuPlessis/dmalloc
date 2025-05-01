@@ -15,14 +15,18 @@ static inline size_t calculate_num_words(size_t num_bits) {
 
 // masks the unused bits
 static inline WORD unused_bit_mask(size_t bits) {
-    return ~(((WORD)1 << bits) - 1);
+  return ~(((WORD)1 << bits) - 1);
 }
 
 // Calculates the word index from an index
-static inline size_t calculate_word_idx(size_t index) { return index / BITS_PER_WORD; }
+static inline size_t calculate_word_idx(size_t index) {
+  return index / BITS_PER_WORD;
+}
 
 // Calculates the bit index within a word from an index
-static inline size_t calculate_bit_idx(size_t index) { return index % BITS_PER_WORD; }
+static inline size_t calculate_bit_idx(size_t index) {
+  return index % BITS_PER_WORD;
+}
 
 static inline size_t size_of_bitset_words(size_t num_bits) {
   return calculate_num_words(num_bits) * sizeof(WORD);
@@ -71,7 +75,8 @@ void mark_bit(BitSet *bitset, size_t index) {
 
   // if the current index and the last free index are the same
   // and the current word is full than move to the next one
-  if (word_idx == bitset->free_word_index && bitset->words[word_idx] == MAX_WORD_SIZE) {
+  if (word_idx == bitset->free_word_index &&
+      bitset->words[word_idx] == MAX_WORD_SIZE) {
     bitset->free_word_index++;
   }
 }
@@ -144,7 +149,8 @@ ssize_t find_first_unmarked_bit(BitSet *bitset) {
   // looping over all of the words
   // dereferncing a pointer is faster than indexing an array
   size_t *word = bitset->words;
-  for (size_t word_idx = bitset->free_word_index; word_idx < num_words; word_idx++, word++) {
+  for (size_t word_idx = bitset->free_word_index; word_idx < num_words;
+       word_idx++, word++) {
     // size_t word = bitset->words[word_idx];
 
     // if the word has all bits marked go to the next word
