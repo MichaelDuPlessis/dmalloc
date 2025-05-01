@@ -59,8 +59,8 @@ int main() {
   // bitset_test();
   // small_allocator_basic_test();
 
-  printf("Benchmarking standard malloc/free:\n");
-  benchmark(malloc, free, "malloc/free");
+  // printf("Benchmarking standard malloc/free:\n");
+  // benchmark(malloc, free, "malloc/free");
 
   printf("\nBenchmarking custom dmalloc/dfree:\n");
   benchmark(dmalloc, dfree, "dmalloc/dfree");

@@ -4,6 +4,8 @@
 
 // The number of bits per word
 #define BITS_PER_WORD (sizeof(WORD) * 8)
+// Sadly there is no way to calculate this at compile time
+#define LOG2_BITS_PER_WORD (6)
 
 // The max size of a word
 #define MAX_WORD_SIZE (~(WORD)0)
@@ -20,12 +22,12 @@ static inline WORD unused_bit_mask(size_t bits) {
 
 // Calculates the word index from an index
 static inline size_t calculate_word_idx(size_t index) {
-  return index / BITS_PER_WORD;
+  return index >> LOG2_BITS_PER_WORD;
 }
 
 // Calculates the bit index within a word from an index
 static inline size_t calculate_bit_idx(size_t index) {
-  return index % BITS_PER_WORD;
+  return index & (BITS_PER_WORD - 1);
 }
 
 static inline size_t size_of_bitset_words(size_t num_bits) {
@@ -159,11 +161,7 @@ ssize_t find_first_unmarked_bit(BitSet *bitset) {
       size_t inverted_word = ~*word;
 
       // some platforms define things differently
-#if SIZE_MAX == UINT64_MAX
       char bit_pos = __builtin_ctzl(inverted_word);
-#else
-      char bit_pos = __builtin_ctz(inverted_word);
-#endif
 
       size_t index = word_idx * BITS_PER_WORD + bit_pos;
       return (ssize_t)index;
