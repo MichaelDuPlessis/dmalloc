@@ -22,6 +22,9 @@ static inline WORD unused_bit_mask(size_t bits) {
 
 // Calculates the word index from an index
 static inline size_t calculate_word_idx(size_t index) {
+  // this works because dividing by 64 (the number of bits in a word)
+  // is equivelant to dividing by 2 6 times an dividing by 2 can be done
+  // using bit shifts which are generally faster
   return index >> LOG2_BITS_PER_WORD;
 }
 
