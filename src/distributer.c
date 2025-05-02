@@ -138,14 +138,14 @@ void *request_block(size_t size) {
 }
 
 // checks if a pointer belongs to a chunk
-bool pointer_belongs_to_chunk(void *ptr, Chunk *chunk) {
+static bool pointer_belongs_to_chunk(void *ptr, Chunk *chunk) {
   return (ptr >= chunk->mmap_allocation.ptr) &&
          (ptr < (void *)((BYTE *)chunk->mmap_allocation.ptr +
                          chunk->mmap_allocation.size));
 }
 
 // frees the memory from a chunk
-void free_memory_from_chunk(void *ptr, Chunk *chunk) {
+static void free_memory_from_chunk(void *ptr, Chunk *chunk) {
   // get the amount of memory used by the header and the allocation
   BlockHeader *header = (BlockHeader *)ptr - 1;
   size_t total_memory_used = header->size + sizeof(BlockHeader);
