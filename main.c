@@ -8,15 +8,17 @@
 #include <unistd.h>
 
 void benchmark(void *(*allocator)(size_t), void (*deallocator)(void *),
+  #define TYPE int
+               
                const char *allocator_name) {
   const int ALLOCATIONS = 1000000; // Number of allocations and deallocations
-  int *allocations[ALLOCATIONS];
+  TYPE *allocations[ALLOCATIONS];
   clock_t start, end;
 
   // Timing the first allocation cycle
   start = clock();
   for (int i = 0; i < ALLOCATIONS; i++) {
-    allocations[i] = allocator(sizeof(int)); // Allocate memory for an integer
+    allocations[i] = allocator(sizeof(TYPE)); // Allocate memory for an integer
   }
   end = clock();
   double alloc_time = (double)(end - start) / CLOCKS_PER_SEC;
@@ -32,7 +34,7 @@ void benchmark(void *(*allocator)(size_t), void (*deallocator)(void *),
   // Timing the reallocation cycle (Allocate again after deallocation)
   start = clock();
   for (int i = 0; i < ALLOCATIONS; i++) {
-    allocations[i] = allocator(sizeof(int)); // Reallocate memory for an integer
+    allocations[i] = allocator(sizeof(TYPE)); // Reallocate memory for an integer
   }
   end = clock();
   double re_alloc_time = (double)(end - start) / CLOCKS_PER_SEC;
