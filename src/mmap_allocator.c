@@ -2,6 +2,7 @@
 #include <sys/mman.h>
 #include "stdint.h"
 
+// TODO: Sometimes it is easier to pass in the amount of memory that is needed
 MmapAllocation mmap_alloc(size_t num_pages) {
   // getting the page size
   size_t page_size = PAGE_SIZE;

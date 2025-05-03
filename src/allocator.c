@@ -61,7 +61,7 @@ void dfree(void *ptr) {
     case FREE_LIST_ALLOCATION_TYPE:
       return_block(ptr);
       break;
-    case MMAP_ALLOCATION_TYPE:
+    case HUGE_ALLOCATION_TYPE:
       // mmap_free(ptr);
       break;
   }

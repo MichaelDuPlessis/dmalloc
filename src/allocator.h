@@ -9,7 +9,7 @@
 typedef enum {
   BIN_ALLOCATION_TYPE,
   FREE_LIST_ALLOCATION_TYPE,
-  MMAP_ALLOCATION_TYPE,
+  HUGE_ALLOCATION_TYPE,
 } AllocationType ;
 
 // This holds metadata about the type of allocation that was made.

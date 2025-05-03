@@ -18,7 +18,7 @@ typedef struct {
 // Allocates memory using mmap. It takes the number of pages to allocate
 // and returns a struct containing a pointer to the allocated memory as well
 // as the amount of memory allocated in bytes
-MmapAllocation mmap_alloc(size_t size);
+MmapAllocation mmap_alloc(size_t num_pages);
 
 // Deallocates memory using mmap. It takes a struct containing the the pointer
 // to the memory as well as the amount of memory to deallocate in bytes
