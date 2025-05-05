@@ -2,6 +2,7 @@
 #include "bin.h"
 #include "bitset.h"
 #include "distributer.h"
+#include "huge.h"
 #include "mmap_allocator.h"
 #include <stddef.h>
 #include <stdio.h>
@@ -16,8 +17,10 @@ const size_t MAX_BIN_SIZE = 1 << NUM_BINS;
 struct {
   // the bins for small objects
   BinManager bins[NUM_BINS];
-} allocator = {
-    .bins = {{.head = NULL, .bin_size = 1}, {.head = NULL, .bin_size = 2}, {.head = NULL, .bin_size = 4}, {.head = NULL, .bin_size = 8}}};
+} allocator = {.bins = {{.head = NULL, .bin_size = 1},
+                        {.head = NULL, .bin_size = 2},
+                        {.head = NULL, .bin_size = 4},
+                        {.head = NULL, .bin_size = 8}}};
 
 // finding which bin an allocation belongs to
 size_t bin_index(size_t size) {
@@ -32,18 +35,24 @@ size_t bin_index(size_t size) {
 }
 
 void *dmalloc(size_t size) {
-  // seeing if there is a valid bin for the allocation
-  if (size > MAX_BIN_SIZE) {
+  // if size fits into a bin
+  if (size <= MAX_BIN_SIZE) {
+    // getting the bin index for the allocation
+    size_t index = bin_index(size);
+
+    // allocating from bin
+    return manager_alloc(&allocator.bins[index]);
+  }
+
+  // if size is larger than a biggest bin
+  // but less than a page
+  if (size < PAGE_SIZE) {
     // if not valid just allocate from the free list
     return request_block(size);
   }
 
-
-  // getting the bin index for the allocation
-  size_t index = bin_index(size);
-
-  // allocating from bin
-  return manager_alloc(&allocator.bins[index]);
+  // if size is large enough just use a whole page to allocate it
+  return huge_alloc(size);
 }
 
 void dfree(void *ptr) {
@@ -55,15 +64,15 @@ void dfree(void *ptr) {
   AllocationHeader *header = (AllocationHeader *)page_start;
 
   switch (header->allocation_type) {
-    case BIN_ALLOCATION_TYPE:
-      manager_free(ptr);
-      break;
-    case FREE_LIST_ALLOCATION_TYPE:
-      return_block(ptr);
-      break;
-    case HUGE_ALLOCATION_TYPE:
-      // mmap_free(ptr);
-      break;
+  case BIN_ALLOCATION_TYPE:
+    manager_free(ptr);
+    break;
+  case FREE_LIST_ALLOCATION_TYPE:
+    return_block(ptr);
+    break;
+  case HUGE_ALLOCATION_TYPE:
+    huge_free(ptr);
+    break;
   }
 }
 
@@ -71,7 +80,7 @@ void dfree(void *ptr) {
 void free_all_memory() {
   for (size_t i = 0; i < NUM_BINS; i++) {
     manager_free_all(&allocator.bins[i]);
-  } 
+  }
 }
 
 size_t num_bins() {
@@ -86,6 +95,6 @@ size_t num_bins() {
   }
 
   // free_all_memory();
-  
+
   return amount;
 }
