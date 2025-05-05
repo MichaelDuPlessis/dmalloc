@@ -57,7 +57,9 @@ void init_bitset(BitSet *bitset, size_t num_bits) {
 }
 
 void mark_bit(BitSet *bitset, size_t index) {
-  if (index >= bitset->num_bits)
+  // since this is almost never true we can
+  // give the compiler a hint
+  if (__builtin_expect(index >= bitset->num_bits, 0))
     return;
 
   // figuring out what word contains the bit to flip
@@ -65,16 +67,8 @@ void mark_bit(BitSet *bitset, size_t index) {
   // the index within the word that needs to be changed
   size_t bit_idx = calculate_bit_idx(index);
 
-  // since the index must be in a valid range and the unused bits are alwayus
-  // one marking does nothing and the code below to check is not needed
-
-  // checking if index is in the last word and if there are any unused bits
-  // if (word_idx == (bitset->num_bits / BITS_PER_WORD) &&
-  //     bitset->last_word_bits != 0) {
-  //   // making sure that we are not trying to set one of the last invalid bits
-  //   if (bit_idx >= bitset->last_word_bits)
-  //     return;
-  // }
+  // since the index must be in a valid range and the unused bits are always
+  // on marking does nothing and the code below to check is not needed
 
   bitset->words[word_idx] |= ((WORD)1 << bit_idx);
 
@@ -96,7 +90,7 @@ void unmark_bit(BitSet *bitset, size_t index) {
   size_t bit_idx = calculate_bit_idx(index);
 
   // checking if index is in the last word and if there are any unused bits
-  // making sure that we are not trying to set one of the last invalid bits
+  // making sure that we are not trying to unset one of the last invalid bits
   if (word_idx == (bitset->num_bits / BITS_PER_WORD) &&
       bitset->last_word_bits != 0 && bit_idx >= bitset->last_word_bits) {
     return;
