@@ -2,6 +2,15 @@
 #include <sys/mman.h>
 #include "stdint.h"
 
+size_t get_page_size() {
+  static size_t size = 0;
+  if (!size) {
+    size = sysconf(_SC_PAGESIZE);
+  }
+
+  return size;
+}
+
 // TODO: Sometimes it is easier to pass in the amount of memory that is needed
 MmapAllocation mmap_alloc(size_t num_pages) {
   // getting the page size

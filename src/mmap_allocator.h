@@ -5,7 +5,14 @@
 #include <unistd.h>
 
 // The size of the page on the os
-#define PAGE_SIZE sysconf(_SC_PAGESIZE)
+// #define PAGE_SIZE sysconf(_SC_PAGESIZE)
+
+// Gets the page size of the os.
+// This function caches the pagesize to avoid system calls
+// TODO: Check if this should be inlined
+size_t get_page_size();
+
+#define PAGE_SIZE (get_page_size())
 
 // The memory from a mmap allocation
 typedef struct {
