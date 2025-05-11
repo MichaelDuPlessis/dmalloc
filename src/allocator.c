@@ -6,6 +6,7 @@
 #include "mmap_allocator.h"
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 
 // The number of bins that we want
 #define NUM_BINS 4
@@ -21,6 +22,12 @@ struct {
                         {.head = NULL, .bin_size = 2},
                         {.head = NULL, .bin_size = 4},
                         {.head = NULL, .bin_size = 8}}};
+
+// gets the size of an allocation
+size_t get_allocation_size(void *ptr) {
+  // STUB for now
+  return 0;
+}
 
 // finding which bin an allocation belongs to
 size_t bin_index(size_t size) {
@@ -44,7 +51,7 @@ void *dmalloc(size_t size) {
     return manager_alloc(&allocator.bins[index]);
   }
 
-  // if size is larger than a biggest bin
+  // if size is larger than the biggest bin
   // but less than a page
   if (size < PAGE_SIZE) {
     // if not valid just allocate from the free list
@@ -53,6 +60,44 @@ void *dmalloc(size_t size) {
 
   // if size is large enough just use a whole page to allocate it
   return huge_alloc(size);
+}
+
+void *dcalloc(size_t num, size_t size) {
+  size_t amount = num * size;
+
+  void *ptr = dmalloc(amount);
+  memset(ptr, 0, amount);
+
+  return ptr;
+}
+
+// The allocator does not curretly support resizing memory allocations in place
+void *drealloc(void *ptr, size_t new_size) {
+  if (ptr == NULL) {
+    return dmalloc(new_size);
+  }
+
+  if (new_size == 0) {
+    dfree(ptr);
+    return NULL;
+  }
+
+  // getting size of what was allocated before
+  size_t size = get_allocation_size(ptr);
+
+  // if the sizes are the same do nothing
+  if (size == new_size) {
+    return ptr;
+  }
+
+  // otherwise allocate new memory of the requested size
+  void *new_ptr = dmalloc(new_size);
+  // getting the smaller of the two sizes to copy bytes over
+  size_t amount_to_copy = size < new_size ? size : new_size;
+
+  memcpy(new_ptr, ptr, amount_to_copy);
+
+  return new_ptr;
 }
 
 void dfree(void *ptr) {

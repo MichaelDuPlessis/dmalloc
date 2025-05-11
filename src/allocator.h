@@ -19,10 +19,16 @@ typedef struct {
   AllocationType allocation_type;
 } AllocationHeader;
 
-// Allocates memory
+// Equivalant to malloc
 void *dmalloc(size_t size);
 
-// Frees memory
+// Equivalent to calloc
+void *dcalloc(size_t num, size_t size);
+
+// Equivalent to realloc
+void *drealloc(void *ptr, size_t new_size);
+
+// Equivalent to free
 void dfree(void *ptr);
 
 size_t num_bins();
