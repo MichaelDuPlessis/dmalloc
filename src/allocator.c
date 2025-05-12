@@ -30,7 +30,7 @@ size_t get_allocation_size(void *ptr) {
 }
 
 // finding which bin an allocation belongs to
-size_t bin_index(size_t size) {
+static inline size_t bin_index(size_t size) {
   // TODO: maybe don't use size_t it may not be necessary
   size_t bin = 0;
   size_t power = 1;
