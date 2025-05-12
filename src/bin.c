@@ -98,7 +98,7 @@ void bin_free(void *ptr) {
   unmark_bit(&bin->bitset, index);
 }
 
-void *manager_alloc(BinManager *manager) {
+void *bin_manager_alloc(BinManager *manager) {
   // finding the first free bin
   Bin *current = manager->head;
 
@@ -133,12 +133,12 @@ void *manager_alloc(BinManager *manager) {
   return ptr;
 }
 
-void manager_free(void *ptr) {
+void bin_manager_free(void *ptr) {
   // the manager does not know what bin this memory belongs to
   bin_free(ptr);
 }
 
-void manager_free_all(BinManager *manager) {
+void bin_manager_free_all(BinManager *manager) {
   Bin *current = manager->head;
   while (current) {
     Bin *next = current->next;

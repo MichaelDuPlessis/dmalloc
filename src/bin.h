@@ -28,12 +28,12 @@ typedef struct {
 
 // Allocates memory from one of the managers bins
 // The caller must know the size of the bins in the manager
-void *manager_alloc(BinManager *manager);
+void *bin_manager_alloc(BinManager *manager);
 
 // Frees memory from one of the managers bins
-void manager_free(void *ptr);
+void bin_manager_free(void *ptr);
 
 // Frees all memory from the bin manager
-void manager_free_all(BinManager *manager);
+void bin_manager_free_all(BinManager *manager);
 
 #endif

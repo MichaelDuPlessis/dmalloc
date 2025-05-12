@@ -48,7 +48,7 @@ void *dmalloc(size_t size) {
     size_t index = bin_index(size);
 
     // allocating from bin
-    return manager_alloc(&allocator.bins[index]);
+    return bin_manager_alloc(&allocator.bins[index]);
   }
 
   // if size is larger than the biggest bin
@@ -110,7 +110,7 @@ void dfree(void *ptr) {
 
   switch (header->allocation_type) {
   case BIN_ALLOCATION_TYPE:
-    manager_free(ptr);
+    bin_manager_free(ptr);
     break;
   case FREE_LIST_ALLOCATION_TYPE:
     return_block(ptr);
@@ -124,7 +124,7 @@ void dfree(void *ptr) {
 // frees all memory at program exit
 void free_all_memory() {
   for (size_t i = 0; i < NUM_BINS; i++) {
-    manager_free_all(&allocator.bins[i]);
+    bin_manager_free_all(&allocator.bins[i]);
   }
 }
 
