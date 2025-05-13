@@ -1,6 +1,7 @@
 #include "free_list.h"
 #include "allocator.h"
 #include "mmap_allocator.h"
+#include <cstdint>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -103,7 +104,9 @@ void *free_list_alloc(size_t size) {
         size_t remaining = current_block->size - total_size;
 
         void *ptr;
-        if (remaining > sizeof(Block)) {
+        // since everythign is aligned to 8 bytes if there is not enough space
+        // to store at least 8 bytes there is not point
+        if (remaining >= sizeof(Block) + ALIGNMENT) {
           // Split the block
           Block *new_block = (Block *)((char *)current_block + total_size);
           init_block(new_block, remaining, current_block->next);
@@ -170,4 +173,58 @@ void *free_list_alloc(size_t size) {
   init_alloc_header(header, total_size);
   ptr = (void *)(header + 1);
   return ptr;
+}
+
+void free_list_free(void *ptr) {
+  // first extract the header
+  AllocHeader *header = (AllocHeader *)ptr - 1;
+
+  // getting the page start so the chunk data can be extracted
+  Chunk *chunk = (Chunk *)calculate_page_start(ptr);
+
+  // we then iterate over the linked list to find first free block of memory
+  // just after the block that is to be deallocated
+  Block *current = chunk->block_head;
+  Block *previous = NULL;
+
+  // keep iterating until a block after the header is found
+  while (current && (uintptr_t)current < (uintptr_t)header) {
+    previous = current;
+    current = current->next;
+  }
+
+  Block *new_block = (Block *)header;
+
+  // if current is NULL than header is at the end of the allocation
+  if (current == NULL) {
+    init_block(new_block, header->size, NULL);
+    if (previous) {
+      previous->next = new_block;
+    } else {
+      chunk->block_head = new_block;
+    }
+    return;
+  }
+
+  // if current is right after the current header than the blocks can be
+  // coalesced
+  if ((char *)header + header->size == (char *)current) {
+    init_block(new_block, header->size + current->size, current->next);
+  } else {
+    init_block(new_block, header->size, current);
+  }
+
+  // if previous is NULL it means the block of memory to be deallocated is in
+  // the begining otherwise have previous point to the new block
+  if (previous) {
+    // if the previous block ends by the header coalesce it too
+    if ((char *)previous + previous->size == (char *)new_block) {
+      previous->size += new_block->size;
+      previous->next = new_block->next;
+    } else {
+      previous->next = new_block;
+    }
+  } else {
+    chunk->block_head = new_block;
+  }
 }
