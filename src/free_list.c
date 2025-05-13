@@ -2,6 +2,11 @@
 #include "allocator.h"
 #include "mmap_allocator.h"
 #include <stddef.h>
+#include <stdint.h>
+
+// used to calculate the alignment of some variable
+#define ALIGNMENT 8
+#define ALIGN(size) (((size) + (ALIGNMENT - 1)) & ~(ALIGNMENT - 1))
 
 // A header for a block of allocated memory
 typedef struct {
@@ -34,6 +39,21 @@ typedef struct Chunk {
 // The head of the chunks
 static Chunk *chunk_head = NULL;
 
+// Calculates how much padding is needed to align the ptr
+static inline size_t alignment_padding(void *ptr, size_t alignment) {
+  uintptr_t p = (uintptr_t)ptr;
+  size_t misalignment = p & (alignment - 1);
+  return misalignment == 0 ? 0 : (alignment - misalignment);
+}
+
+// Returns an aligned memory address
+static inline void *alignment_forward(void *ptr, size_t alignment) {
+  uintptr_t p = (uintptr_t)ptr;
+  size_t misalignment = p & (alignment - 1);
+  size_t padding = misalignment == 0 ? 0 : (alignment - misalignment);
+  return (void *)(p + padding);
+}
+
 // initializes a Block
 static inline void init_block(Block *block, size_t size, Block *next) {
   block->size = size;
@@ -52,8 +72,10 @@ static inline Chunk *new_chunk() {
   Chunk *chunk = (Chunk *)allocation.ptr;
 
   // creating block head
-  Block *block = (Block *)(chunk + 1);
-  init_block(block, allocation.size - sizeof(Block), NULL);
+  uintptr_t chunk_end = (uintptr_t)((char *)allocation.ptr + allocation.size);
+  Block *block = (Block *)alignment_forward((void *)(chunk + 1), ALIGNMENT);
+  size_t block_size = chunk_end - (uintptr_t)block;
+  init_block(block, block_size, NULL);
 
   *chunk = (Chunk){
       .header = FREE_LIST_ALLOCATION_TYPE,
@@ -66,6 +88,9 @@ static inline Chunk *new_chunk() {
 }
 
 void *free_list_alloc(size_t size) {
+  // calculating the actual amount of memory that is needed
+  size = ALIGN(size);
+
   Chunk *current_chunk = chunk_head;
 
   while (current_chunk) {
@@ -119,5 +144,30 @@ void *free_list_alloc(size_t size) {
   chunk->next = chunk_head;
   chunk_head = chunk;
 
-  return free_list_alloc(size); // try again
+  // this is duplicating code but its better than a loop or another function
+  // call
+  Block *current_block = chunk->block_head;
+  size_t total_size = sizeof(AllocHeader) + size;
+  size_t remaining = current_block->size - total_size;
+
+  void *ptr;
+  if (remaining > sizeof(Block)) {
+    // Split the block
+    Block *new_block = (Block *)((char *)current_block + total_size);
+    init_block(new_block, remaining, current_block->next);
+
+    chunk->block_head = new_block;
+
+    current_block->size = total_size; // Resize current block
+  } else {
+    // Use the whole block
+    total_size = current_block->size;
+
+    chunk->block_head = current_block->next;
+  }
+
+  AllocHeader *header = (AllocHeader *)current_block;
+  init_alloc_header(header, total_size);
+  ptr = (void *)(header + 1);
+  return ptr;
 }
