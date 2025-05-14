@@ -2,6 +2,7 @@
 #include "bin.h"
 #include "bitset.h"
 #include "distributer.h"
+#include "free_list.h"
 #include "huge.h"
 #include "mmap_allocator.h"
 #include <stddef.h>
@@ -55,7 +56,7 @@ void *dmalloc(size_t size) {
   // but less than a page
   if (size < PAGE_SIZE) {
     // if not valid just allocate from the free list
-    return request_block(size);
+    return free_list_alloc(size);
   }
 
   // if size is large enough just use a whole page to allocate it
@@ -113,7 +114,7 @@ void dfree(void *ptr) {
     bin_manager_free(ptr);
     break;
   case FREE_LIST_ALLOCATION_TYPE:
-    return_block(ptr);
+    free_list_free(ptr);
     break;
   case HUGE_ALLOCATION_TYPE:
     huge_free(ptr);
