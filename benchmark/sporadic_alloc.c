@@ -49,6 +49,7 @@ BenchmarkResult sporadic_allocs(void *(*allocator)(size_t),
 
   BenchmarkResult result = {.allocator_name = allocator_name,
                             .benchmark_name = "sporadic",
+                            .amount=amount,
                             .total_time =
                                 (double)(end - start) / CLOCKS_PER_SEC};
 

@@ -1,4 +1,7 @@
 main
+bench
 *.o
 .DS_Store
 *.dSYM/
+# Unsure whether this should be in the gitignore
+results/

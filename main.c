@@ -1,18 +1,43 @@
-// #include "src/allocator.h"
-#include "benchmark/benchmark.h"
 #include "src/allocator.h"
-#include "test/test.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/mman.h>
-#include <unistd.h>
-#include <stdalign.h>
+#include "benchmark/benchmark.h"
+
+// the benchmark to use
+#ifndef BENCHMARK
+#define BENCHMARK basic_allocs
+#endif
+
+// the amount timen s to allocate memory
+#ifndef AMOUNT
+#define AMOUNT 10000
+#endif
+
+// the seed to use
+#ifndef SEED
+#define SEED 42
+#endif
+
+// the allocator to use
+#ifndef ALLOCATOR
+#define ALLOCATOR dmalloc
+#endif
+#ifndef DEALLOCATOR
+#define DEALLOCATOR dfree
+#endif
+
+// the allocators name
+#ifndef NAME
+#define NAME "dmalloc"
+#endif
+
+// the size of the allocations to make
+#ifndef SIZE
+#define SIZE sizeof(int)
+#endif
 
 int main() {
-  BenchmarkResult res1 = basic_alloc(dmalloc, dfree, 10, sizeof(int) * 10, "dmalloc");
-  BenchmarkResult res2 = sporadic_alloc(dmalloc, dfree, 10, sizeof(int) * 10, "dmalloc");
+  BenchmarkResult res = BENCHMARK(ALLOCATOR, DEALLOCATOR, AMOUNT, SIZE, NAME, SEED);
 
-  print_result(res1);
-  print_result(res2);
+  print_result(res);
+
   return 0;
 }

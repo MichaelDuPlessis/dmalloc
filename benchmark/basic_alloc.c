@@ -4,8 +4,9 @@
 #include <time.h>
 
 BenchmarkResult basic_allocs(void *(*allocator)(size_t),
-                            void (*deallocator)(void *), size_t amount,
-                            size_t alloc_size, const char *allocator_name) {
+                             void (*deallocator)(void *), size_t amount,
+                             size_t alloc_size, const char *allocator_name,
+                             unsigned int seed) {
   void *allocations[amount];
   clock_t start, end;
 
@@ -35,6 +36,7 @@ BenchmarkResult basic_allocs(void *(*allocator)(size_t),
 
   BenchmarkResult result = {.allocator_name = allocator_name,
                             .benchmark_name = "basic",
+                            .amount=amount,
                             .total_time =
                                 (double)(end - start) / CLOCKS_PER_SEC};
 
