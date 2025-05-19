@@ -5,7 +5,7 @@
 
 BenchmarkResult varying_allocs(void *(*allocator)(size_t),
                                void (*deallocator)(void *), size_t amount,
-                               size_t size, const char *allocator_name,
+                               size_t alloc_size, const char *allocator_name,
                                unsigned int seed) {
   void **allocations = (void **)allocator(amount * sizeof(void *));
   size_t *sizes = (size_t *)allocator(amount * sizeof(size_t));
@@ -20,7 +20,7 @@ BenchmarkResult varying_allocs(void *(*allocator)(size_t),
 
   // Allocate varying sizes
   for (size_t i = 0; i < amount; ++i) {
-    size_t size = 16 + rand() % 4081; // [16, 4096]
+    size_t size = 1 + rand() % 4081; // [1, 4096]
     sizes[i] = size;
     allocations[i] = allocator(size);
     if (!allocations[i]) {
@@ -52,6 +52,7 @@ BenchmarkResult varying_allocs(void *(*allocator)(size_t),
   BenchmarkResult result = {.allocator_name = allocator_name,
                             .benchmark_name = "varying_allocs",
                             .amount=amount,
+                            .size=alloc_size,
                             .total_time = total_time};
   return result;
 }

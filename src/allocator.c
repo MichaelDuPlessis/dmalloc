@@ -12,7 +12,7 @@
 #define NUM_BINS 4
 
 // the maximum sized allocation that can fit into a bin
-const size_t MAX_BIN_SIZE = 1 << NUM_BINS;
+const size_t MAX_BIN_SIZE = 1 << (NUM_BINS - 1);
 
 // This is contains the metadata for the allocator
 struct {

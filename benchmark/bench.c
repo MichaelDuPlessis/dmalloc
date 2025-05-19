@@ -36,7 +36,7 @@
 
 // the size of the allocations to make
 #ifndef SIZE
-#define SIZE sizeof(int)
+#define SIZE 0
 #endif
 
 // the amount of steps to use
@@ -65,7 +65,7 @@ int main() {
 
   // Create dynamic filename based on ALLOCATOR and BENCHMARK
   char filename[256];
-  snprintf(filename, sizeof(filename), "./results/%s_%s.csv", STR(ALLOCATOR), STR(BENCHMARK));
+  snprintf(filename, sizeof(filename), "./results/%s_%s_%zu.csv", STR(ALLOCATOR), STR(BENCHMARK), (size_t)SIZE);
   write_results_to_file(results, STEPS, filename);
 
   return 0;

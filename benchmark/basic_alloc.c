@@ -37,6 +37,7 @@ BenchmarkResult basic_allocs(void *(*allocator)(size_t),
   BenchmarkResult result = {.allocator_name = allocator_name,
                             .benchmark_name = "basic",
                             .amount=amount,
+                            .size=alloc_size,
                             .total_time =
                                 (double)(end - start) / CLOCKS_PER_SEC};
 

@@ -6,6 +6,7 @@ void print_result(BenchmarkResult result) {
   printf("Allocator: %s\n", result.allocator_name);
   printf("Benchmark: %s\n", result.benchmark_name);
   printf("Amount: %zu\n", result.amount);
+  printf("Size: %zu\n", result.size);
   printf("Total time: %.6f seconds\n\n", result.total_time);
 }
 
@@ -21,14 +22,15 @@ int write_results_to_file(BenchmarkResult *results, size_t amount,
   // Write header if file is empty
   fseek(file, 0, SEEK_END);
   if (ftell(file) == 0) {
-    fprintf(file, "allocator_name,benchmark_name,amount,total_time\n");
+    fprintf(file, "allocator_name,benchmark_name,size,amount,total_time\n");
   }
 
   for (size_t i = 0; i < amount; i++) {
     BenchmarkResult result = results[i];
     // Write result
-    fprintf(file, "%s,%s,%zu,%.6f\n", result.allocator_name, result.benchmark_name,
-            result.amount, result.total_time);
+    fprintf(file, "%s,%s,%zu,%zu,%f\n", result.allocator_name,
+            result.benchmark_name, result.size, result.amount,
+            result.total_time);
   }
 
   fclose(file);

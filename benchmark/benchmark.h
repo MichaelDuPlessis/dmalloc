@@ -10,6 +10,8 @@ typedef struct {
   const char *benchmark_name;
   // The amount of objects allocated
   size_t amount;
+  // The size of the allocations
+  size_t size;
   // The total amount of time
   double total_time;
 } BenchmarkResult;
