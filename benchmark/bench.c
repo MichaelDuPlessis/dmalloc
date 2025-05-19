@@ -1,9 +1,14 @@
 #include "../src/allocator.h"
+#include <stdlib.h>
 #include "benchmark.h"
+#include <stdio.h>
+
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
 
 // the benchmark to use
 #ifndef BENCHMARK
-#define BENCHMARK basic_allocs
+#define BENCHMARK varying_allocs
 #endif
 
 // the amount timen s to allocate memory
@@ -26,7 +31,7 @@
 
 // the allocators name
 #ifndef NAME
-#define NAME "dmalloc"
+#define NAME STR(ALLOCATOR)
 #endif
 
 // the size of the allocations to make
@@ -58,7 +63,10 @@ int main() {
 #endif
   }
 
-  write_results_to_file(results, STEPS, "./results/results.csv");
+  // Create dynamic filename based on ALLOCATOR and BENCHMARK
+  char filename[256];
+  snprintf(filename, sizeof(filename), "./results/%s_%s.csv", STR(ALLOCATOR), STR(BENCHMARK));
+  write_results_to_file(results, STEPS, filename);
 
   return 0;
 }
