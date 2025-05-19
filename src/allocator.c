@@ -23,10 +23,26 @@ struct {
                         {.head = NULL, .bin_size = 4},
                         {.head = NULL, .bin_size = 8}}};
 
+// gets the kind of allocation that was made
+// must pass in memory that points to the start of a page
+static inline AllocationType get_allocation_type(void *page_start) {
+  AllocationHeader *header = (AllocationHeader *)page_start;
+  return header->allocation_type;
+}
+
 // gets the size of an allocation
-size_t get_allocation_size(void *ptr) {
-  // STUB for now
-  return 0;
+static size_t get_allocation_size(void *ptr) {
+  void *page_start = calculate_page_start(ptr);
+  AllocationType type = get_allocation_type(page_start);
+
+  switch (type) {
+  case BIN_ALLOCATION_TYPE:
+    return bin_manager_size((BinManager *)page_start);
+  case FREE_LIST_ALLOCATION_TYPE:
+    return free_list_size(ptr);
+  case HUGE_ALLOCATION_TYPE:
+    return huge_size(page_start);
+  }
 }
 
 // finding which bin an allocation belongs to
@@ -97,18 +113,18 @@ void *drealloc(void *ptr, size_t new_size) {
 
   memcpy(new_ptr, ptr, amount_to_copy);
 
+  // after data has been copied free the old memory
+  dfree(ptr);
+
   return new_ptr;
 }
 
 void dfree(void *ptr) {
-  // determining if the memory was allocated from a free list or from a bin
-  // return_block(ptr);
-
   // determining what allocator was used to allocate the memory
   void *page_start = calculate_page_start(ptr);
-  AllocationHeader *header = (AllocationHeader *)page_start;
+  AllocationType type = get_allocation_type(page_start);
 
-  switch (header->allocation_type) {
+  switch (type) {
   case BIN_ALLOCATION_TYPE:
     bin_manager_free(ptr);
     break;

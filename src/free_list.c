@@ -1,7 +1,6 @@
 #include "free_list.h"
 #include "allocator.h"
 #include "mmap_allocator.h"
-#include <stdint.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -105,7 +104,7 @@ void *free_list_alloc(size_t size) {
 
         void *ptr;
         // since everythign is aligned to 8 bytes if there is not enough space
-        // to store at least 8 bytes there is not point
+        // to store at least 8 bytes there is no point
         if (remaining >= sizeof(Block) + ALIGNMENT) {
           // Split the block
           Block *new_block = (Block *)((char *)current_block + total_size);
@@ -227,4 +226,9 @@ void free_list_free(void *ptr) {
   } else {
     chunk->block_head = new_block;
   }
+}
+
+size_t free_list_size(void *ptr) {
+  AllocHeader *header = (AllocHeader *)ptr - 1;
+  return header->size - sizeof(AllocHeader);
 }

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-BenchmarkResult basic_alloc(void *(*allocator)(size_t),
+BenchmarkResult basic_allocs(void *(*allocator)(size_t),
                             void (*deallocator)(void *), size_t amount,
                             size_t alloc_size, const char *allocator_name) {
   void *allocations[amount];

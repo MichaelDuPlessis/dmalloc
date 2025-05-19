@@ -36,4 +36,8 @@ void bin_manager_free(void *ptr);
 // Frees all memory from the bin manager
 void bin_manager_free_all(BinManager *manager);
 
+// Gets the size of the bin
+// It requires a page aligned pointer
+size_t bin_manager_size(BinManager *manager);
+
 #endif

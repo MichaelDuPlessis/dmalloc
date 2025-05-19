@@ -3,14 +3,15 @@
 #include <stdlib.h>
 #include <time.h>
 
-BenchmarkResult sporadic_alloc(void *(*allocator)(size_t),
-                               void (*deallocator)(void *), size_t amount,
-                               size_t alloc_size, const char *allocator_name) {
+BenchmarkResult sporadic_allocs(void *(*allocator)(size_t),
+                                void (*deallocator)(void *), size_t amount,
+                                size_t alloc_size, const char *allocator_name,
+                                unsigned int seed) {
   void *allocations[amount];
   size_t allocated = 0;
   clock_t start, end;
 
-  srand((unsigned int)time(NULL));
+  srand(seed);
   for (size_t i = 0; i < amount; i++) {
     allocations[i] = NULL;
   }

@@ -155,3 +155,7 @@ void bin_manager_free_all(BinManager *manager) {
 
   manager->head = NULL;
 }
+
+size_t bin_manager_size(BinManager *manager) {
+  return manager->bin_size;
+}

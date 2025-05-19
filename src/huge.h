@@ -5,10 +5,15 @@
 
 #include <stddef.h>
 
-// allocates a large amount of memory of at least 1 page size
+// Allocates a large amount of memory of at least 1 page size
 void *huge_alloc(size_t size);
 
-// deallocates a large amount of memory allocated by hugealloc
+// Deallocates a large amount of memory allocated by hugealloc
 void huge_free(void *ptr);
+
+// Retrieves the amount of memory allocated for this allocation
+// this is the amount of memory needed, not used.
+// It requires a page aligned pointer
+size_t huge_size(void *ptr);
 
 #endif

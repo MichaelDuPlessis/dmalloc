@@ -9,15 +9,23 @@ typedef struct {
   double total_time;
 } BenchmarkResult;
 
-// Allocates the amount of objects specified, then deallocates them, then reallocates them and then deallocates them
-BenchmarkResult basic_alloc(void *(*allocator)(size_t),
-                            void (*deallocator)(void *), size_t amount,
-                            size_t alloc_size, const char *allocator_name);
+// Allocates the amount of objects specified, then deallocates them, then
+// reallocates them and then deallocates them
+BenchmarkResult basic_allocs(void *(*allocator)(size_t),
+                             void (*deallocator)(void *), size_t amount,
+                             size_t alloc_size, const char *allocator_name);
 
-// Randomly allocates and deallocates the amount of times specified and then deallocates everything
-BenchmarkResult sporadic_alloc(void *(*allocator)(size_t),
+// Randomly allocates and deallocates the amount of times specified and then
+// deallocates everything
+BenchmarkResult sporadic_allocs(void *(*allocator)(size_t),
+                                void (*deallocator)(void *), size_t amount,
+                                size_t alloc_size, const char *allocator_name,
+                                unsigned int seed);
+
+// Does varying allocations of varying sizes
+BenchmarkResult varying_allocs(void *(*allocator)(size_t),
                                void (*deallocator)(void *), size_t amount,
-                               size_t alloc_size, const char *allocator_name);
+                               const char *allocator_name, unsigned int seed);
 
 // Prints a Benchmark result to stdout
 void print_result(BenchmarkResult result);

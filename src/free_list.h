@@ -10,4 +10,7 @@ void *free_list_alloc(size_t size);
 // Deallocates memory from the free list
 void free_list_free(void *ptr);
 
+// Returns the size of the memory allocated for that object in the free list
+size_t free_list_size(void *ptr);
+
 #endif
