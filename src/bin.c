@@ -88,18 +88,8 @@ void *bin_alloc(Bin *bin) {
   return (void *)((char *)bin->ptr + index * bin->bin_size);
 }
 
-void bin_free(void *ptr) {
-  // pages are aligned to their allocation size
-  // this can be used to figure out where the region
-  // of memory starts and thus get the header information
-
-  // getting page start
-  void *page_start = calculate_page_start(ptr);
-
-  // now that we have the start of the page the header information
-  // can be extracted
-  Bin *bin = (Bin *)page_start;
-
+// Takes a pointer smemory to free as well as the bin which it belongs to
+void bin_free(void *ptr, Bin *bin) {
   // now the index of the allocation needs to be derived
   // allocation is done according to this formula
   // start_ptr + index * bin_size = allocation_ptr
@@ -147,9 +137,9 @@ void *bin_manager_alloc(BinManager *manager) {
   return ptr;
 }
 
-void bin_manager_free(void *ptr) {
+void bin_manager_free(void *ptr, Bin *bin) {
   // the manager does not know what bin this memory belongs to
-  bin_free(ptr);
+  bin_free(ptr, bin);
 }
 
 void bin_manager_free_all(BinManager *manager) {

@@ -21,7 +21,9 @@ typedef struct {
 void *bin_manager_alloc(BinManager *manager);
 
 // Frees memory from one of the managers bins
-void bin_manager_free(void *ptr);
+// It requires a pointer to the memory to be free as well as
+// the pointer to the bin
+void bin_manager_free(void *ptr, Bin *bin);
 
 // Frees all memory from the bin manager
 void bin_manager_free_all(BinManager *manager);

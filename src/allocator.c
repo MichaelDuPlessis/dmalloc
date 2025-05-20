@@ -126,7 +126,7 @@ void dfree(void *ptr) {
 
   switch (type) {
   case BIN_ALLOCATION_TYPE:
-    bin_manager_free(ptr);
+    bin_manager_free(ptr, page_start);
     break;
   case FREE_LIST_ALLOCATION_TYPE:
     free_list_free(ptr);
@@ -142,20 +142,4 @@ void free_all_memory() {
   for (size_t i = 0; i < NUM_BINS; i++) {
     bin_manager_free_all(&allocator.bins[i]);
   }
-}
-
-size_t num_bins() {
-  Bin *current = allocator.bins[2].head;
-  size_t amount = 0;
-  while (current) {
-    // printf("Bin: %zu\n", amount);
-    // print_bitset(&current->bitset);
-    // amount++;
-    clear_bitset(&current->bitset);
-    current = current->next;
-  }
-
-  // free_all_memory();
-
-  return amount;
 }
