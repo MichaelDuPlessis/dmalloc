@@ -11,8 +11,7 @@ void print_result(BenchmarkResult result) {
 }
 
 // Append result to a file (CSV-like)
-int write_results_to_file(BenchmarkResult *results, size_t amount,
-                          const char *filename) {
+int write_result_to_file(BenchmarkResult result, const char *filename) {
   FILE *file = fopen(filename, "a");
   if (!file) {
     perror("Error opening file");
@@ -25,13 +24,9 @@ int write_results_to_file(BenchmarkResult *results, size_t amount,
     fprintf(file, "allocator_name,benchmark_name,size,amount,total_time\n");
   }
 
-  for (size_t i = 0; i < amount; i++) {
-    BenchmarkResult result = results[i];
-    // Write result
-    fprintf(file, "%s,%s,%zu,%zu,%f\n", result.allocator_name,
-            result.benchmark_name, result.size, result.amount,
-            result.total_time);
-  }
+  // Write result
+  fprintf(file, "%s,%s,%zu,%zu,%f\n", result.allocator_name,
+          result.benchmark_name, result.size, result.amount, result.total_time);
 
   fclose(file);
   return 0;

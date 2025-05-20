@@ -47,26 +47,18 @@
 #endif
 
 int main() {
-  // first warm up the code
-  BenchmarkResult res = basic_allocs(ALLOCATOR, DEALLOCATOR, 10, SIZE, NAME, SEED);
-
   // after that the tests can be run
-  BenchmarkResult results[STEPS];
+  BenchmarkResult result = BENCHMARK(ALLOCATOR, DEALLOCATOR, AMOUNT, SIZE, NAME, SEED);;
 
   // the actual benchmark
-  size_t step_size = AMOUNT / STEPS;
-  for (size_t i = 0; i < STEPS; i++) {
-    results[i] = BENCHMARK(ALLOCATOR, DEALLOCATOR, step_size + i * step_size, SIZE, NAME, SEED);
-
 #ifdef PRINT_RES
-    print_result(results[i]);
+    print_result(result);
 #endif
-  }
 
   // Create dynamic filename based on ALLOCATOR and BENCHMARK
   char filename[256];
   snprintf(filename, sizeof(filename), "./results/%s_%s_%zu.csv", STR(ALLOCATOR), STR(BENCHMARK), (size_t)SIZE);
-  write_results_to_file(results, STEPS, filename);
+  write_result_to_file(result, filename);
 
   return 0;
 }

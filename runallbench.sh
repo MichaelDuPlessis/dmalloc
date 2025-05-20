@@ -12,6 +12,12 @@ BENCHMARKS=("basic_allocs" "sporadic_allocs" "varying_allocs")
 # The sizes to test on (in bytes)
 SIZES=(1 2 4 8 16 32 64)
 
+# Accept total amount from CLI or default to 100
+TOTAL_AMOUNT=${1:-10000}
+# Always run 10 steps
+NUM_STEPS=10
+STEP=$((TOTAL_AMOUNT / NUM_STEPS))
+
 # Create results directory
 mkdir -p ./results
 
@@ -21,45 +27,49 @@ for PAIR in "${ALLOCATOR_PAIRS[@]}"; do
 
   for BENCHMARK in "${BENCHMARKS[@]}"; do
 
-    # Run varying_allocs only once per pair
-    if [[ "$BENCHMARK" == "varying_allocs" ]]; then
-      echo "🔧 Building and running ALLOCATOR=$ALLOCATOR, BENCHMARK=$BENCHMARK"
+    for ((i=1; i<=NUM_STEPS; i++)); do
+      AMOUNT=$((STEP * i))
 
-      clang -O3 \
-        -DALLOCATOR="$ALLOCATOR" \
-        -DDEALLOCATOR="$DEALLOCATOR" \
-        -DBENCHMARK="$BENCHMARK" \
-        -o ./bench \
-        src/*.c test/*.c benchmark/*.c
-
-      if [[ $? -ne 0 ]]; then
-        echo "❌ Compilation failed for $ALLOCATOR with $BENCHMARK"
-        continue
-      fi
-
-      ./bench
-
-    else
-      # Loop over sizes for other benchmarks
-      for SIZE in "${SIZES[@]}"; do
-        echo "🔧 Building and running ALLOCATOR=$ALLOCATOR, BENCHMARK=$BENCHMARK, SIZE=$SIZE"
+      if [[ "$BENCHMARK" == "varying_allocs" ]]; then
+        echo "🔧 Running ALLOCATOR=$ALLOCATOR, BENCHMARK=$BENCHMARK, AMOUNT=$AMOUNT"
 
         clang -O3 \
           -DALLOCATOR="$ALLOCATOR" \
           -DDEALLOCATOR="$DEALLOCATOR" \
           -DBENCHMARK="$BENCHMARK" \
-          -DSIZE=$SIZE \
+          -DAMOUNT=$AMOUNT \
           -o ./bench \
           src/*.c test/*.c benchmark/*.c
 
         if [[ $? -ne 0 ]]; then
-          echo "❌ Compilation failed for $ALLOCATOR with $BENCHMARK size $SIZE"
+          echo "❌ Compilation failed for $ALLOCATOR with $BENCHMARK (amount=$AMOUNT)"
           continue
         fi
 
         ./bench
-      done
-    fi
 
+      else
+        for SIZE in "${SIZES[@]}"; do
+          echo "🔧 Running ALLOCATOR=$ALLOCATOR, BENCHMARK=$BENCHMARK, SIZE=$SIZE, AMOUNT=$AMOUNT"
+
+          clang -O3 \
+            -DALLOCATOR="$ALLOCATOR" \
+            -DDEALLOCATOR="$DEALLOCATOR" \
+            -DBENCHMARK="$BENCHMARK" \
+            -DSIZE=$SIZE \
+            -DAMOUNT=$AMOUNT \
+            -o ./bench \
+            src/*.c test/*.c benchmark/*.c
+
+          if [[ $? -ne 0 ]]; then
+            echo "❌ Compilation failed for $ALLOCATOR with $BENCHMARK size=$SIZE amount=$AMOUNT"
+            continue
+          fi
+
+          ./bench
+        done
+      fi
+
+    done
   done
 done
