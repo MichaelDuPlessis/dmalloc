@@ -1,3 +1,8 @@
+/*
+  This file is used to benchmark various allocators. Currently the code has to be recompiled with different macros being defined at compilation time.
+  This should change to make use of command line arguments as well as MACROS defined at compilation time.
+*/
+
 #include "../src/allocator.h"
 #include <stdlib.h>
 #include "benchmark.h"
@@ -48,7 +53,7 @@
 
 int main() {
   // after that the tests can be run
-  BenchmarkResult result = BENCHMARK(ALLOCATOR, DEALLOCATOR, AMOUNT, SIZE, NAME, SEED);;
+  BenchmarkResult result = BENCHMARK(ALLOCATOR, DEALLOCATOR, AMOUNT, SIZE, NAME, SEED);
 
   // the actual benchmark
 #ifdef PRINT_RES
