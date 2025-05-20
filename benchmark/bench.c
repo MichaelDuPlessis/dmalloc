@@ -62,7 +62,7 @@ int main() {
 
   // Create dynamic filename based on ALLOCATOR and BENCHMARK
   char filename[256];
-  snprintf(filename, sizeof(filename), "./results/%s_%s_%zu.csv", STR(ALLOCATOR), STR(BENCHMARK), (size_t)SIZE);
+  snprintf(filename, sizeof(filename), "./results/%s_%s_%zu.csv", NAME, STR(BENCHMARK), (size_t)SIZE);
   write_result_to_file(result, filename);
 
   return 0;

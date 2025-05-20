@@ -4,6 +4,20 @@
 #include "mmap_allocator.h"
 #include <stdio.h>
 
+// A bin and all its metadata
+typedef struct Bin {
+  AllocationHeader header;
+  // the memory where items are allocated
+  void *ptr;
+  // the next bin
+  struct Bin *next;
+  // the size of the objects allocated in the bin
+  size_t bin_size;
+  // the free spots in the bin
+  BitSet bitset;
+} Bin;
+
+
 // Calculates the number of blocks that can fit in some amount of memory
 size_t calculate_num_blocks(size_t block_size, size_t total_memory) {
   return total_memory / block_size;
