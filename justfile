@@ -25,6 +25,10 @@ buildbench:
 bench: buildbench
     ./bench
 
+# counts the lines of code in the program not including the notebooks directory
+count:
+    cloc $(git ls-files) --by-file --exclude-dir=notebooks
+
 # deletes all build artifacts
 clean:
-    rm main
+    rm main bench
