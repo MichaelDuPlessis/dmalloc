@@ -25,8 +25,7 @@ struct {
 
 // gets the kind of allocation that was made
 // must pass in memory that points to the start of a page
-static inline AllocationType get_allocation_type(void *page_start) {
-  AllocationHeader *header = (AllocationHeader *)page_start;
+static inline AllocationType get_allocation_type(AllocationHeader *header) {
   return header->allocation_type;
 }
 
@@ -129,7 +128,7 @@ void dfree(void *ptr) {
     bin_manager_free(ptr, page_start);
     break;
   case FREE_LIST_ALLOCATION_TYPE:
-    free_list_free(ptr);
+    free_list_free(ptr, page_start);
     break;
   case HUGE_ALLOCATION_TYPE:
     huge_free(ptr);

@@ -174,12 +174,9 @@ void *free_list_alloc(size_t size) {
   return ptr;
 }
 
-void free_list_free(void *ptr) {
+void free_list_free(void *ptr, Chunk *chunk) {
   // first extract the header
   AllocHeader *header = (AllocHeader *)ptr - 1;
-
-  // getting the page start so the chunk data can be extracted
-  Chunk *chunk = (Chunk *)calculate_page_start(ptr);
 
   // we then iterate over the linked list to find first free block of memory
   // just after the block that is to be deallocated
