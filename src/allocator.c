@@ -1,27 +1,11 @@
 #include "allocator.h"
 #include "bin.h"
-#include "bitset.h"
 #include "free_list.h"
 #include "huge.h"
 #include "mmap_allocator.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-
-// The number of bins that we want
-#define NUM_BINS 4
-
-// the maximum sized allocation that can fit into a bin
-const size_t MAX_BIN_SIZE = 1 << (NUM_BINS - 1);
-
-// This is contains the metadata for the allocator
-struct {
-  // the bins for small objects
-  BinManager bins[NUM_BINS];
-} allocator = {.bins = {{.head = NULL, .bin_size = 1},
-                        {.head = NULL, .bin_size = 2},
-                        {.head = NULL, .bin_size = 4},
-                        {.head = NULL, .bin_size = 8}}};
 
 // gets the kind of allocation that was made
 // must pass in memory that points to the start of a page
@@ -36,7 +20,7 @@ static size_t get_allocation_size(void *ptr) {
 
   switch (type) {
   case BIN_ALLOCATION_TYPE:
-    return bin_manager_size((BinManager *)page_start);
+    return bin_size(page_start);
   case FREE_LIST_ALLOCATION_TYPE:
     return free_list_size(ptr);
   case HUGE_ALLOCATION_TYPE:
@@ -63,7 +47,7 @@ void *dmalloc(size_t size) {
     size_t index = bin_index(size);
 
     // allocating from bin
-    return bin_manager_alloc(&allocator.bins[index]);
+    return bin_alloc(size);
   }
 
   // if size is larger than the biggest bin
@@ -125,7 +109,7 @@ void dfree(void *ptr) {
 
   switch (type) {
   case BIN_ALLOCATION_TYPE:
-    bin_manager_free(ptr, page_start);
+    bin_free(ptr, page_start);
     break;
   case FREE_LIST_ALLOCATION_TYPE:
     free_list_free(ptr, page_start);
@@ -133,12 +117,5 @@ void dfree(void *ptr) {
   case HUGE_ALLOCATION_TYPE:
     huge_free(ptr);
     break;
-  }
-}
-
-// frees all memory at program exit
-void free_all_memory() {
-  for (size_t i = 0; i < NUM_BINS; i++) {
-    bin_manager_free_all(&allocator.bins[i]);
   }
 }

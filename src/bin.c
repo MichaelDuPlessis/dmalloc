@@ -17,14 +17,38 @@ typedef struct Bin {
   BitSet bitset;
 } Bin;
 
+// The bins to where memory can be allocated to
+static Bin *bins[NUM_BINS] = {NULL, NULL, NULL, NULL};
+
+// finding which bin an allocation belongs to
+static inline size_t bin_index(size_t size) {
+  // TODO: maybe don't use size_t it may not be necessary
+  size_t bin = 0;
+  size_t power = 1;
+  while (power < size) {
+    power <<= 1;
+    bin++;
+  }
+  return bin;
+}
 
 // Calculates the number of blocks that can fit in some amount of memory
-size_t calculate_num_blocks(size_t block_size, size_t total_memory) {
+static inline size_t calculate_num_blocks(size_t block_size,
+                                          size_t total_memory) {
   return total_memory / block_size;
 }
 
+// Calculates the size of a bin based off of the index it
+// belongs
+static inline size_t calculate_bin_size(size_t index) {
+  // Since bins are always powers of 2 we just have to shift
+  // by the index used
+  size_t bin_size = 1 << index;
+  return bin_size;
+}
+
 // Calculates the number of bits needed for the bitset
-size_t calculate_bitset_size(size_t block_size) {
+static size_t calculate_bitset_size(size_t block_size) {
   // the amount of memory availble
   // since I don't want to include th bitsets values
   size_t total_memory_available = PAGE_SIZE - (sizeof(Bin) - sizeof(BitSet));
@@ -52,7 +76,7 @@ size_t calculate_bitset_size(size_t block_size) {
   return total_blocks;
 }
 
-void init_bin(Bin *bin, size_t bin_size) {
+static void init_bin(Bin *bin, size_t bin_size) {
   // setting the type of allocation
   bin->header = (AllocationHeader){.allocation_type = BIN_ALLOCATION_TYPE};
 
@@ -72,7 +96,8 @@ void init_bin(Bin *bin, size_t bin_size) {
                       sizeof(BitSet));
 }
 
-void *bin_alloc(Bin *bin) {
+// Allocates memory to the passed in bin
+static void *allocate_mem_to_bin(Bin *bin) {
   // finding first free available slot
   ssize_t index = find_first_unmarked_bit(&bin->bitset);
 
@@ -88,27 +113,20 @@ void *bin_alloc(Bin *bin) {
   return (void *)((char *)bin->ptr + index * bin->bin_size);
 }
 
-// Takes a pointer smemory to free as well as the bin which it belongs to
-void bin_free(void *ptr, Bin *bin) {
-  // now the index of the allocation needs to be derived
-  // allocation is done according to this formula
-  // start_ptr + index * bin_size = allocation_ptr
-  // where start_ptr is the begining of the region of memory
-  // hence the calculation to get the index is
-  // (allocation_ptr - start_ptr) / bin_size = index
-  size_t index = ((char *)ptr - (char *)bin->ptr) / bin->bin_size;
+void *bin_alloc(size_t size) {
+  // First figure out what in to use
+  // aka what bin size to use
+  size_t index = bin_index(size);
 
-  // now that we have the index we can mark the bit as free in the bitlist
-  unmark_bit(&bin->bitset, index);
-}
+  // The head of bins for the specific size
+  Bin *head = bins[index];
 
-void *bin_manager_alloc(BinManager *manager) {
   // finding the first free bin
-  Bin *current = manager->head;
+  Bin *current = head;
 
   while (current) {
     // if there is free space in the bin allocate memory
-    void *ptr = bin_alloc(current);
+    void *ptr = allocate_mem_to_bin(current);
     if (ptr) {
       return ptr;
     }
@@ -126,40 +144,50 @@ void *bin_manager_alloc(BinManager *manager) {
     return NULL;
   }
 
+  // initializing the bin
   Bin *bin = (Bin *)allocation.ptr;
-  init_bin(bin, manager->bin_size);
+  size_t bin_size = calculate_bin_size(index);
+  init_bin(bin, bin_size);
+
   // setting bin as head of manager
-  bin->next = manager->head;
-  manager->head = bin;
+  bin->next = head;
+  bins[index] = bin;
 
   // allocating memory to bin
-  void *ptr = bin_alloc(bin);
+  void *ptr = allocate_mem_to_bin(bin);
   return ptr;
 }
 
-void bin_manager_free(void *ptr, Bin *bin) {
-  // the manager does not know what bin this memory belongs to
-  bin_free(ptr, bin);
+// Takes a pointer smemory to free as well as the bin which it belongs to
+void bin_free(void *ptr, Bin *bin) {
+  // now the index of the allocation needs to be derived
+  // allocation is done according to this formula
+  // start_ptr + index * bin_size = allocation_ptr
+  // where start_ptr is the begining of the region of memory
+  // hence the calculation to get the index is
+  // (allocation_ptr - start_ptr) / bin_size = index
+  size_t index = ((char *)ptr - (char *)bin->ptr) / bin->bin_size;
+
+  // now that we have the index we can mark the bit as free in the bitlist
+  unmark_bit(&bin->bitset, index);
 }
 
-void bin_manager_free_all(BinManager *manager) {
-  Bin *current = manager->head;
-  while (current) {
-    Bin *next = current->next;
+// void bin_manager_free_all(BinManager *manager) {
+//   Bin *current = manager->head;
+//   while (current) {
+//     Bin *next = current->next;
 
-    // deallocating memory
-    MmapAllocation allocation = {
-        .ptr = (void *)current,
-        .size = 1,
-    };
-    mmap_free(allocation);
+//     // deallocating memory
+//     MmapAllocation allocation = {
+//         .ptr = (void *)current,
+//         .size = 1,
+//     };
+//     mmap_free(allocation);
 
-    current = next;
-  }
+//     current = next;
+//   }
 
-  manager->head = NULL;
-}
+//   manager->head = NULL;
+// }
 
-size_t bin_manager_size(BinManager *manager) {
-  return manager->bin_size;
-}
+size_t bin_size(Bin *bin) { return bin->bin_size; }

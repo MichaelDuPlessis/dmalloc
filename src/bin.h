@@ -5,31 +5,22 @@
 #include "allocator.h"
 #include "bitset.h"
 
-// forward declaration
+// The number of bins that we want
+#define NUM_BINS 4
+
+// the maximum sized allocation that can fit into a bin
+#define MAX_BIN_SIZE (1 << (NUM_BINS - 1))
+
+// Forward declaration since the implementor does not need to know the inner workings
 struct Bin;
 
-// This struct is responsible for managing a specifically sized bin
-typedef struct {
-  // the size of the blocks for this manages bins
-  size_t bin_size;
-  // the firt bin in the list
-  struct Bin *head;
-} BinManager;
+// Allocators memory to a bin and returns a pointer to the bin
+void *bin_alloc(size_t size);
 
-// Allocates memory from one of the managers bins
-// The caller must know the size of the bins in the manager
-void *bin_manager_alloc(BinManager *manager);
+// Frees memory from the bin containing the pointer
+void bin_free(void *ptr, struct Bin *bin);
 
-// Frees memory from one of the managers bins
-// It requires a pointer to the memory to be free as well as
-// the pointer to the bin
-void bin_manager_free(void *ptr, struct Bin *bin);
-
-// Frees all memory from the bin manager
-void bin_manager_free_all(BinManager *manager);
-
-// Gets the size of the bin
-// It requires a page aligned pointer
-size_t bin_manager_size(BinManager *manager);
+// The size of blocks of memory that the bin allocates
+size_t bin_size(struct Bin *bin);
 
 #endif
