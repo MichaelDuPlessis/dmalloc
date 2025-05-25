@@ -14,7 +14,7 @@ static inline AllocationType get_allocation_type(AllocationHeader *header) {
 }
 
 // gets the size of an allocation
-static size_t get_allocation_size(void *ptr) {
+static inline size_t get_allocation_size(void *ptr) {
   void *page_start = calculate_page_start(ptr);
   AllocationType type = get_allocation_type(page_start);
 

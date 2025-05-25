@@ -19,7 +19,7 @@ typedef struct {
 
 // initializes the huge header
 // from a mmap allocation
-void init_huge_header(HugeHeader *header, size_t size, MmapAllocation allocation) {
+static inline void init_huge_header(HugeHeader *header, size_t size, MmapAllocation allocation) {
   *header = (HugeHeader){
     .header = HUGE_ALLOCATION_TYPE,
     .size = size,
