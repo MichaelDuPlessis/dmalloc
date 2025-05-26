@@ -18,7 +18,7 @@ typedef struct Bin {
 } Bin;
 
 // The bins to where memory can be allocated to
-static Bin *bins[NUM_BINS] = {NULL, NULL, NULL, NULL};
+static Bin *bins[NUM_BINS] = {[0 ... NUM_BINS - 1] = NULL};
 
 // finding which bin an allocation belongs to
 static inline size_t bin_index(size_t size) {
