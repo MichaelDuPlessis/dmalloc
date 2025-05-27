@@ -1,9 +1,8 @@
 #include "benchmark.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
-BenchmarkResult varying_allocs(void *(*allocator)(size_t),
+void varying_allocs(void *(*allocator)(size_t),
                                void (*deallocator)(void *), size_t amount,
                                size_t alloc_size, const char *allocator_name,
                                unsigned int seed) {
@@ -15,8 +14,6 @@ BenchmarkResult varying_allocs(void *(*allocator)(size_t),
   }
 
   srand(seed); // Set seed for reproducibility
-
-  clock_t start = clock();
 
   // Allocate varying sizes
   for (size_t i = 0; i < amount; ++i) {
@@ -43,16 +40,6 @@ BenchmarkResult varying_allocs(void *(*allocator)(size_t),
     }
   }
 
-  clock_t end = clock();
-  double total_time = (double)(end - start) / CLOCKS_PER_SEC;
-
   deallocator(allocations);
   deallocator(sizes);
-
-  BenchmarkResult result = {.allocator_name = allocator_name,
-                            .benchmark_name = "varying_allocs",
-                            .amount=amount,
-                            .size=alloc_size,
-                            .total_time = total_time};
-  return result;
 }

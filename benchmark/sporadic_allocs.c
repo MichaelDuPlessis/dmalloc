@@ -1,22 +1,18 @@
 #include "benchmark.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
-BenchmarkResult sporadic_allocs(void *(*allocator)(size_t),
+void sporadic_allocs(void *(*allocator)(size_t),
                                 void (*deallocator)(void *), size_t amount,
                                 size_t alloc_size, const char *allocator_name,
                                 unsigned int seed) {
   void *allocations[amount];
   size_t allocated = 0;
-  clock_t start, end;
 
   srand(seed);
   for (size_t i = 0; i < amount; i++) {
     allocations[i] = NULL;
   }
-
-  start = clock();
 
   for (size_t i = 0; i < amount * 2; i++) {
     int action = rand() % 2;
@@ -44,15 +40,4 @@ BenchmarkResult sporadic_allocs(void *(*allocator)(size_t),
       deallocator(allocations[i]);
     }
   }
-
-  end = clock();
-
-  BenchmarkResult result = {.allocator_name = allocator_name,
-                            .benchmark_name = "sporadic",
-                            .amount=amount,
-                            .size=alloc_size,
-                            .total_time =
-                                (double)(end - start) / CLOCKS_PER_SEC};
-
-  return result;
 }

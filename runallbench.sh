@@ -7,12 +7,12 @@ ALLOCATOR_PAIRS=(
 )
 
 # Define benchmark functions
-BENCHMARKS=("basic_allocs" "sporadic_allocs" "varying_allocs")
+BENCHMARKS=("basic" "sporadic" "varying")
 
 # The sizes to test on (in bytes)
 SIZES=(1 2 4 8 16 32 64)
 
-# Accept total amount from CLI or default to 100
+# Accept total amount from CLI or default to 10000
 TOTAL_AMOUNT=${1:-10000}
 # Always run 10 steps
 NUM_STEPS=10
@@ -21,55 +21,43 @@ STEP=$((TOTAL_AMOUNT / NUM_STEPS))
 # Create results directory
 mkdir -p ./results
 
+# Check if hyperfine is installed
+if ! command -v hyperfine &> /dev/null; then
+  echo "❌ 'hyperfine' is not installed. Install it to benchmark performance."
+  exit 1
+fi
+
 # Loop through combinations
 for PAIR in "${ALLOCATOR_PAIRS[@]}"; do
   IFS=":" read -r ALLOCATOR DEALLOCATOR <<< "$PAIR"
 
-  for BENCHMARK in "${BENCHMARKS[@]}"; do
+  echo "🔨 Compiling with ALLOCATOR=$ALLOCATOR, DEALLOCATOR=$DEALLOCATOR"
+  clang -O3 \
+    -DALLOCATOR="$ALLOCATOR" \
+    -DDEALLOCATOR="$DEALLOCATOR" \
+    -o ./bench \
+    src/*.c test/*.c benchmark/*.c
 
+  if [[ $? -ne 0 ]]; then
+    echo "❌ Compilation failed for $ALLOCATOR and $DEALLOCATOR"
+    continue
+  fi
+
+  for BENCHMARK in "${BENCHMARKS[@]}"; do
     for ((i=1; i<=NUM_STEPS; i++)); do
       AMOUNT=$((STEP * i))
 
-      if [[ "$BENCHMARK" == "varying_allocs" ]]; then
-        echo "🔧 Running ALLOCATOR=$ALLOCATOR, BENCHMARK=$BENCHMARK, AMOUNT=$AMOUNT"
-
-        clang -O3 \
-          -DALLOCATOR="$ALLOCATOR" \
-          -DDEALLOCATOR="$DEALLOCATOR" \
-          -DBENCHMARK="$BENCHMARK" \
-          -DAMOUNT=$AMOUNT \
-          -o ./bench \
-          src/*.c test/*.c benchmark/*.c
-
-        if [[ $? -ne 0 ]]; then
-          echo "❌ Compilation failed for $ALLOCATOR with $BENCHMARK (amount=$AMOUNT)"
-          continue
-        fi
-
-        ./bench
-
+      if [[ "$BENCHMARK" == "varying" ]]; then
+        CMD="./bench $BENCHMARK $AMOUNT"
+        echo "🚀 Benchmarking $LABEL"
+        hyperfine --warmup 1 --export-csv "./results/results.csv" --runs 5 "$CMD"
       else
         for SIZE in "${SIZES[@]}"; do
-          echo "🔧 Running ALLOCATOR=$ALLOCATOR, BENCHMARK=$BENCHMARK, SIZE=$SIZE, AMOUNT=$AMOUNT"
-
-          clang -O3 \
-            -DALLOCATOR="$ALLOCATOR" \
-            -DDEALLOCATOR="$DEALLOCATOR" \
-            -DBENCHMARK="$BENCHMARK" \
-            -DSIZE=$SIZE \
-            -DAMOUNT=$AMOUNT \
-            -o ./bench \
-            src/*.c test/*.c benchmark/*.c
-
-          if [[ $? -ne 0 ]]; then
-            echo "❌ Compilation failed for $ALLOCATOR with $BENCHMARK size=$SIZE amount=$AMOUNT"
-            continue
-          fi
-
-          ./bench
+          CMD="./bench $BENCHMARK $AMOUNT $SIZE"
+          echo "🚀 Benchmarking $LABEL"
+          hyperfine --warmup 1 --export-csv "./results/results.csv" --runs 5 "$CMD"
         done
       fi
-
     done
   done
 done

@@ -1,69 +1,60 @@
 /*
-  This file is used to benchmark various allocators. Currently the code has to be recompiled with different macros being defined at compilation time.
-  This should change to make use of command line arguments as well as MACROS defined at compilation time.
+  This file is used to benchmark various allocators.
+  ALLOCATOR and DEALLOCATOR are still defined at compile time.
+  Other configurations can now be passed via command-line arguments.
 */
 
 #include "../src/allocator.h"
-#include <stdlib.h>
 #include "benchmark.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
-// the benchmark to use
-#ifndef BENCHMARK
-#define BENCHMARK varying_allocs
-#endif
-
-// the amount timen s to allocate memory
-#ifndef AMOUNT
-#define AMOUNT 10000
-#endif
-
-// the seed to use
-#ifndef SEED
-#define SEED 42
-#endif
-
-// the allocator to use
 #ifndef ALLOCATOR
 #define ALLOCATOR dmalloc
 #endif
 #ifndef DEALLOCATOR
 #define DEALLOCATOR dfree
 #endif
-
-// the allocators name
 #ifndef NAME
 #define NAME STR(ALLOCATOR)
 #endif
 
-// the size of the allocations to make
-#ifndef SIZE
-#define SIZE 0
-#endif
+typedef void (*BenchmarkFunc)(void *(*allocator)(size_t),
+                                         void (*deallocator)(void *),
+                                         size_t amount, size_t alloc_size,
+                                         const char *allocator_name,
+                                         unsigned int seed);
 
-// the amount of steps to use
-// the allocator is run the amount of times equal to the value of STEPS
-// the amount of items to allocate increases as the steps increase
-#ifndef STEPS
-#define STEPS 10
-#endif
+int main(int argc, char **argv) {
+  if (argc < 2) {
+    fprintf(stderr,
+            "Usage: %s <benchmark_name> [amount] [size] [seed] [name]\n",
+            argv[0]);
+    return 1;
+  }
 
-int main() {
-  // after that the tests can be run
-  BenchmarkResult result = BENCHMARK(ALLOCATOR, DEALLOCATOR, AMOUNT, SIZE, NAME, SEED);
+  const char *benchmark_name = argv[1];
+  size_t amount = (argc > 2) ? strtoull(argv[2], NULL, 10) : 10000;
+  size_t size = (argc > 3) ? strtoull(argv[3], NULL, 10) : 1;
+  size_t seed = (argc > 4) ? strtoull(argv[4], NULL, 10) : 42;
+  const char *name = (argc > 5) ? argv[5] : NAME;
 
-  // the actual benchmark
-#ifdef PRINT_RES
-    print_result(result);
-#endif
+  BenchmarkFunc benchmark_fn = NULL;
 
-  // Create dynamic filename based on ALLOCATOR and BENCHMARK
-  char filename[256];
-  snprintf(filename, sizeof(filename), "./results/%s_%s_%zu.csv", NAME, STR(BENCHMARK), (size_t)SIZE);
-  write_result_to_file(result, filename);
+  if (strcmp(benchmark_name, "basic") == 0) {
+    benchmark_fn = basic_allocs;
+  } else if (strcmp(benchmark_name, "sporadic") == 0) {
+    benchmark_fn = sporadic_allocs;
+  } else if (strcmp(benchmark_name, "varying") == 0) {
+    benchmark_fn = varying_allocs;
+  } else {
+    fprintf(stderr, "Unknown benchmark: %s\n", benchmark_name);
+    return 1;
+  }
 
   return 0;
 }

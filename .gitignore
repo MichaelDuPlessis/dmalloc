@@ -5,4 +5,5 @@ bench
 *.dSYM/
 # Unsure whether this should be in the gitignore
 results/
+old_results/
 .venv/
