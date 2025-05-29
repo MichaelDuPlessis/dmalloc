@@ -49,13 +49,15 @@ for PAIR in "${ALLOCATOR_PAIRS[@]}"; do
 
       if [[ "$BENCHMARK" == "varying" ]]; then
         CMD="./bench $BENCHMARK $AMOUNT"
+        LABEL="${BENCHMARK}_${ALLOCATOR}_amount${AMOUNT}"
         echo "🚀 Benchmarking $LABEL"
-        hyperfine --warmup 1 --export-csv "./results/results.csv" --runs 5 "$CMD"
+        hyperfine --warmup 1 --export-csv "./results/${LABEL}.csv" --runs 10 -N "$CMD"
       else
         for SIZE in "${SIZES[@]}"; do
           CMD="./bench $BENCHMARK $AMOUNT $SIZE"
+          LABEL="${BENCHMARK}_${ALLOCATOR}_amount${AMOUNT}_size${SIZE}"
           echo "🚀 Benchmarking $LABEL"
-          hyperfine --warmup 1 --export-csv "./results/results.csv" --runs 5 "$CMD"
+          hyperfine --warmup 1 --export-csv "./results/${LABEL}.csv" --runs 10 -N "$CMD"
         done
       fi
     done
