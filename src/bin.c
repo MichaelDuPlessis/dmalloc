@@ -194,9 +194,14 @@ void bin_free(void *ptr, Bin *bin) {
     // if prev is null than this bin is the head
     if (bin->prev == NULL) {
       bins[index] = bin->next;
+      bin->next->prev = NULL;
     } else {
       bin->prev->next = bin->next;
-      bin->next->prev = bin->prev;
+
+      // if there is a next
+      if (bin->next != NULL) {
+        bin->next->prev = bin->prev;
+      }
     }
 
     // return the page to the store

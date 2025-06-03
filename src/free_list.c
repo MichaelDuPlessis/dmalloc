@@ -1,6 +1,8 @@
 #include "free_list.h"
 #include "allocator.h"
 #include "mmap_allocator.h"
+#include "page_store.h"
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -30,6 +32,8 @@ typedef struct Chunk {
   AllocationHeader header;
   // The original allocation
   MmapAllocation mmap_allocation;
+  // The previous chunk of memory
+  struct Chunk *prev;
   // The next chunk of memory
   struct Chunk *next;
   // Where the first free block of memory is
@@ -44,6 +48,11 @@ static inline size_t alignment_padding(void *ptr, size_t alignment) {
   uintptr_t p = (uintptr_t)ptr;
   size_t misalignment = p & (alignment - 1);
   return misalignment == 0 ? 0 : (alignment - misalignment);
+}
+
+// determines if the free list is empty
+static inline bool is_free_list_empty(Chunk *chunk) {
+  return chunk->block_head->size == (chunk->mmap_allocation.size - sizeof(Chunk));
 }
 
 // Returns an aligned memory address
@@ -67,7 +76,7 @@ static inline void init_alloc_header(AllocHeader *header, size_t size) {
 
 // Allocates memory using mmap and creates a new chunk and initializes it
 static inline Chunk *new_chunk() {
-  MmapAllocation allocation = mmap_alloc(1);
+  MmapAllocation allocation = retrieve_page();
   // this is the start of the chunk
   Chunk *chunk = (Chunk *)allocation.ptr;
 
@@ -80,6 +89,7 @@ static inline Chunk *new_chunk() {
   *chunk = (Chunk){
       .header = FREE_LIST_ALLOCATION_TYPE,
       .mmap_allocation = allocation,
+      .prev = NULL,
       .next = NULL,
       .block_head = block,
   };
@@ -144,6 +154,7 @@ void *free_list_alloc(size_t size) {
   // No suitable block found — create new chunk
   Chunk *chunk = new_chunk();
   chunk->next = chunk_head;
+  chunk_head->prev = chunk;
   chunk_head = chunk;
 
   // this is duplicating code but its better than a loop or another function
@@ -222,6 +233,25 @@ void free_list_free(void *ptr, Chunk *chunk) {
     }
   } else {
     chunk->block_head = new_block;
+  }
+
+  // if there is no allocated memory left return allocation to the store 
+  if (is_free_list_empty(chunk)) {
+     // if the prev is null it is the head
+     if (chunk->prev == NULL) {
+       chunk_head = chunk->next;
+       chunk_head->prev = NULL;
+     } else {
+      chunk->prev->next = chunk->next;
+
+      // if there is a next
+      if (chunk->next != NULL) {
+        chunk->next->prev = chunk->prev;
+      }
+     }
+
+    // return the page to the store
+    store_page(chunk->mmap_allocation);
   }
 }
 
