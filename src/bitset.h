@@ -11,6 +11,8 @@
 typedef struct {
   // Number of bits
   size_t num_bits;
+  // The number of bits that are marked
+  size_t num_bits_marked;
   // The number number of bits in the last word that are used
   size_t last_word_bits;
   // keeps track of the last known word with free bits
@@ -47,6 +49,9 @@ void print_bitset(BitSet *bitset);
 
 // Checks if all bits in the bitset are marked
 bool all_bits_marked(BitSet *bitset);
+
+// Checks if all bits in the bitset are umarked
+bool all_bits_unmarked(BitSet *bitset);
 
 // Clears the bitset marking all bits as unused
 void clear_bitset(BitSet *bitset);

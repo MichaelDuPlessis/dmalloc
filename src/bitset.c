@@ -45,6 +45,9 @@ void init_bitset(BitSet *bitset, size_t num_bits) {
   // setting the number of bits
   bitset->num_bits = num_bits;
 
+  // setting the number of marked bits
+  bitset->num_bits_marked = 0;
+
   // since the bitset was just initialized the index of a word
   // with free bits is the first one
   bitset->free_word_index = 0;
@@ -70,7 +73,14 @@ void mark_bit(BitSet *bitset, size_t index) {
   // since the index must be in a valid range and the unused bits are always
   // on marking does nothing and the code below to check is not needed
 
-  bitset->words[word_idx] |= ((WORD)1 << bit_idx);
+  WORD bitmask = (WORD)1 << bit_idx;
+  // checking if bit is already marked
+  if ((bitset->words[word_idx] & bitmask) == 0) {
+    // if so a new bit has been marked
+    bitset->num_bits_marked++;
+  }
+
+  bitset->words[word_idx] |= bitmask;
 
   // if the current index and the last free index are the same
   // and the current word is full than move to the next one
@@ -96,7 +106,13 @@ void unmark_bit(BitSet *bitset, size_t index) {
     return;
   }
 
-  bitset->words[word_idx] &= ~((WORD)1 << bit_idx);
+  WORD bitmask = (WORD)1 << bit_idx;
+  // checking if bit is already marked
+  if ((bitset->words[word_idx] & bitmask) == 1) {
+    // if the bit was marked less bits than have been marked
+    bitset->num_bits_marked--;
+  }
+  bitset->words[word_idx] &= ~bitmask;
 
   // setting the index for the word with free bits
   // only update it if the index is less than the current one
@@ -123,7 +139,14 @@ void flip_bit(BitSet *bitset, size_t index) {
       return;
   }
 
-  bitset->words[word_idx] ^= ((WORD)1 << bit_idx);
+  WORD bitmask = (WORD)1 << bit_idx;
+
+  bitset->words[word_idx] ^= bitmask;
+  if ((bitset->words[word_idx] & bitmask) == 1) {
+    bitset->num_bits_marked++; 
+  } else {
+    bitset->num_bits_marked--; 
+  }
 }
 
 bool check_bit(BitSet *bitset, size_t index) {
@@ -169,8 +192,11 @@ ssize_t find_first_unmarked_bit(BitSet *bitset) {
 }
 
 bool all_bits_marked(BitSet *bitset) {
-  // TODO: Maybe add a size parameter for speed
-  return find_first_unmarked_bit(bitset) == -1;
+  return bitset->num_bits_marked == bitset->num_bits;
+}
+
+bool all_bits_unmarked(BitSet *bitset) {
+  return bitset->num_bits_marked == 0;
 }
 
 void clear_bitset(BitSet *bitset) {

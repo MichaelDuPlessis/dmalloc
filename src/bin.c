@@ -2,13 +2,18 @@
 #include "allocator.h"
 #include "bitset.h"
 #include "mmap_allocator.h"
+#include "page_store.h"
 #include <stdio.h>
 
 // A bin and all its metadata
 typedef struct Bin {
   AllocationHeader header;
+  // the mmap allocation for the bin
+  MmapAllocation mmap_allocation;
   // the memory where items are allocated
   void *ptr;
+  // the previous bin
+  struct Bin *prev;
   // the next bin
   struct Bin *next;
   // the size of the objects allocated in the bin
@@ -20,7 +25,12 @@ typedef struct Bin {
 // The bins to where memory can be allocated to
 static Bin *bins[NUM_BINS] = {[0 ... NUM_BINS - 1] = NULL};
 
-// finding which bin an allocation belongs to
+// Checks if a bin is empty (no memory is allocated to it)
+static inline bool is_bin_empty(Bin *bin) {
+  return all_bits_unmarked(&bin->bitset);
+}
+
+// Finding which bin an allocation belongs to
 static inline size_t bin_index(size_t size) {
   // TODO: maybe don't use size_t it may not be necessary
   size_t bin = 0;
@@ -76,12 +86,16 @@ static size_t calculate_bitset_size(size_t block_size) {
   return total_blocks;
 }
 
-static void init_bin(Bin *bin, size_t bin_size) {
+static void init_bin(Bin *bin, size_t bin_size, MmapAllocation allocation) {
   // setting the type of allocation
   bin->header = (AllocationHeader){.allocation_type = BIN_ALLOCATION_TYPE};
 
+  // setting the mmap allocation
+  bin->mmap_allocation = allocation;
+
   // setting the size of the bin
   bin->bin_size = bin_size;
+  bin->prev = NULL;
   bin->next = NULL;
 
   // calculating the size of the bitset
@@ -137,7 +151,7 @@ void *bin_alloc(size_t size) {
 
   // if current is null we are out of memory and a new bin needs to be allocated
   // one page is always allocated
-  MmapAllocation allocation = mmap_alloc(1);
+  MmapAllocation allocation = retrieve_page();
 
   // if the allocation fails return NULL
   if (allocation.ptr == NULL) {
@@ -147,10 +161,12 @@ void *bin_alloc(size_t size) {
   // initializing the bin
   Bin *bin = (Bin *)allocation.ptr;
   size_t bin_size = calculate_bin_size(index);
-  init_bin(bin, bin_size);
+  init_bin(bin, bin_size, allocation);
 
   // setting bin as head of manager
+  bin->prev = NULL;
   bin->next = head;
+  head->prev = bin;
   bins[index] = bin;
 
   // allocating memory to bin
@@ -158,7 +174,7 @@ void *bin_alloc(size_t size) {
   return ptr;
 }
 
-// Takes a pointer smemory to free as well as the bin which it belongs to
+// Takes a pointer to memory to free as well as the bin which it belongs to
 void bin_free(void *ptr, Bin *bin) {
   // now the index of the allocation needs to be derived
   // allocation is done according to this formula
@@ -170,6 +186,22 @@ void bin_free(void *ptr, Bin *bin) {
 
   // now that we have the index we can mark the bit as free in the bitlist
   unmark_bit(&bin->bitset, index);
+
+  // if no memory is still allocated return the memory
+  if (is_bin_empty(bin)) {
+    size_t index = bin_index(bin->bin_size);
+
+    // if prev is null than this bin is the head
+    if (bin->prev == NULL) {
+      bins[index] = bin->next;
+    } else {
+      bin->prev->next = bin->next;
+      bin->next->prev = bin->prev;
+    }
+
+    // return the page to the store
+    store_page(bin->mmap_allocation);
+  }
 }
 
 // void bin_manager_free_all(BinManager *manager) {
