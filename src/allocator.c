@@ -28,24 +28,9 @@ static inline size_t get_allocation_size(void *ptr) {
   }
 }
 
-// finding which bin an allocation belongs to
-static inline size_t bin_index(size_t size) {
-  // TODO: maybe don't use size_t it may not be necessary
-  size_t bin = 0;
-  size_t power = 1;
-  while (power < size) {
-    power <<= 1;
-    bin++;
-  }
-  return bin;
-}
-
 void *dmalloc(size_t size) {
   // if size fits into a bin
   if (size <= MAX_BIN_SIZE) {
-    // getting the bin index for the allocation
-    size_t index = bin_index(size);
-
     // allocating from bin
     return bin_alloc(size);
   }
