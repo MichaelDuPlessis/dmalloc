@@ -6,7 +6,9 @@
 #include "bitset.h"
 
 // The number of bins that we want
+#ifndef NUM_BINS
 #define NUM_BINS 4
+#endif
 
 // the maximum sized allocation that can fit into a bin
 #define MAX_BIN_SIZE (1 << (NUM_BINS - 1))
