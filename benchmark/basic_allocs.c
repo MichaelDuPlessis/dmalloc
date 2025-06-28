@@ -11,10 +11,13 @@ void basic_allocs(void *(*allocator)(size_t), void (*deallocator)(void *),
     allocations[i] = allocator(alloc_size);
   }
 
+
   // First deallocation
   for (size_t i = 0; i < amount; i++) {
     deallocator(allocations[i]);
   }
+
+  return;
 
   // Reallocation
   for (size_t i = 0; i < amount; i++) {

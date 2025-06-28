@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 // used to calculate the alignment of some variable
 #define ALIGNMENT 8
@@ -52,7 +53,8 @@ static inline size_t alignment_padding(void *ptr, size_t alignment) {
 
 // determines if the free list is empty
 static inline bool is_free_list_empty(Chunk *chunk) {
-  return chunk->block_head->size == (chunk->mmap_allocation.size - sizeof(Chunk));
+  return chunk->block_head->size ==
+         (chunk->mmap_allocation.size - sizeof(Chunk));
 }
 
 // Returns an aligned memory address
@@ -154,7 +156,9 @@ void *free_list_alloc(size_t size) {
   // No suitable block found — create new chunk
   Chunk *chunk = new_chunk();
   chunk->next = chunk_head;
-  chunk_head->prev = chunk;
+  if (chunk_head != NULL) {
+    chunk_head->prev = chunk;
+  }
   chunk_head = chunk;
 
   // this is duplicating code but its better than a loop or another function
@@ -235,20 +239,22 @@ void free_list_free(void *ptr, Chunk *chunk) {
     chunk->block_head = new_block;
   }
 
-  // if there is no allocated memory left return allocation to the store 
+  // if there is no allocated memory left return allocation to the store
   if (is_free_list_empty(chunk)) {
-     // if the prev is null it is the head
-     if (chunk->prev == NULL) {
-       chunk_head = chunk->next;
-       chunk_head->prev = NULL;
-     } else {
+    // if the prev is null it is the head
+    if (chunk->prev == NULL) {
+      chunk_head = chunk->next;
+      if (chunk_head != NULL) {
+        chunk_head->prev = NULL;
+      }
+    } else {
       chunk->prev->next = chunk->next;
 
       // if there is a next
       if (chunk->next != NULL) {
         chunk->next->prev = chunk->prev;
       }
-     }
+    }
 
     // return the page to the store
     store_page(chunk->mmap_allocation);
