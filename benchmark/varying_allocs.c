@@ -2,10 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void varying_allocs(void *(*allocator)(size_t),
-                               void (*deallocator)(void *), size_t amount,
-                               size_t alloc_size, const char *allocator_name,
-                               unsigned int seed) {
+void varying_allocs(void *(*allocator)(size_t), void (*deallocator)(void *),
+                    size_t amount, size_t alloc_size, unsigned int seed) {
   void **allocations = (void **)allocator(amount * sizeof(void *));
   size_t *sizes = (size_t *)allocator(amount * sizeof(size_t));
   if (!allocations || !sizes) {

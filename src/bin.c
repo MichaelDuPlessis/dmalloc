@@ -166,11 +166,14 @@ void *bin_alloc(size_t size) {
   // setting bin as head of manager
   bin->prev = NULL;
   bin->next = head;
-  head->prev = bin;
+  if (head != NULL) {
+    head->prev = bin;
+  }
   bins[index] = bin;
 
   // allocating memory to bin
   void *ptr = allocate_mem_to_bin(bin);
+
   return ptr;
 }
 
@@ -194,7 +197,9 @@ void bin_free(void *ptr, Bin *bin) {
     // if prev is null than this bin is the head
     if (bin->prev == NULL) {
       bins[index] = bin->next;
-      bin->next->prev = NULL;
+      if (bin->next != NULL) {
+        bin->next->prev = NULL;
+      }
     } else {
       bin->prev->next = bin->next;
 

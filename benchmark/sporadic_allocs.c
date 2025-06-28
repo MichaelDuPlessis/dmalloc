@@ -2,10 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void sporadic_allocs(void *(*allocator)(size_t),
-                                void (*deallocator)(void *), size_t amount,
-                                size_t alloc_size, const char *allocator_name,
-                                unsigned int seed) {
+void sporadic_allocs(void *(*allocator)(size_t), void (*deallocator)(void *),
+                     size_t amount, size_t alloc_size, unsigned int seed) {
   void *allocations[amount];
   size_t allocated = 0;
 

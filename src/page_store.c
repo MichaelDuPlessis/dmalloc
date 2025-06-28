@@ -1,6 +1,7 @@
 #include "page_store.h"
 #include "mmap_allocator.h"
 #include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 
 // The number of papes to keep cached
@@ -13,8 +14,8 @@
 static MmapAllocation store[STORE_SIZE] = {0};
 
 // Determines if the MmapAllocation is 0 initialized 
-static inline bool is_zero_initalized(MmapAllocation *allocation) {
-  return memcmp(&allocation, &(MmapAllocation){0}, sizeof(MmapAllocation)) == 0;
+static inline bool is_zero_initalized(MmapAllocation allocation) {
+  return allocation.ptr == NULL && allocation.size == 0;
 }
 
 MmapAllocation retrieve_page() {
@@ -23,7 +24,7 @@ MmapAllocation retrieve_page() {
     MmapAllocation allocation = store[i];
 
     // if a page is found
-    if (!is_zero_initalized(&allocation)) {
+    if (!is_zero_initalized(allocation)) {
       // Mark spot as not available
       store[i] = (MmapAllocation){0};
 
@@ -35,9 +36,9 @@ MmapAllocation retrieve_page() {
   // if no free spot is found then new pages need to be allocated
   // allocate pages plus an extra one for memory that has to be allocated now
   size_t pages_to_allocated = STORE_SIZE + 1;
-  MmapAllocation allocation = mmap_alloc(pages_to_allocated);
+  MmapAllocation allocations = mmap_alloc(pages_to_allocated);
   // the pointer to the beginning of the memory region
-  char *ptr = allocation.ptr;
+  char *ptr = allocations.ptr;
 
   // getting the size of a page
   size_t page_size = get_page_size();
@@ -50,10 +51,12 @@ MmapAllocation retrieve_page() {
     };
   }
 
-  return (MmapAllocation) {
+  MmapAllocation allocation = {
    .ptr = ptr,
    .size = page_size, 
   };
+
+  return allocation; 
 }
 
 void store_page(MmapAllocation allocation) {
@@ -62,7 +65,7 @@ void store_page(MmapAllocation allocation) {
     MmapAllocation allocation = store[i];
 
     // if a page is found
-    if (is_zero_initalized(&allocation)) {
+    if (is_zero_initalized(allocation)) {
       // Mark spot as not available
       store[i] = allocation;
       return;

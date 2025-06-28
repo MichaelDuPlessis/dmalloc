@@ -26,7 +26,7 @@
 typedef void (*BenchmarkFunc)(void *(*allocator)(size_t),
                                          void (*deallocator)(void *),
                                          size_t amount, size_t alloc_size,
-                                         const char *allocator_name,
+                                         
                                          unsigned int seed);
 
 int main(int argc, char **argv) {
@@ -55,6 +55,10 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Unknown benchmark: %s\n", benchmark_name);
     return 1;
   }
+
+  printf("Start bench\n");
+  benchmark_fn(ALLOCATOR, DEALLOCATOR, amount, size, seed);
+  printf("End bench\n");
 
   return 0;
 }

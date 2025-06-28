@@ -1,4 +1,5 @@
 #include "mmap_allocator.h"
+#include <stdio.h>
 #include <sys/mman.h>
 #include "stdint.h"
 
@@ -40,4 +41,16 @@ size_t calculate_num_pages(size_t size) {
 void *calculate_page_start(void *ptr) {
   uintptr_t addr = (uintptr_t)ptr;
   return (void *)(addr & ~(PAGE_SIZE - 1));
+}
+
+void print_mmap_allocation(const MmapAllocation *allocation) {
+  if (!allocation || !allocation->ptr) {
+    printf("MmapAllocation: NULL\n");
+    return;
+  }
+
+  printf("MmapAllocation {\n");
+  printf("  Address: %p\n", allocation->ptr);
+  printf("  Size:    %zu bytes\n", allocation->size);
+  printf("}\n");
 }

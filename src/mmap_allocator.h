@@ -40,4 +40,7 @@ size_t calculate_num_pages(size_t size);
 // be allocated in powers of 2 for this function to work
 void *calculate_page_start(void* ptr);
 
+// Prints the size and ptr of the MmapAllocation
+void print_mmap_allocation(const MmapAllocation *allocation);
+
 #endif
