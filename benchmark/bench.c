@@ -51,6 +51,8 @@ int main(int argc, char **argv) {
     benchmark_fn = sporadic_allocs;
   } else if (strcmp(benchmark_name, "varying") == 0) {
     benchmark_fn = varying_allocs;
+  } else if (strcmp(benchmark_name, "tree") == 0) {
+    benchmark_fn = tree_allocs;
   } else {
     fprintf(stderr, "Unknown benchmark: %s\n", benchmark_name);
     return 1;
