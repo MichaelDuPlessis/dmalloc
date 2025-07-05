@@ -7,10 +7,10 @@ ALLOCATOR_PAIRS=(
 )
 
 # Define benchmark functions
-BENCHMARKS=("basic" "sporadic" "varying")
+BENCHMARKS=("basic" "sporadic" "varying" "tree")
 
 # The sizes to test on (in bytes)
-SIZES=(1 2 4 8 16 32 64)
+SIZES=(1 2 4 8 16 32 64 256 512 1024 2048)
 
 # Accept total amount from CLI or default to 10000
 TOTAL_AMOUNT=${1:-10000}

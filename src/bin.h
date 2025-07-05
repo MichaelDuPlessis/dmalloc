@@ -7,7 +7,7 @@
 
 // The number of bins that we want
 #ifndef NUM_BINS
-#define NUM_BINS 4
+#define NUM_BINS 8
 #endif
 
 // the maximum sized allocation that can fit into a bin
