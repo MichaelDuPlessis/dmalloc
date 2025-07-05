@@ -37,7 +37,7 @@ void *dmalloc(size_t size) {
 
   // if size is larger than the biggest bin
   // but less than a page
-  if (size < PAGE_SIZE) {
+  if (size < (PAGE_SIZE / 2)) {
     // if not valid just allocate from the free list
     return free_list_alloc(size);
   }
