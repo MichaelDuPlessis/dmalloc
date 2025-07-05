@@ -7,10 +7,10 @@ ALLOCATOR_PAIRS=(
 )
 
 # Define benchmark functions
-BENCHMARKS=("basic" "sporadic" "varying" "tree")
+BENCHMARKS=("basic" "sporadic" "varying")
 
 # The sizes to test on (in bytes)
-SIZES=(1 2 4 8 16 32 64 256 512 1024 2048)
+SIZES=(1 2 4 8 16 32 64 128 256 512 1024 2048)
 
 # Accept total amount from CLI or default to 10000
 TOTAL_AMOUNT=${1:-10000}
@@ -52,12 +52,14 @@ for PAIR in "${ALLOCATOR_PAIRS[@]}"; do
         LABEL="${BENCHMARK}_${ALLOCATOR}_amount${AMOUNT}"
         echo "🚀 Benchmarking $LABEL"
         hyperfine --warmup 1 --export-csv "./results/${LABEL}.csv" --runs 10 -N "$CMD"
+        /usr/bin/time -v $CMD 2> "./results/mem_${LABEL}.txt"
       else
         for SIZE in "${SIZES[@]}"; do
           CMD="./bench $BENCHMARK $AMOUNT $SIZE"
           LABEL="${BENCHMARK}_${ALLOCATOR}_amount${AMOUNT}_size${SIZE}"
           echo "🚀 Benchmarking $LABEL"
           hyperfine --warmup 1 --export-csv "./results/${LABEL}.csv" --runs 10 -N "$CMD"
+          /usr/bin/time -v $CMD 2> "./results/mem_${LABEL}.txt"
         done
       fi
     done
