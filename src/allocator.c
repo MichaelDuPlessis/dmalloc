@@ -5,7 +5,10 @@
 #include "mmap_allocator.h"
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+#define ONLY_SMALL
 
 // gets the kind of allocation that was made
 // must pass in memory that points to the start of a page
@@ -35,6 +38,7 @@ void *dmalloc(size_t size) {
     return bin_alloc(size);
   }
 
+#ifndef ONLY_SMALL
   // if size is larger than the biggest bin
   // but less than a page
   if (size < (PAGE_SIZE / 2)) {
@@ -44,6 +48,11 @@ void *dmalloc(size_t size) {
 
   // if size is large enough just use a whole page to allocate it
   return huge_alloc(size);
+#endif
+
+#ifdef ONLY_SMALL
+  return malloc(size);
+#endif
 }
 
 void *dcalloc(size_t num, size_t size) {
@@ -88,6 +97,7 @@ void *drealloc(void *ptr, size_t new_size) {
 }
 
 void dfree(void *ptr) {
+#ifndef ONLY_SMALL
   // determining what allocator was used to allocate the memory
   void *page_start = calculate_page_start(ptr);
   AllocationType type = get_allocation_type(page_start);
@@ -103,4 +113,14 @@ void dfree(void *ptr) {
     huge_free(ptr);
     break;
   }
+#endif
+
+#ifdef ONLY_SMALL
+  struct Bin* bin = allocated_by_bin(ptr);
+  if (bin != NULL) {
+    bin_free(ptr, bin);
+  } else {
+    free(ptr);    
+  }
+#endif
 }
