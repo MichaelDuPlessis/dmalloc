@@ -25,4 +25,10 @@ void bin_free(void *ptr, struct Bin *bin);
 // The size of blocks of memory that the bin allocates
 size_t bin_size(struct Bin *bin);
 
+// Whether this memory pointed to by the provided ptr was allocated using
+// the bin allocator. If true return a pointer to the Bin in which it belongs if
+// false return null
+struct Bin *allocated_by_bin(void *ptr);
+
 #endif
+

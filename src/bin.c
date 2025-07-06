@@ -233,3 +233,21 @@ void bin_free(void *ptr, Bin *bin) {
 // }
 
 size_t bin_size(Bin *bin) { return bin->bin_size; }
+
+Bin *allocated_by_bin(void *ptr) {
+  // loop through all allocations until one is found that contains the ptr
+  // if one is not found then the ptr was not allocated using bin  
+  for (size_t i = 0; i < NUM_BINS; i++) {
+    Bin *current = bins[i];
+
+    while (current) {
+      if (mmap_contains_ptr(current->mmap_allocation, ptr)) {
+        return current;
+      }
+
+      current = current->next;
+    }
+  }
+
+  return NULL;
+}

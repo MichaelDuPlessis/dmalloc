@@ -54,3 +54,7 @@ void print_mmap_allocation(const MmapAllocation *allocation) {
   printf("  Size:    %zu bytes\n", allocation->size);
   printf("}\n");
 }
+
+bool mmap_contains_ptr(const MmapAllocation allocation, char *ptr) {
+  return (char *)allocation.ptr <= ptr && ptr <= ((char *)allocation.ptr + allocation.size);
+}

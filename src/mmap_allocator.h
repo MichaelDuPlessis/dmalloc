@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 // The size of the page on the os
 // #define PAGE_SIZE sysconf(_SC_PAGESIZE)
@@ -42,5 +43,8 @@ void *calculate_page_start(void* ptr);
 
 // Prints the size and ptr of the MmapAllocation
 void print_mmap_allocation(const MmapAllocation *allocation);
+
+// Determines whether a ptr lies within an MmapAllocation
+bool mmap_contains_ptr(const MmapAllocation allocation, char *ptr);
 
 #endif
