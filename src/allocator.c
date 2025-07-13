@@ -35,7 +35,8 @@ void *dmalloc(size_t size) {
   // if size fits into a bin
   if (size <= MAX_BIN_SIZE) {
     // allocating from bin
-    return bin_alloc(size);
+    void *ptr = bin_alloc(size);
+    return ptr;
   }
 
 #ifndef ONLY_SMALL
@@ -116,11 +117,11 @@ void dfree(void *ptr) {
 #endif
 
 #ifdef ONLY_SMALL
-  struct Bin* bin = allocated_by_bin(ptr);
+  struct Bin *bin = allocated_by_bin(ptr);
   if (bin != NULL) {
     bin_free(ptr, bin);
   } else {
-    free(ptr);    
+    free(ptr);
   }
 #endif
 }

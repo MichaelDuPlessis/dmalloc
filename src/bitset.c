@@ -170,11 +170,10 @@ ssize_t find_first_unmarked_bit(BitSet *bitset) {
 
   // looping over all of the words
   // dereferncing a pointer is faster than indexing an array
-  size_t *word = bitset->words;
-  for (size_t word_idx = bitset->free_word_index; word_idx < num_words;
+  size_t word_idx = bitset->free_word_index;
+  size_t *word = &bitset->words[word_idx];
+  for (; word_idx < num_words;
        word_idx++, word++) {
-    // size_t word = bitset->words[word_idx];
-
     // if the word has all bits marked go to the next word
     if (*word != MAX_WORD_SIZE) {
       // inverting the word since the builtin methods check for trailing zeroes

@@ -34,6 +34,8 @@ int main(int argc, char **argv) {
     fprintf(stderr,
             "Usage: %s <benchmark_name> [amount] [size] [seed] [name]\n",
             argv[0]);
+    fprintf(stderr, "Available benchmarks: basic, sporadic, varying, tree, genetic\n");
+    fprintf(stderr, "For genetic: amount=generations, size=population_size\n");
     return 1;
   }
 
@@ -53,8 +55,11 @@ int main(int argc, char **argv) {
     benchmark_fn = varying_allocs;
   } else if (strcmp(benchmark_name, "tree") == 0) {
     benchmark_fn = tree_allocs;
+  } else if (strcmp(benchmark_name, "genetic") == 0) {
+    benchmark_fn = (BenchmarkFunc)genetic_program;
   } else {
     fprintf(stderr, "Unknown benchmark: %s\n", benchmark_name);
+    fprintf(stderr, "Available benchmarks: basic, sporadic, varying, tree, genetic\n");
     return 1;
   }
 

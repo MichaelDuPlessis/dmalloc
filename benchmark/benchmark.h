@@ -20,4 +20,8 @@ void varying_allocs(void *(*allocator)(size_t), void (*deallocator)(void *),
 // Does varying allocations of varying sizes
 void tree_allocs(void *(*allocator)(size_t), void (*deallocator)(void *),
                  size_t amount, size_t size, unsigned int seed);
+
+// Genetic programming benchmark that evolves mathematical expressions
+void genetic_program(void *(*allocator)(size_t), void (*deallocator)(void *),
+                     size_t generations, size_t pop_size, unsigned int seed);
 #endif

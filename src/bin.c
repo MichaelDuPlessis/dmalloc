@@ -60,8 +60,7 @@ static inline size_t calculate_bin_size(size_t index) {
 // Calculates the number of bits needed for the bitset
 static size_t calculate_bitset_size(size_t block_size) {
   // the amount of memory availble
-  // since I don't want to include th bitsets values
-  size_t total_memory_available = PAGE_SIZE - (sizeof(Bin) - sizeof(BitSet));
+  size_t total_memory_available = PAGE_SIZE - sizeof(Bin);
 
   size_t total_blocks =
       calculate_num_blocks(block_size, total_memory_available);
@@ -103,11 +102,10 @@ static void init_bin(Bin *bin, size_t bin_size, MmapAllocation allocation) {
 
   // initializing bitset
   // since the bitset has to be at the end this is a clever way to get its start
-  init_bitset(((BitSet *)(bin + 1)) - 1, num_bits);
+  init_bitset(&bin->bitset, num_bits);
 
   // Setting where the initial memory used for allocation begins
-  bin->ptr = (void *)((char *)bin + sizeof(Bin) + size_of_bitset(num_bits) -
-                      sizeof(BitSet));
+  bin->ptr = (void *)((char *)bin + sizeof(Bin) + size_of_bitset(num_bits));
 }
 
 // Allocates memory to the passed in bin
