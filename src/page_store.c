@@ -45,7 +45,7 @@ MmapAllocation retrieve_page() {
 
   // all pages are allocated at once for effiency so the headers now need to be added
   for (size_t i = 1; i < pages_to_allocated; i++) {    
-    store[i] = (MmapAllocation) {
+    store[i - 1] = (MmapAllocation) {
       .ptr = (void *)(ptr + page_size * i),
       .size = page_size,
     };
