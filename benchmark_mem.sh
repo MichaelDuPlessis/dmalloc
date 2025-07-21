@@ -71,9 +71,9 @@ for PAIR in "${ALLOCATOR_PAIRS[@]}"; do
         # Append to CSV summary
         CSV_FILE="./results/artificial_memory/memory_summary.csv"
         if [ ! -f "$CSV_FILE" ]; then
-          echo "benchmark,label,amount,0,max_rss_kb" > "$CSV_FILE"
+          echo "benchmark,label,amount,size,max_rss_kb" > "$CSV_FILE"
         fi
-        echo "${BENCHMARK},${LABEL},${AMOUNT},${MAX_RSS}" >> "$CSV_FILE"
+        echo "${BENCHMARK},${LABEL},${AMOUNT},0,${MAX_RSS}" >> "$CSV_FILE"
 
       else
         for SIZE in "${SIZES[@]}"; do
