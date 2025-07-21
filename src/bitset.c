@@ -168,11 +168,6 @@ bool check_bit(BitSet *bitset, size_t index) {
 
 // ssize_t is used because it can reprsent -1 to show no bit found
 ssize_t find_first_unmarked_bit(BitSet *bitset) {
-  // Early return if all bits are marked
-  if (bitset->num_bits_marked == bitset->num_bits) {
-    return -1;
-  }
-
   // getting the number of words in the bitset
   size_t num_words = bitset->num_words;
 
@@ -191,6 +186,8 @@ ssize_t find_first_unmarked_bit(BitSet *bitset) {
       char bit_pos = __builtin_ctzll(inverted_word);
 
       size_t index = word_idx * BITS_PER_WORD + bit_pos;
+      // since this is the first word with free spot it must be the next free word
+      bitset->free_word_index = word_idx;
       return (ssize_t)index;
     }
   }
