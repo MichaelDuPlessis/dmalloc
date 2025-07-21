@@ -15,8 +15,10 @@ typedef struct {
   size_t num_bits_marked;
   // The number number of bits in the last word that are used
   size_t last_word_bits;
-  // keeps track of the last known word with free bits
+  // Keeps track of the last known word with free bits
   size_t free_word_index;
+  // The number of words in the bitset
+  size_t num_words;
   // The words in the bitset
   WORD words[];
 } BitSet;

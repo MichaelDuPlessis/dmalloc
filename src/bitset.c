@@ -166,7 +166,7 @@ bool check_bit(BitSet *bitset, size_t index) {
 // ssize_t is used because it can reprsent -1 to show no bit found
 ssize_t find_first_unmarked_bit(BitSet *bitset) {
   // getting the number of words in the bitset
-  size_t num_words = calculate_num_words(bitset->num_bits);
+  size_t num_words = bitset->num_words;
 
   // looping over all of the words
   // dereferncing a pointer is faster than indexing an array
@@ -198,7 +198,7 @@ bool all_bits_unmarked(BitSet *bitset) { return bitset->num_bits_marked == 0; }
 
 void clear_bitset(BitSet *bitset) {
   // getting the number of words
-  size_t num_words = calculate_num_words(bitset->num_bits);
+  size_t num_words = bitset->num_words;
 
   // zeroing out buffer
   memset(bitset->words, 0, num_words * sizeof(WORD));
