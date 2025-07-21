@@ -19,7 +19,7 @@ runfast: buildfast
 
 # compiles the benchmark
 buildbench:
-    clang -O3 -o ./bench src/*.c test/*.c benchmark/*.c
+    clang -O3 -o ./bench src/*.c benchmark/*.c
 
 # benchmarks the program
 bench: buildbench
