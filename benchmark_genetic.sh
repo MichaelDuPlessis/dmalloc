@@ -1,68 +1,73 @@
 #!/bin/bash
 
-# Genetic Programming Benchmark Script
-# Compares dmalloc vs standard malloc performance
+# Benchmark script for genetic programming using dmalloc, malloc, and hybrid mode
+# All executables compiled as "bench", benchmarked immediately, then replaced
 
-echo "Building genetic programming benchmarks..."
+# Define allocator-deallocator pairs
+# Format: allocator:deallocator:define_only_small_flag
+ALLOCATOR_PAIRS=(
+  "dmalloc:dfree:no"
+  "malloc:free:no"
+  "dmalloc:dfree:yes"
+)
 
-# Build with dmalloc
-echo "Building with dmalloc..."
-clang -O3 -o ./bench_dmalloc src/*.c test/*.c benchmark/*.c -lm
+# Ensure hyperfine is installed
+if ! command -v hyperfine &> /dev/null; then
+  echo "❌ 'hyperfine' is not installed. Please install it to run benchmarks."
+  exit 1
+fi
 
-# Build with standard malloc
-echo "Building with standard malloc..."
-clang -O3 -DALLOCATOR=malloc -DDEALLOCATOR=free -DNAME=malloc \
-      -o ./bench_malloc src/*.c test/*.c benchmark/*.c -lm
+# Prepare results directory
+mkdir -p ./results/genetic
 
-echo ""
-echo "Running Genetic Programming Benchmarks"
-echo "======================================"
+# Test cases: (name, generations, population)
+TEST_CASES=(
+  "small:50:50"
+  "large:50:500"
+  "long:50:1000"
+)
 
-# Test parameters
-GENERATIONS=30
-POPULATION=50
 SEED=42
 
+echo "🛠️  Starting genetic programming benchmarks..."
+
+for PAIR in "${ALLOCATOR_PAIRS[@]}"; do
+  IFS=":" read -r ALLOCATOR DEALLOCATOR DEFINE_ONLY_SMALL <<< "$PAIR"
+
+  EXTRA_FLAGS=""
+  LABEL="$ALLOCATOR"
+  if [[ "$DEFINE_ONLY_SMALL" == "yes" ]]; then
+    EXTRA_FLAGS="-DONLY_SMALL"
+    LABEL="${ALLOCATOR}_onlysmall"
+  fi
+
+  echo ""
+  echo "🔨 Compiling with ALLOCATOR=$ALLOCATOR, DEALLOCATOR=$DEALLOCATOR, ONLY_SMALL=$DEFINE_ONLY_SMALL..."
+  clang -O3 \
+    -DALLOCATOR="$ALLOCATOR" \
+    -DDEALLOCATOR="$DEALLOCATOR" \
+    $EXTRA_FLAGS \
+    -o bench \
+    src/*.c benchmark/*.c -lm
+
+  if [[ $? -ne 0 ]]; then
+    echo "❌ Compilation failed for $ALLOCATOR"
+    exit 1
+  fi
+
+  for TEST in "${TEST_CASES[@]}"; do
+    IFS=":" read -r TEST_NAME GENERATIONS POPULATION <<< "$TEST"
+    echo ""
+    echo "🧪 Running test '$TEST_NAME' ($GENERATIONS generations, $POPULATION individuals) with $LABEL"
+    echo "------------------------------------------------------------"
+
+    CMD="./bench genetic $GENERATIONS $POPULATION $SEED"
+
+    # Run benchmark with hyperfine, export results to unique CSV per allocator and test
+    hyperfine --warmup 1 --export-csv "./results/genetic/genetic_${TEST_NAME}_${LABEL}.csv" --runs 10 -N "$CMD"
+  done
+done
+
 echo ""
-echo "Test 1: Small population (30 generations, 50 individuals)"
-echo "--------------------------------------------------------"
-
-echo "dmalloc:"
-time ./bench_dmalloc genetic $GENERATIONS $POPULATION $SEED dmalloc
-
-echo ""
-echo "malloc:"
-time ./bench_malloc genetic $GENERATIONS $POPULATION $SEED malloc
-
-echo ""
-echo "Test 2: Larger population (20 generations, 100 individuals)"
-echo "----------------------------------------------------------"
-
-GENERATIONS=20
-POPULATION=100
-
-echo "dmalloc:"
-time ./bench_dmalloc genetic $GENERATIONS $POPULATION $SEED dmalloc
-
-echo ""
-echo "malloc:"
-time ./bench_malloc genetic $GENERATIONS $POPULATION $SEED malloc
-
-echo ""
-echo "Test 3: Many generations (50 generations, 30 individuals)"
-echo "--------------------------------------------------------"
-
-GENERATIONS=50
-POPULATION=30
-
-echo "dmalloc:"
-time ./bench_dmalloc genetic $GENERATIONS $POPULATION $SEED dmalloc
-
-echo ""
-echo "malloc:"
-time ./bench_malloc genetic $GENERATIONS $POPULATION $SEED malloc
-
-echo ""
-echo "Benchmark complete!"
-echo "The genetic programming algorithm creates many small tree nodes,"
-echo "making it ideal for testing small object allocators."
+echo "✅ Benchmarking complete!"
+echo "Results saved in ./results/genetic/"

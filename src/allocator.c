@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ONLY_SMALL
+// #define ONLY_SMALL
 
 // gets the kind of allocation that was made
 // must pass in memory that points to the start of a page

@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
   size_t amount = (argc > 2) ? strtoull(argv[2], NULL, 10) : 10000;
   size_t size = (argc > 3) ? strtoull(argv[3], NULL, 10) : 1;
   size_t seed = (argc > 4) ? strtoull(argv[4], NULL, 10) : 42;
-  const char *name = (argc > 5) ? argv[5] : NAME;
+  const char *name = (argc > 5) ? argv[5] : (char *)NAME;
 
   BenchmarkFunc benchmark_fn = NULL;
 
