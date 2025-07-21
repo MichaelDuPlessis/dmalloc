@@ -143,9 +143,9 @@ void flip_bit(BitSet *bitset, size_t index) {
 
   bitset->words[word_idx] ^= bitmask;
   if ((bitset->words[word_idx] & bitmask) == 1) {
-    bitset->num_bits_marked++; 
+    bitset->num_bits_marked++;
   } else {
-    bitset->num_bits_marked--; 
+    bitset->num_bits_marked--;
   }
 }
 
@@ -171,13 +171,13 @@ ssize_t find_first_unmarked_bit(BitSet *bitset) {
   // looping over all of the words
   // dereferncing a pointer is faster than indexing an array
   size_t word_idx = bitset->free_word_index;
-  size_t *word = &bitset->words[word_idx];
-  for (; word_idx < num_words;
-       word_idx++, word++) {
+  size_t *words = (bitset->words + word_idx);
+  for (; word_idx < num_words; word_idx++, words++) {
+    size_t word = *words;
     // if the word has all bits marked go to the next word
-    if (*word != MAX_WORD_SIZE) {
+    if (word != MAX_WORD_SIZE) {
       // inverting the word since the builtin methods check for trailing zeroes
-      size_t inverted_word = ~*word;
+      size_t inverted_word = ~word;
 
       // some platforms define things differently
       char bit_pos = __builtin_ctzl(inverted_word);
@@ -194,9 +194,7 @@ bool all_bits_marked(BitSet *bitset) {
   return bitset->num_bits_marked == bitset->num_bits;
 }
 
-bool all_bits_unmarked(BitSet *bitset) {
-  return bitset->num_bits_marked == 0;
-}
+bool all_bits_unmarked(BitSet *bitset) { return bitset->num_bits_marked == 0; }
 
 void clear_bitset(BitSet *bitset) {
   // getting the number of words
