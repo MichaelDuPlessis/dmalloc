@@ -169,7 +169,7 @@ bool check_bit(BitSet *bitset, size_t index) {
 
 // ssize_t is used because it can reprsent -1 to show no bit found
 
-ssize_t find_first_unmarked_bit_simd(BitSet *bitset) {
+ssize_t find_first_unmarked_bit(BitSet *bitset) {
   const size_t words_per_vector = 4; // AVX2 = 256 bits = 4 x 64-bit words
   const WORD full = MAX_WORD_SIZE;
   const __m256i full_mask = _mm256_set1_epi64x(full);
