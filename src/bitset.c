@@ -168,26 +168,58 @@ bool check_bit(BitSet *bitset, size_t index) {
 
 // ssize_t is used because it can reprsent -1 to show no bit found
 ssize_t find_first_unmarked_bit(BitSet *bitset) {
-  // getting the number of words in the bitset
+  // Early return if all bits are marked
+  if (bitset->num_bits_marked == bitset->num_bits) {
+    return -1;
+  }
+
   size_t num_words = bitset->num_words;
-
-  // looping over all of the words
-  // dereferncing a pointer is faster than indexing an array
   size_t word_idx = bitset->free_word_index;
-  size_t *words = (bitset->words + word_idx);
-  for (; word_idx < num_words; word_idx++, words++) {
-    size_t word = *words;
-    // if the word has all bits marked go to the next word
+
+  // Process words
+  while (word_idx < num_words) {
+    WORD word = bitset->words[word_idx];
+
+    // If not all bits are marked in this word
     if (word != MAX_WORD_SIZE) {
-      // inverting the word since the builtin methods check for trailing zeroes
-      size_t inverted_word = ~word;
+      // Find position of first unmarked bit using compiler intrinsic
+      unsigned int bit_pos;
 
-      // some platforms define things differently
-      char bit_pos = __builtin_ctzl(inverted_word);
+#if defined(__GNUC__) || defined(__clang__)
+      // GCC and Clang provide __builtin_ctzl
+      bit_pos = __builtin_ctzl(~word);
+#elif defined(_MSC_VER)
+      // MSVC has _BitScanForward
+      unsigned long index;
+      _BitScanForward(&index, ~word);
+      bit_pos = index;
+#else
+      // Fallback implementation for other compilers
+      WORD temp = ~word;
+      bit_pos = 0;
+      while ((temp & 1) == 0) {
+        temp >>= 1;
+        bit_pos++;
+      }
+#endif
 
+      // Calculate absolute bit position
       size_t index = word_idx * BITS_PER_WORD + bit_pos;
-      return (ssize_t)index;
+
+      // Ensure the index is within valid range
+      if (index < bitset->num_bits) {
+        return (ssize_t)index;
+      }
     }
+
+    word_idx++;
+
+// Optional: prefetch next word if not at the end
+#if defined(__GNUC__) || defined(__clang__)
+    if (word_idx < num_words - 1) {
+      __builtin_prefetch(&bitset->words[word_idx + 1], 0, 0);
+    }
+#endif
   }
 
   return -1;
