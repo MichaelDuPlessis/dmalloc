@@ -45,6 +45,9 @@ void init_bitset(BitSet *bitset, size_t num_bits) {
   // setting the number of bits
   bitset->num_bits = num_bits;
 
+  // setting the number of words
+  bitset->num_words = calculate_num_words(num_bits);
+
   // setting the number of marked bits
   bitset->num_bits_marked = 0;
 
