@@ -1,4 +1,5 @@
 #include "bitset.h"
+#include <immintrin.h> // For AVX2 intrinsics
 #include <stdio.h>
 #include <string.h>
 
@@ -167,28 +168,55 @@ bool check_bit(BitSet *bitset, size_t index) {
 }
 
 // ssize_t is used because it can reprsent -1 to show no bit found
-ssize_t find_first_unmarked_bit(BitSet *bitset) {
-  // getting the number of words in the bitset
-  size_t num_words = bitset->num_words;
 
-  // looping over all of the words
-  // dereferncing a pointer is faster than indexing an array
-  size_t word_idx = bitset->free_word_index;
-  size_t *words = (bitset->words + word_idx);
-  for (; word_idx < num_words; word_idx++, words++) {
-    size_t word = *words;
-    // if the word has all bits marked go to the next word
-    if (word != MAX_WORD_SIZE) {
-      // inverting the word since the builtin methods check for trailing zeroes
-      size_t inverted_word = ~word;
+ssize_t find_first_unmarked_bit_simd(BitSet *bitset) {
+  const size_t words_per_vector = 4; // AVX2 = 256 bits = 4 x 64-bit words
+  const WORD full = MAX_WORD_SIZE;
+  const __m256i full_mask = _mm256_set1_epi64x(full);
 
-      // some platforms define things differently
-      char bit_pos = __builtin_ctzll(inverted_word);
+  size_t i = bitset->free_word_index;
+  size_t limit = bitset->num_words & ~(words_per_vector - 1); // multiple of 4
 
-      size_t index = word_idx * BITS_PER_WORD + bit_pos;
-      // since this is the first word with free spot it must be the next free word
-      bitset->free_word_index = word_idx;
-      return (ssize_t)index;
+  // SIMD loop
+  for (; i < limit; i += words_per_vector) {
+    __m256i current = _mm256_loadu_si256((__m256i *)&bitset->words[i]);
+    __m256i cmp = _mm256_cmpeq_epi64(current, full_mask);
+    int mask = _mm256_movemask_pd((__m256d)cmp); // 4 bits: 1 if word == full
+
+    if (mask != 0xF) {
+      // At least one word is not fully marked
+      for (int j = 0; j < words_per_vector; ++j) {
+        WORD word = bitset->words[i + j];
+
+        WORD unused_mask = 0;
+        if ((i + j) == bitset->num_words - 1 && bitset->last_word_bits != 0) {
+          unused_mask = unused_bit_mask(bitset->last_word_bits);
+        }
+
+        WORD inverted = ~word & ~unused_mask;
+        if (inverted) {
+          int bit_pos = __builtin_ctzl(inverted);
+          size_t index = (i + j) * BITS_PER_WORD + bit_pos;
+          return index < bitset->num_bits ? (ssize_t)index : -1;
+        }
+      }
+    }
+  }
+
+  // Fallback for any remaining words
+  for (; i < bitset->num_words; i++) {
+    WORD word = bitset->words[i];
+
+    WORD unused_mask = 0;
+    if (i == bitset->num_words - 1 && bitset->last_word_bits != 0) {
+      unused_mask = unused_bit_mask(bitset->last_word_bits);
+    }
+
+    WORD inverted = ~word & ~unused_mask;
+    if (inverted) {
+      int bit_pos = __builtin_ctzl(inverted);
+      size_t index = i * BITS_PER_WORD + bit_pos;
+      return index < bitset->num_bits ? (ssize_t)index : -1;
     }
   }
 
