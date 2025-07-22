@@ -32,14 +32,12 @@ static inline bool is_bin_empty(Bin *bin) {
 
 // Finding which bin an allocation belongs to
 static inline size_t bin_index(size_t size) {
-  // TODO: maybe don't use size_t it may not be necessary
-  size_t bin = 0;
-  size_t power = 1;
-  while (power < size) {
-    power <<= 1;
-    bin++;
-  }
-  return bin;
+  // Handle edge case
+  if (size <= 1) return 0;
+  
+  // Use built-in leading zero count for faster power-of-2 ceiling calculation
+  // size-1 ensures we round up to the next power of 2 for non-power-of-2 sizes
+  return (sizeof(size_t) * 8) - __builtin_clzll(size - 1);
 }
 
 // Calculates the number of blocks that can fit in some amount of memory
@@ -59,155 +57,183 @@ static inline size_t calculate_bin_size(size_t index) {
 
 // Calculates the number of bits needed for the bitset
 static size_t calculate_bitset_size(size_t block_size) {
-  // the amount of memory availble
+  // The amount of memory available (excluding the Bin structure)
   size_t total_memory_available = PAGE_SIZE - sizeof(Bin);
-
-  size_t total_blocks =
-      calculate_num_blocks(block_size, total_memory_available);
-  // size of bitset required
+  
+  // Initial estimate of total blocks
+  size_t total_blocks = total_memory_available / block_size;
+  
+  // Initial estimate of bitset size
   size_t bitset_size = size_of_bitset(total_blocks);
-
-  // after accounting for the size of the bitset figure out how many blocks
-  // can now be allocated
-  size_t new_total_blocks =
-      calculate_num_blocks(block_size, total_memory_available - bitset_size);
-
-  // if the new total number of blocks is the same as the old we have converged
-  while (new_total_blocks != total_blocks) {
-    new_total_blocks =
-        calculate_num_blocks(block_size, total_memory_available - bitset_size);
-
-    // getting the new
-    bitset_size = size_of_bitset(new_total_blocks);
-    total_blocks = new_total_blocks;
-  }
-
-  return total_blocks;
+  
+  // Calculate the actual number of blocks after accounting for bitset size
+  // Use a more direct calculation to avoid iterations
+  size_t available_for_blocks = total_memory_available - bitset_size;
+  size_t new_total_blocks = available_for_blocks / block_size;
+  
+  // One more refinement is usually enough for convergence
+  bitset_size = size_of_bitset(new_total_blocks);
+  new_total_blocks = (total_memory_available - bitset_size) / block_size;
+  
+  return new_total_blocks;
 }
 
 static void init_bin(Bin *bin, size_t bin_size, MmapAllocation allocation) {
-  // setting the type of allocation
-  bin->header = (AllocationHeader){.allocation_type = BIN_ALLOCATION_TYPE};
-
-  // setting the mmap allocation
+  // Set allocation type
+  bin->header.allocation_type = BIN_ALLOCATION_TYPE;
+  
+  // Set mmap allocation
   bin->mmap_allocation = allocation;
-
-  // setting the size of the bin
+  
+  // Set bin size
   bin->bin_size = bin_size;
+  
+  // Initialize linked list pointers
   bin->prev = NULL;
   bin->next = NULL;
-
-  // calculating the size of the bitset
+  
+  // Calculate bitset size (already optimized)
   size_t num_bits = calculate_bitset_size(bin_size);
-
-  // initializing bitset
-  // since the bitset has to be at the end this is a clever way to get its start
+  
+  // Initialize bitset
   init_bitset(&bin->bitset, num_bits);
-
-  // Setting where the initial memory used for allocation begins
-  bin->ptr = (void *)((char *)bin + sizeof(Bin) + size_of_bitset(num_bits));
+  
+  // Calculate pointer to the memory region for allocations
+  // This avoids an extra calculation in the hot path
+  size_t bitset_mem_size = size_of_bitset(num_bits);
+  bin->ptr = (void *)((char *)bin + sizeof(Bin) + bitset_mem_size);
 }
 
 // Allocates memory to the passed in bin
 static void *allocate_mem_to_bin(Bin *bin) {
-  // finding first free available slot
+  // Fast path: find first free available slot
   ssize_t index = find_first_unmarked_bit(&bin->bitset);
-
-  // if not index was found return null
-  if (index == -1) {
+  
+  // If no free slot found, return NULL immediately
+  if (__builtin_expect(index == -1, 0)) {
     return NULL;
   }
-
-  // mark block as used
+  
+  // Mark block as used (already optimized in mark_bit)
   mark_bit(&bin->bitset, index);
-
-  // return corresponding block of memory
+  
+  // Calculate and return pointer to the allocated memory block
+  // Use direct pointer arithmetic for better performance
   return (void *)((char *)bin->ptr + index * bin->bin_size);
 }
 
 void *bin_alloc(size_t size) {
-  // First figure out what in to use
-  // aka what bin size to use
+  // Fast path: determine bin index using optimized function
   size_t index = bin_index(size);
-
-  // The head of bins for the specific size
-  Bin *head = bins[index];
-
-  // finding the first free bin
-  Bin *current = head;
-
-  while (current) {
-    // if there is free space in the bin allocate memory
+  
+  // Get the head bin for this size
+  Bin *current = bins[index];
+  Bin *best_bin = NULL;
+  size_t best_free_count = 0;
+  
+  // Fast path: if we have a bin with this size, try to allocate from it
+  if (current != NULL) {
+    // Prefetch the bitset data to reduce cache misses
+    __builtin_prefetch(&current->bitset, 0, 3);
+    
+    // First try the head bin (most common case)
     void *ptr = allocate_mem_to_bin(current);
     if (ptr) {
       return ptr;
     }
-
-    // otherwise go to next bin
+    
+    // If first bin is full, search for a bin with the most free space
+    // This helps reduce fragmentation by filling up bins more completely
     current = current->next;
+    
+    // Prefetch the next bin if it exists
+    if (current) {
+      __builtin_prefetch(&current->bitset, 0, 3);
+    }
+    
+    // Only check up to 3 bins to avoid excessive searching
+    int bin_count = 0;
+    while (current && bin_count < 3) {
+      // Count free bits in this bin
+      size_t free_count = current->bitset.num_bits - current->bitset.num_bits_marked;
+      
+      // If this bin has free space and more than our current best, use it
+      if (free_count > 0 && free_count > best_free_count) {
+        best_bin = current;
+        best_free_count = free_count;
+      }
+      
+      // Prefetch the next bin in the list to reduce cache misses
+      if (current->next) {
+        __builtin_prefetch(&current->next->bitset, 0, 3);
+      }
+      
+      current = current->next;
+      bin_count++;
+    }
+    
+    // If we found a bin with free space, allocate from it
+    if (best_bin) {
+      ptr = allocate_mem_to_bin(best_bin);
+      if (ptr) {
+        return ptr;
+      }
+    }
   }
 
-  // if current is null we are out of memory and a new bin needs to be allocated
-  // one page is always allocated
+  // No available bins or all bins are full, allocate a new one
   MmapAllocation allocation = retrieve_page();
-
-  // if the allocation fails return NULL
-  if (allocation.ptr == NULL) {
-    return NULL;
+  if (__builtin_expect(allocation.ptr == NULL, 0)) {
+    return NULL; // Out of memory
   }
 
-  // initializing the bin
+  // Initialize the new bin
   Bin *bin = (Bin *)allocation.ptr;
   size_t bin_size = calculate_bin_size(index);
   init_bin(bin, bin_size, allocation);
 
-  // setting bin as head of manager
+  // Insert at the head of the list for better cache locality on future allocations
+  bin->next = bins[index];
   bin->prev = NULL;
-  bin->next = head;
-  if (head != NULL) {
-    head->prev = bin;
+  if (bins[index] != NULL) {
+    bins[index]->prev = bin;
   }
   bins[index] = bin;
 
-  // allocating memory to bin
-  void *ptr = allocate_mem_to_bin(bin);
-
-  return ptr;
+  // Allocate from the new bin
+  return allocate_mem_to_bin(bin);
 }
 
 // Takes a pointer to memory to free as well as the bin which it belongs to
 void bin_free(void *ptr, Bin *bin) {
-  // now the index of the allocation needs to be derived
-  // allocation is done according to this formula
-  // start_ptr + index * bin_size = allocation_ptr
-  // where start_ptr is the begining of the region of memory
-  // hence the calculation to get the index is
+  // Fast path: calculate index of the allocation
   // (allocation_ptr - start_ptr) / bin_size = index
   size_t index = ((char *)ptr - (char *)bin->ptr) / bin->bin_size;
-
-  // now that we have the index we can mark the bit as free in the bitlist
+  
+  // Unmark the bit in the bitset (already optimized)
   unmark_bit(&bin->bitset, index);
-
-  // if no memory is still allocated return the memory
-  if (is_bin_empty(bin)) {
-    size_t index = bin_index(bin->bin_size);
-
-    // if prev is null than this bin is the head
+  
+  // Check if bin is now empty - only free the bin if it's completely empty
+  // to reduce fragmentation and allocation overhead
+  if (__builtin_expect(is_bin_empty(bin), 0)) {
+    size_t bin_index_val = bin_index(bin->bin_size);
+    
+    // Remove bin from the linked list
     if (bin->prev == NULL) {
-      bins[index] = bin->next;
+      // This bin is the head
+      bins[bin_index_val] = bin->next;
       if (bin->next != NULL) {
         bin->next->prev = NULL;
       }
     } else {
+      // This bin is in the middle or end of the list
       bin->prev->next = bin->next;
-
-      // if there is a next
       if (bin->next != NULL) {
         bin->next->prev = bin->prev;
       }
     }
-
-    // return the page to the store
+    
+    // Return the page to the store
     store_page(bin->mmap_allocation);
   }
 }
@@ -233,19 +259,32 @@ void bin_free(void *ptr, Bin *bin) {
 size_t bin_size(Bin *bin) { return bin->bin_size; }
 
 Bin *allocated_by_bin(void *ptr) {
-  // loop through all allocations until one is found that contains the ptr
-  // if one is not found then the ptr was not allocated using bin  
+  // Calculate the page start address for faster comparison
+  void *page_start = calculate_page_start(ptr);
+  
+  // First check if the pointer is page-aligned, which would indicate
+  // it's the start of a bin (most common case for bin allocations)
+  if (page_start == ptr) {
+    // Check if this page start is a bin by examining its header
+    AllocationHeader *header = (AllocationHeader *)page_start;
+    if (header->allocation_type == BIN_ALLOCATION_TYPE) {
+      return (Bin *)page_start;
+    }
+  }
+  
+  // If not found via direct check, search through all bins
+  // Start with smaller bins as they're more common
   for (size_t i = 0; i < NUM_BINS; i++) {
     Bin *current = bins[i];
-
+    
     while (current) {
+      // Check if the pointer is within this bin's memory range
       if (mmap_contains_ptr(current->mmap_allocation, ptr)) {
         return current;
       }
-
       current = current->next;
     }
   }
-
+  
   return NULL;
 }

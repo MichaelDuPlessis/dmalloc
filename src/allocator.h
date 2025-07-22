@@ -3,6 +3,15 @@
 
 #include <stddef.h>
 
+// Define compiler optimization attributes
+#define DMALLOC_HOT __attribute__((hot))
+#define DMALLOC_COLD __attribute__((cold))
+#define DMALLOC_INLINE __attribute__((always_inline))
+#define DMALLOC_NOINLINE __attribute__((noinline))
+#define DMALLOC_PURE __attribute__((pure))
+#define DMALLOC_CONST __attribute__((const))
+#define DMALLOC_MALLOC __attribute__((malloc))
+
 // The type of allocator used to make an allocation,
 // this is used when freeing memory to determine
 // what allocator to use to free the memory
@@ -20,17 +29,17 @@ typedef struct {
 } AllocationHeader;
 
 // Equivalant to malloc
-void *dmalloc(size_t size);
+DMALLOC_HOT DMALLOC_MALLOC void *dmalloc(size_t size);
 
 // Equivalent to calloc
-void *dcalloc(size_t num, size_t size);
+DMALLOC_HOT DMALLOC_MALLOC void *dcalloc(size_t num, size_t size);
 
 // Equivalent to realloc
-void *drealloc(void *ptr, size_t new_size);
+DMALLOC_HOT DMALLOC_MALLOC void *drealloc(void *ptr, size_t new_size);
 
 // Equivalent to free
-void dfree(void *ptr);
+DMALLOC_HOT void dfree(void *ptr);
 
-size_t num_bins();
+DMALLOC_PURE size_t num_bins();
 
 #endif

@@ -17,18 +17,18 @@
 struct Bin;
 
 // Allocators memory to a bin and returns a pointer to the bin
-void *bin_alloc(size_t size);
+DMALLOC_HOT DMALLOC_MALLOC void *bin_alloc(size_t size);
 
 // Frees memory from the bin containing the pointer
-void bin_free(void *ptr, struct Bin *bin);
+DMALLOC_HOT void bin_free(void *ptr, struct Bin *bin);
 
 // The size of blocks of memory that the bin allocates
-size_t bin_size(struct Bin *bin);
+DMALLOC_PURE size_t bin_size(struct Bin *bin);
 
 // Whether this memory pointed to by the provided ptr was allocated using
 // the bin allocator. If true return a pointer to the Bin in which it belongs if
 // false return null
-struct Bin *allocated_by_bin(void *ptr);
+DMALLOC_PURE struct Bin *allocated_by_bin(void *ptr);
 
 #endif
 

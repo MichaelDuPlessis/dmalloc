@@ -32,22 +32,24 @@ static inline size_t get_allocation_size(void *ptr) {
 }
 
 void *dmalloc(size_t size) {
-  // if size fits into a bin
-  if (size <= MAX_BIN_SIZE) {
-    // allocating from bin
-    void *ptr = bin_alloc(size);
-    return ptr;
+  // Fast path: handle zero-size allocation
+  if (__builtin_expect(size == 0, 0)) {
+    // Return a small allocation for zero-size requests
+    return bin_alloc(1);
+  }
+  
+  // Fast path: if size fits into a bin (most common case)
+  if (__builtin_expect(size <= MAX_BIN_SIZE, 1)) {
+    return bin_alloc(size);
   }
 
 #ifndef ONLY_SMALL
-  // if size is larger than the biggest bin
-  // but less than a page
+  // Medium allocations: larger than bin but smaller than half a page
   if (size < (PAGE_SIZE / 2)) {
-    // if not valid just allocate from the free list
     return free_list_alloc(size);
   }
 
-  // if size is large enough just use a whole page to allocate it
+  // Large allocations: use whole pages
   return huge_alloc(size);
 #endif
 
@@ -65,54 +67,95 @@ void *dcalloc(size_t num, size_t size) {
   return ptr;
 }
 
-// The allocator does not curretly support resizing memory allocations in place
+// The allocator does not currently support resizing memory allocations in place
 void *drealloc(void *ptr, size_t new_size) {
-  if (ptr == NULL) {
+  // Fast path: handle NULL pointer (equivalent to malloc)
+  if (__builtin_expect(ptr == NULL, 0)) {
     return dmalloc(new_size);
   }
 
-  if (new_size == 0) {
+  // Fast path: handle zero size (equivalent to free)
+  if (__builtin_expect(new_size == 0, 0)) {
     dfree(ptr);
     return NULL;
   }
 
-  // getting size of what was allocated before
-  size_t size = get_allocation_size(ptr);
-
-  // if the sizes are the same do nothing
-  if (size == new_size) {
+  // Get size of current allocation
+  size_t current_size = get_allocation_size(ptr);
+  
+  // Fast path: if sizes are the same, no need to reallocate
+  if (current_size == new_size) {
     return ptr;
   }
-
-  // otherwise allocate new memory of the requested size
-  void *new_ptr = dmalloc(new_size);
-  // getting the smaller of the two sizes to copy bytes over
-  size_t amount_to_copy = size < new_size ? size : new_size;
-
-  memcpy(new_ptr, ptr, amount_to_copy);
-
-  // after data has been copied free the old memory
-  dfree(ptr);
-
-  return new_ptr;
+  
+  // Optimization: if new size is smaller and significantly so,
+  // still reallocate to avoid wasting memory
+  if (new_size < current_size && new_size <= (current_size / 2)) {
+    // Allocate new smaller block
+    void *new_ptr = dmalloc(new_size);
+    if (__builtin_expect(new_ptr == NULL, 0)) {
+      // If allocation fails, return original pointer
+      return ptr;
+    }
+    
+    // Copy data to new location
+    memcpy(new_ptr, ptr, new_size);
+    
+    // Free old memory
+    dfree(ptr);
+    
+    return new_ptr;
+  }
+  
+  // If new size is larger or only slightly smaller
+  if (new_size > current_size || new_size > (current_size / 2)) {
+    // Allocate new block
+    void *new_ptr = dmalloc(new_size);
+    if (__builtin_expect(new_ptr == NULL, 0)) {
+      // If allocation fails, return original pointer
+      return ptr;
+    }
+    
+    // Copy data to new location (use smaller of two sizes)
+    memcpy(new_ptr, ptr, (current_size < new_size) ? current_size : new_size);
+    
+    // Free old memory
+    dfree(ptr);
+    
+    return new_ptr;
+  }
+  
+  // Default case: return original pointer
+  return ptr;
 }
 
 void dfree(void *ptr) {
+  // Fast path: handle NULL pointer
+  if (__builtin_expect(ptr == NULL, 0)) {
+    return;
+  }
+  
 #ifndef ONLY_SMALL
-  // determining what allocator was used to allocate the memory
+  // Fast path: determine allocation type
   void *page_start = calculate_page_start(ptr);
   AllocationType type = get_allocation_type(page_start);
-
+  
+  // Use switch with likely/unlikely hints for better branch prediction
   switch (type) {
-  case BIN_ALLOCATION_TYPE:
-    bin_free(ptr, page_start);
-    break;
-  case FREE_LIST_ALLOCATION_TYPE:
-    free_list_free(ptr, page_start);
-    break;
-  case HUGE_ALLOCATION_TYPE:
-    huge_free(ptr);
-    break;
+    case BIN_ALLOCATION_TYPE:
+      // Most common case for small allocations
+      bin_free(ptr, page_start);
+      break;
+      
+    case FREE_LIST_ALLOCATION_TYPE:
+      // Medium allocations
+      free_list_free(ptr, page_start);
+      break;
+      
+    case HUGE_ALLOCATION_TYPE:
+      // Large allocations
+      huge_free(ptr);
+      break;
   }
 #endif
 
