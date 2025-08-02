@@ -25,6 +25,7 @@ TEST_CASES=(
   "small:50:50"
   "large:50:500"
   "long:50:1000"
+  "verylong:50:10000"
 )
 
 SEED=42

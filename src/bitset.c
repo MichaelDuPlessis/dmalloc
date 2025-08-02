@@ -56,7 +56,6 @@ void init_bitset(BitSet *bitset, size_t num_bits) {
   bitset->free_word_index = 0;
 
   // setting the number of bits used in the last word of the bitset
-  // TODO: I think there is a better way to do this
   bitset->last_word_bits = num_bits % BITS_PER_WORD;
 
   clear_bitset(bitset);
@@ -75,14 +74,19 @@ void mark_bit(BitSet *bitset, size_t index) {
   WORD bitmask = (WORD)1 << bit_idx;
   
   // Check if bit is already marked (avoid unnecessary updates)
-  if ((bitset->words[word_idx] & bitmask) == 0) {
+  if (__builtin_expect((bitset->words[word_idx] & bitmask) == 0, 1)) {
     // Update the word and increment marked bit count
     bitset->words[word_idx] |= bitmask;
     bitset->num_bits_marked++;
     
     // Update free_word_index if this word becomes full
-    if (bitset->words[word_idx] == MAX_WORD_SIZE && word_idx == bitset->free_word_index) {
-      bitset->free_word_index++;
+    if (__builtin_expect(bitset->words[word_idx] == MAX_WORD_SIZE && word_idx == bitset->free_word_index, 0)) {
+      // Find next word with free bits
+      size_t next_free = word_idx + 1;
+      while (next_free < bitset->num_words && bitset->words[next_free] == MAX_WORD_SIZE) {
+        next_free++;
+      }
+      bitset->free_word_index = next_free;
     }
   }
 }
@@ -107,7 +111,7 @@ void unmark_bit(BitSet *bitset, size_t index) {
   WORD bitmask = (WORD)1 << bit_idx;
   
   // Check if bit is marked before unmarking
-  if ((bitset->words[word_idx] & bitmask) != 0) {
+  if (__builtin_expect((bitset->words[word_idx] & bitmask) != 0, 1)) {
     // Update the word and decrement marked bit count
     bitset->words[word_idx] &= ~bitmask;
     bitset->num_bits_marked--;
@@ -160,50 +164,56 @@ bool check_bit(BitSet *bitset, size_t index) {
   return (bitset->words[word_idx] >> bit_idx) & 1;
 }
 
-// ssize_t is used because it can reprsent -1 to show no bit found
+// Optimized find_first_unmarked_bit using CPU intrinsics
 ssize_t find_first_unmarked_bit(BitSet *bitset) {
-  // getting the number of words in the bitset
-  size_t num_words = bitset->num_words;
-
   // Start from the free_word_index for better cache locality
-  size_t word_idx = bitset->free_word_index;
+  size_t start_word = bitset->free_word_index;
   
   // Fast path: check if we're already at the end
-  if (word_idx >= num_words) {
+  if (__builtin_expect(start_word >= bitset->num_words, 0)) {
     return -1;
   }
   
-  // Check the first word directly - most common case
-  WORD word = bitset->words[word_idx];
-  if (word != MAX_WORD_SIZE) {
+  // Check words starting from free_word_index
+  for (size_t word_idx = start_word; word_idx < bitset->num_words; word_idx++) {
+    WORD word = bitset->words[word_idx];
+    
+    // Skip full words quickly
+    if (__builtin_expect(word == MAX_WORD_SIZE, 0)) {
+      continue;
+    }
+    
+    // Handle last word specially to avoid checking unused bits
+    if (__builtin_expect(word_idx == bitset->num_words - 1 && bitset->last_word_bits != 0, 0)) {
+      // Mask out unused bits in the last word
+      WORD mask = ((WORD)1 << bitset->last_word_bits) - 1;
+      word |= ~mask; // Set unused bits to 1 (marked)
+      
+      if (word == MAX_WORD_SIZE) {
+        break; // No free bits in last word
+      }
+    }
+    
     // Use intrinsic to find first zero bit (unmarked bit)
     WORD inverted_word = ~word;
     unsigned int bit_pos = __builtin_ctzll(inverted_word);
-    return (ssize_t)(word_idx * BITS_PER_WORD + bit_pos);
-  }
-  
-  // If first word is full, check remaining words
-  for (word_idx++; word_idx < num_words; word_idx++) {
-    // Prefetch the next word to reduce cache misses
-    if (word_idx + 1 < num_words) {
-      __builtin_prefetch(&bitset->words[word_idx + 1], 0, 3);
+    
+    // Calculate final bit index
+    size_t bit_index = word_idx * BITS_PER_WORD + bit_pos;
+    
+    // Double-check we're not returning an invalid bit in the last word
+    if (__builtin_expect(bit_index >= bitset->num_bits, 0)) {
+      break;
     }
     
-    word = bitset->words[word_idx];
-    if (word != MAX_WORD_SIZE) {
-      // Found a word with at least one unmarked bit
-      WORD inverted_word = ~word;
-      unsigned int bit_pos = __builtin_ctzll(inverted_word);
-      
-      // Update free_word_index for next search
-      bitset->free_word_index = word_idx;
-      
-      return (ssize_t)(word_idx * BITS_PER_WORD + bit_pos);
-    }
+    // Update free_word_index for next search
+    bitset->free_word_index = word_idx;
+    
+    return (ssize_t)bit_index;
   }
   
   // No unmarked bits found
-  bitset->free_word_index = num_words; // All words are full
+  bitset->free_word_index = bitset->num_words;
   return -1;
 }
 
@@ -221,10 +231,13 @@ void clear_bitset(BitSet *bitset) {
   memset(bitset->words, 0, num_words * sizeof(WORD));
 
   // setting unused bits to 1 in the last word
-  // TODO: Find a way to get rid of this if statement
   if (bitset->last_word_bits != 0) {
     bitset->words[num_words - 1] = unused_bit_mask(bitset->last_word_bits);
   }
+  
+  // Reset counters
+  bitset->num_bits_marked = 0;
+  bitset->free_word_index = 0;
 }
 
 void print_bitset(BitSet *bitset) {
