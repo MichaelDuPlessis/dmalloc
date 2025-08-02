@@ -266,15 +266,23 @@ void bin_free(void *ptr, Bin *bin) {
 size_t bin_size(Bin *bin) { return bin->bin_size; }
 
 Bin *allocated_by_bin(void *ptr) {
-  // Calculate the page start address
+  // Calculate the page start address for faster comparison
   void *page_start = calculate_page_start(ptr);
-
-  // Fast path: check if this is a bin allocation
-  AllocationHeader *header = (AllocationHeader *)page_start;
-  if (__builtin_expect(header->allocation_type == BIN_ALLOCATION_TYPE, 1)) {
-    return (Bin *)page_start;
+  
+  // If not found via direct check, search through all bins
+  // Start with smaller bins as they're more common
+  for (size_t i = 0; i < NUM_BINS; i++) {
+    Bin *current = bins[i];
+    
+    while (current) {
+      // Check if the pointer is within this bin's memory range
+      if (mmap_contains_ptr(current->mmap_allocation, ptr)) {
+        return current;
+      }
+      current = current->next;
+    }
   }
-
+  
   return NULL;
 }
 
