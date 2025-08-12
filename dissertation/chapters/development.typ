@@ -122,30 +122,6 @@ I make use of these optimizations in the bitset to ensure fast lookup time.
 
 The bin allocator works using a bitset as described above to keep track of what blocks are free so that allocation is fast. When a block is free the bit is unmarked so that future allocations can use that block. Further another optimization that was implemented is that a last free bit index is not used in the same way as described above. Instead this index is only updated if the free block of memory is at a lower address than what this index points to. This means that the memory allocator guarantees that forever where that index is there will only be free blocks of memory at a higher memory address and never lower. Let the index be $I$ and have it bounded as such $0 <= I < M$ then the new time complexity for finding the first free bit is $O(M - I)$.
 
-Another easy optimalization is to not traverse the bitset array using array indexing and to instead use pointer arithmetic since there is not repeated arithmetic to derive the value's address.
-
-#code_block(
-  "Using indexing to traverse an array."
-)[```c
-  int x[100] = get_array();
-
-  for (int i = 0; i < 100; i++) {
-    do_something(x[i]);
-  }
-```]
-
-#code_block(
-  "Using pointer arithmetic to traverse an array."
-)[```c
-  int x[100] = get_array();
-
-  int *y = x;
-  for (int i = 0; i < 100; i++) {
-    do_something(*y);
-    y += 1;
-  }
-```]
-
 Each bin size consists of multiple bins connected through a linked list. When allocating the bins are search consecutively until a bin with a free block is found. If no free block is found a new bin is created, the memory allocated and then made the head of the linked list to ensure that next time an allocation happens it does not search through all the bins and has the highest chance of finding a free bin early.
 
 When a bin is allocated the size of the bitset needs to be determined based on how much space is available after the metadata for the bin has been stored but this leads to an interesting problem: the bitset is stored before the available memory to allocate and is part of the bin's metadata but the larger the bitset the less blocks the bin can have but the less blocks the bin has the smaller the bitset and this cycle continues forever. The following algorithm is used to determine the size of the bitset:
@@ -367,6 +343,114 @@ To further this example use the same allocations as before but have the followin
 - After step 6 dealloacte the allocation made in step one.
 
 Now after step 3 all the memory allocated to the free list allocator is deallocate bu more importantly the memory page where the objects were allocated too no longer has any memory allocated to it so when the the last 247b object is deallocated the page is returned to the page cache and since the page cache won't be full because in the previous step the bin allocator took a page the page is stored for later use. When the free list allocator is used again to allocate the object in step 5 a new memory page will be requested from the page cache. When deallocating the object allocated in step 1 a simple call to `munmap` is made since the page allocator does not interface with the page cache.
+
+== Optimisations
+
+These are some optimisations that were made that are not memory allocator specific but still help with performance:
+
+=== Using pointer arithmatic over array indexing
+
+Since there is not repeated arithmetic to derive the value's address this can lead to significant speadups as there a pointer addition is a single operation whereas array indexing
+often requires a multiplication and an addition.
+
+#code_block(
+  "Using indexing to traverse an array."
+)[```c
+  int x[100] = get_array();
+
+  for (int i = 0; i < 100; i++) {
+    do_something(x[i]);
+  }
+```]
+
+#code_block(
+  "Using pointer arithmetic to traverse an array."
+)[```c
+  int x[100] = get_array();
+
+  int *y = x;
+  for (int i = 0; i < 100; i++) {
+    do_something(*y);
+    y += 1;
+  }
+```]
+
+=== Prefetching
+
+Using prefetching to fetch data that will be needed before it is required can reduce cache misses thus increasing speadup. Prefetching is achieved using the compiler
+intrinsic `__builtin_prefetch`.
+
+=== Branch Prediction
+
+Modern CPU's make use of pipelineing to fetch multiple instructions in parallel. For example while the cpu is executing the current instruction it can fetch the next one
+but `if` statements in programming present a problem as it is not known what branch of the `if` statement will execute at runtime and while modern processors do have
+sophisticated branch prediction algorithms they can be wrong in which case a cache miss occurs and the data has too be fetched a second time.
+
+Using the compiler builtin `__builtin_expect` it is possilbe to tell the CPU what branch it can expect to execute next. This is not a silver bullet however as this only leads
+to performance increases if one branch of the `if` statement is selected disproportionately to the other, in scenarious where each branch is evaluated more or less the same
+amount using `__builtin_expect` can degrade performance. Branch prediction is used in the memory allocator in places where there are outlier cases, for example:
+
+#code_block("An example of where branch prediction is used.")[
+  ```c
+
+void mark_bit(BitSet *bitset, size_t index) {
+  // Fast bounds check with branch prediction hint
+  if (__builtin_expect(index >= bitset->num_bits, 0))
+    return;
+
+  /*
+    Code
+  */
+}
+  ```
+]
+
+In the scenario above most of the time the index provided for the bit to be marked will be a valid index so it is expected to evaluate to false.
+
+=== Loop Unrolling
+
+Loops are not free they require setup. For example a classic for loop in assembly requires a register to hold the count as well as an increment operation and
+then also a comparision operation. If this loop is run from the beginning frequently the costs add up. Now if the loop contains an early return such as a
+`break`, `goto` or `return` statement and if this early return  is triggered frequently on the first iteration of the loop it can be a performance gain to
+first evaluate what would be the first element in the loop and only if that is false run the loop.
+
+#code_block("An example of a for loop which has not been unrolled.")[
+  ```c
+  bool exists_in_array(int *arr, size_t size, int num) {
+    for (int i = 0; i < size; i++) {
+      if (arr[i] == num) {
+        return true;
+      }
+    }
+
+    return false
+  }
+  ```
+]
+
+#code_block("An example of a for loop which has been unrolled.")[
+  ```c
+  bool exists_in_array(int *arr, size_t size, int num) {
+    if (size > 0 && arr[0] == num) {
+      return true;
+    }
+
+    for (int i = 1; i < size; i++) {
+      if (arr[i] == num) {
+        return true;
+      }
+    }
+
+    return false
+  }
+  ```
+]
+
+Assuming for this workload we know that for `num` we are checking it frequently appears as the first element in the array then unrolling the loop can speed up the code. This
+can then further be extended by checkin the 2nd, 3rd, .., nth element. This optimisation only works if you understand your workload and shouldn't be blindly used as it bloats
+the final binary and larger binaries are also bad for program speed.
+
+The implementation of the memory allocator uses this technique in the `find_first_unmarked_bit` function as frequently the first word checked will have an unmarked bit.
 
 == Limitations
 
