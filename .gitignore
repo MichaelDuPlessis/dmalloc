@@ -8,3 +8,6 @@ results/
 old_results/
 .venv/
 benchmark_result_graphs/
+
+# For dissertation
+*.pdf

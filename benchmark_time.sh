@@ -5,7 +5,7 @@
 ALLOCATOR_PAIRS=(
   "dmalloc:dfree:no"    # Pure dmalloc
   "malloc:free:no"      # Pure malloc
-  "dmalloc:dfree:yes"   # Hybrid mode (ONLY_SMALL defined)
+  # "dmalloc:dfree:yes"   # Hybrid mode (ONLY_SMALL defined)
 )
 
 # Define benchmark types
