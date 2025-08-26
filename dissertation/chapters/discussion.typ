@@ -242,33 +242,59 @@ dmallocs cache locality advantages.
 
 === MacOS
 
-==== Basic
+#grid(
+  columns: num_columns,
+  gutter: 1em,
+  ..sizes.map(size => [
+    #figure(
+      image("../results/macos/time/basic_size_" + size + ".0.png"),
+      caption: "Basic benchmark for size: " + size
+    ) #label("macos-basic-time-" + size)
+  ])
+)
+
+#grid(
+  columns: num_columns,
+  gutter: 1em,
+  ..sizes.map(size => [
+    #figure(
+      image("../results/macos/time/sporadic_size_" + size + ".0.png"),
+      caption: "Sporadic benchmark for size: " + size
+    ) #label("macos-sporadic-time-" + size)
+  ])
+)
+
+#grid(
+  columns: 2,
+  gutter: 1em,
+  [#figure(
+    image("../results/macos/time/varying_size_varying.png"),
+    caption: "Varying time usage"
+  ) <macos-varying-time>],
+  [#figure(
+    image("../results/macos/genetic/genetic_benchmark_mean_time.png"),
+    caption: "Genetic program mean time"
+  ) <macos-genetic>]
+)
 
 The same that was said about the Linux benchmark could be mentioned here except that the graphs do appear to be more sporadic this is maybe due to how MacOS schedules
 processing time when compared to Linux or could be due to the difference in architecture (x86 vs ARM). A strong possiblity for the odd spikes could be due to MacOS moving
-the application between performance and efficiency cores. Both dmalloc and malloc are sporadic so it the cause does not appear
-to be with the implementation of either allocator. Overall dmalloc is faster and by larger margins at times then when compared to the linux benchmark. The same thing occurs after
-128 bytes where dmalloc starts slowing down when compared to malloc due to the subpar allocation strategy which is used.
+the application between performance and efficiency cores. Both dmalloc and malloc have these fluctuations so the cause does not appear
+to be with the implementation of either allocator. Overall dmalloc is faster. The same thing occurs after 128 bytes where dmalloc starts slowing down when compared to malloc
+but again this is due to the subpar allocation strategy which is used after the small object boundry has been crossed. Both dmalloc and malloc are mirror images of one another and
+there is no significant difference between the two for all sizes and for sporadic allocations either allocator could be used. The varying benchmark has the same results as it did
+on Linux and what was stated there can be applied exactly here. Looking a the genetic benchmark this is where the results get interesting as now the reverse of what happened on Linux is happening here. Now dmalloc is the superior memory allocator with a growing
+lead as the number of iterations increase. This is most likely due to the massively increased page size which is four times what it is on linux. Other factors may include a weaker memory
+allocator when compared to Linux but this unlikely as the artificial benchmarks are similar. Overall the benchmark on MacOS showed promising results performing better then malloc
+overall and is a suitable replacement for general purpose allocations but more importantly outperforms malloc in a real test when it comes to an optimisation problem. The gap in the
+genetic program benchmark also widens as the number of iterations increase showing that the speedup is more significant the longer the program runs. It is not possible to
+view memory consumption on MacOS as it is on Linux so there are no result for memory.
 
-==== Sporadic
-
-Both dmalloc and malloc are mirror images of one another and there is no significant difference between the two however unlike on linux this remains the case as the sizes
-increase showing that there is no real difference between the two.
-
-==== Varying
-
-The varying benchmark has the same results as it did on Linux and what was stated there can be applied exactly here.
-
-==== Genetic Program
-
-This is where the benchmark results get interesting as now the reverse of what happened on Linux is happening here. Now dmalloc is the superior memory allocator with a growing
-lead as the number of iterations increase. This is most likely due to the increased page size which is four times what it is on linux. Other factors may include a weaker memory
-allocator when compared to Linux but this unlikely as the artificial benchmarks are similar.
-
-=== Conclusion
+== Conclusion
 
 Overall looking at all the benchmarks above it is clear that there is merit in the design of dmalloc. It is also interesting to see how dmalloc performs better on MacOS
-when compared to linux. This is most likley due to the larger page size that MacOS has by default allowing for more allocations to occur before a systemcall needs to be made.
+when compared to linux. This is most likley due to the larger page size that MacOS has by default allowing for more allocations to occur before a system call needs to be made.
 The larger page size also means that there is a lower level of internal fragmentation percentage wise. Both glibc malloc and magazine malloc have optimisations in place for
 small object allocation, this shows that dmalloc is competative with other state of the art memory allocators where it will perform similarly or even outperform it in some case.
-It also showed promise in a real world use case where it performed both well on Linux and MacOS for the genetic program.
+It also showed promise in a real world use case where it performed both well on Linux and MacOS for the genetic program showing that a there is performance gains that can
+be made by using a non-general purpose memroy allocator and instead a purpose built memory allocator.
