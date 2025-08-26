@@ -1,3 +1,6 @@
+// add date
+// submitted in partial fulfilment of the requirements for the MIT (Big Data Science) in the Department of Computer Science, University of Pretoria
+
 // Introduction 1
 // Why am I doing this study
 // What is the gap
@@ -91,8 +94,6 @@
 
 #include "chapters/development.typ"
 
-#include "chapters/allocator_applications.typ"
-
 #include "chapters/discussion.typ"
 
 #include "chapters/conclusion.typ"
@@ -101,6 +102,8 @@
 
 // references
 #bibliography("refs.bib", title: "References")
+
+#include "chapters/appendix.typ"
 
 
 // TODO:

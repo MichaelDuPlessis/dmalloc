@@ -144,84 +144,105 @@ typedef struct Node {
 
 All in all the node structure is 25 bytes but due to how C's padding in structs work this will be padded with another 7 bytes for a total size of 32 bytes. This size does fit in the small object allocator and will be handled by the bin allocator. 
 
+A genetic program was chosen since it is a real world optimisation algorithm and can show what real would performance would be like for the differenet memory allocators. The exact
+goal of the algorithm or whether it achieved the desired output is not important since this is a performance test focusing mainly on execution time but also memory usage.
+
 == Memory Allocator Benchmark Results
+
+#let sizes = ("1", "2", "4", "8", "16", "32", "64", "128", "256")
+#let num_columns = 3
+
+The results discussed below will be focusing on the small object memory allocator implmentation which means most results will be discussed focusing on 128 bytes and lower.
+Benchmarks up to 2048 bytes have been run for completenetss sake and can be viewed in the appendix but will not be the main focus of this paper. 
 
 === Linux
 
-==== Basic
+#grid(
+  columns: num_columns,
+  gutter: 1em,
+  ..sizes.map(size => [
+    #figure(
+      image("../results/linux/time/basic_size_" + size + ".0.png"),
+      caption: "Basic benchmark for size: " + size
+    ) #label("linux-basic-time-" + size)
+  ])
+)
 
-#for size in ("1", "2", "4", "8", "16", "32", "64", "128", "256", "512", "1024", "2048") [
-  #figure(
-    image("../results/linux/memory/basic_size_"+size+"_memory.png"),
-    caption: "Basic benchmark memory usage for size: " + size
-  )
+#grid(
+  columns: num_columns,
+  gutter: 1em,
+  ..sizes.map(size => [
+    #figure(
+      image("../results/linux/memory/basic_size_"+size+"_memory.png"),
+      caption: "Basic benchmark memory usage for size: " + size
+    ) #label("linux-basic-mem-" + size)
+  ])
+)
 
-  #figure(
-    image("../results/linux/time/basic_size_"+size+".0.png"),
-    caption: "Basic benchark for size: "+ size
-  )
-]
+#grid(
+  columns: num_columns,
+  gutter: 1em,
+  ..sizes.map(size => [
+    #figure(
+      image("../results/linux/time/sporadic_size_" + size + ".0.png"),
+      caption: "Sporadic benchmark for size: " + size
+    ) #label("linux-sporadic-time-" + size)
+  ])
+)
 
-Looking at the benchmarks its clear that dmalloc outperforms malloc on smaller sizes. dmalloc has a noticable lead 16 bytes where it is most of the time outperforming malloc
-with some spikes where malloc will outperform it but this is not the norm. Starting at 32 bytes the gap between the two allocators narrows but dmalloc is still superior in
-terms of speed. As allocation sizes approach 256 bytes the gab narrows until finally malloc is superior. When it comes to memory usage dmalloc is slightly better over malloc
+#grid(
+  columns: num_columns,
+  gutter: 1em,
+  ..sizes.map(size => [
+    #figure(
+      image("../results/linux/memory/sporadic_size_"+size+"_memory.png"),
+      caption: "Sporadic benchmark memory usage for size: " + size
+    ) #label("linux-sporadic-mem-" + size)
+  ])
+)
+
+#grid(
+  columns: 3,
+  gutter: 1em,
+  [#figure(
+    image("../results/linux/time/varying_size_varying.png"),
+    caption: "Varying time usage"
+  ) <linux-varying-time>],
+  [#figure(
+    image("../results/linux/memory/varying_size_0_memory.png"),
+    caption: "Varying memory usage"
+  ) <linux-varying-mem>],
+  [#figure(
+    image("../results/linux/genetic/genetic_benchmark_mean_time.png"),
+    caption: "Genetic program mean time"
+  ) <linux-genetic>]
+)
+
+Looking at the benchmarks its clear that dmalloc outperforms malloc on smaller sizes. dmalloc has a noticable lead up to 16 bytes where it is most of the time outperforming malloc
+with some spikes where malloc will outperform it as seen in figures @linux-basic-time-1, @linux-basic-time-2, @linux-basic-time-4, @linux-basic-time-8 and @linux-basic-time-16
+but this is not the norm. Starting at 32 bytes the gap between the two allocators narrows but dmalloc is still superior in
+terms of speed for the basic allocations. As allocation sizes approach 256 bytes the gap narrows as seen in figure @linux-basic-time-256 until finally malloc is superior.
+When it comes to memory usage dmalloc is slightly better over malloc
 until again 256 byte sized allocations in which malloc starts to outperform dmalloc. It must be stated that dmalloc's small memory allocator is only active up until 128 bytes
-afterwards a different allocation strategy is used.
-
-==== Sporadic
-
-#for size in ("1", "2", "4", "8", "16", "32", "64", "128", "256", "512", "1024", "2048") [
-  #figure(
-  image("../results/linux/memory/sporadic_size_"+size+"_memory.png"),
-    caption: "Sporadic benchmark memory usage for size: " + size
-  )
-
-  #figure(
-    image("../results/linux/time/sporadic_size_"+size+".0.png"),
-    caption: "Sporadic benchark for size: "+ size
-  )
-]
-
-The performance time wise between malloc and dmalloc is nearly identical (barring for the size class 2048 bytes) which shows when compared to the basic benchmark that
-malloc performs better for linear allocations for sizes 128 bytes and smaller. However dmalloc does perform worse when it comes to total amount of memory used across every
-version of the benchmark. This benchmark seems to indicate that dmalloc is not well suited to tasks where allocations are all over the place.
-
-==== Varying
-
-#figure(
-  image("../results/linux/memory/varying_size_0_memory.png"),
-  caption: "Varying memory usage"
-)
-
-#figure(
-  image("../results/linux/time/varying_size_varying.png"),
-  caption: "Varying time usage"
-)
-
-The varying benchmark is biased towards dmalloc as dmalloc focuses on small objects while varying allocates objects of many different sizes which can mean that other weaker
-allocation strategies can be used. It is however useful to see how dmalloc would perform if just arbitraly used instead of focusing on its strongs points.
-
-==== Genetic Program
-
-#figure(
-  image("../results/linux/genetic/genetic_benchmark_mean_time.png"),
-  caption: "Genetic program mean time"
-)
-
-This benchmark shows how a real world algorithm would perform. On linux dmalloc performs worse than malloc on versions of the benchmark (small, large, long). The gap also
+afterwards a different allocation strategy is used. The performance time wise between malloc and dmalloc is nearly identical (barring for the size class 2048 bytes) which shows when compared to the basic benchmark that
+malloc performs better for linear allocations for sizes 128 bytes and smaller. This shows that both allocators perform equally well when it comes to random allocations and deallocations
+but dmalloc is superior for linear allocations which makes sense since it is similar to a bump allocator in the sense that it does not have any metadata stored between
+object alloctions (for small objects). However when it comes to memory usage dmalloc is better for linear allocations but more random allocations as done in the sporadic
+test show that it has higher memory usage across the board which means it may not be suitable for low memory systems such as embedded devices. This however is not a major downside
+as dmalloc is designed for big data science applications which very rarely if every run on embedded systems whereas malloc is designed as a general purpose memroy allocator
+to be good enough in most use cases.
+The varying benchmark is biased against dmalloc as dmalloc focuses on small objects while varying allocates objects of many different sizes which can mean that other weaker
+allocation strategies can be used. It is however useful to see how dmalloc would perform if just arbitraly used instead of focusing on its strongs points and it is clear that if many
+objects of varying sizes are too be allocated dmalloc should not be used despite it not having a much larger memory footprint. This downside can be rectified however by
+combining dmalloc with another memory allocator which is better suited to dealing with larger objects that dmallocs primative allocation strategies do poorely in. This is
+commonly done with memory allocators where different memory allocators are used for different tasks. The genetic benchmark shows how a real world algorithm would perform.
+On linux dmalloc performs worse than malloc on all versions of the benchmark (small, large, long) @linux-genetic. The gap also
 grows as the number of iterations increase. This algorithm creates lots of trees and perhaps accessing the memory is slower using dmalloc when compared to malloc despite
 dmallocs cache locality advantages.
 
 === MacOS
 
 ==== Basic
-
-#for size in ("1", "2", "4", "8", "16", "32", "64", "128", "256", "512", "1024", "2048") [
-  #figure(
-    image("../results/macos/time/basic_size_"+size+".0.png"),
-    caption: "Basic benchark for size: "+ size
-  )
-]
 
 The same that was said about the Linux benchmark could be mentioned here except that the graphs do appear to be more sporadic this is maybe due to how MacOS schedules
 processing time when compared to Linux or could be due to the difference in architecture (x86 vs ARM). A strong possiblity for the odd spikes could be due to MacOS moving
@@ -231,32 +252,23 @@ to be with the implementation of either allocator. Overall dmalloc is faster and
 
 ==== Sporadic
 
-#for size in ("1", "2", "4", "8", "16", "32", "64", "128", "256", "512", "1024", "2048") [
-  #figure(
-    image("../results/macos/time/sporadic_size_"+size+".0.png"),
-    caption: "Sporadic benchark for size: "+ size
-  )
-]
-
 Both dmalloc and malloc are mirror images of one another and there is no significant difference between the two however unlike on linux this remains the case as the sizes
 increase showing that there is no real difference between the two.
 
 ==== Varying
 
-#figure(
-  image("../results/macos/time/varying_size_varying.png"),
-  caption: "Varying time usage"
-)
-
 The varying benchmark has the same results as it did on Linux and what was stated there can be applied exactly here.
 
 ==== Genetic Program
 
-#figure(
-  image("../results/macos/genetic/genetic_benchmark_mean_time.png"),
-  caption: "Genetic program mean time"
-)
-
 This is where the benchmark results get interesting as now the reverse of what happened on Linux is happening here. Now dmalloc is the superior memory allocator with a growing
 lead as the number of iterations increase. This is most likely due to the increased page size which is four times what it is on linux. Other factors may include a weaker memory
 allocator when compared to Linux but this unlikely as the artificial benchmarks are similar.
+
+=== Conclusion
+
+Overall looking at all the benchmarks above it is clear that there is merit in the design of dmalloc. It is also interesting to see how dmalloc performs better on MacOS
+when compared to linux. This is most likley due to the larger page size that MacOS has by default allowing for more allocations to occur before a systemcall needs to be made.
+The larger page size also means that there is a lower level of internal fragmentation percentage wise. Both glibc malloc and magazine malloc have optimisations in place for
+small object allocation, this shows that dmalloc is competative with other state of the art memory allocators where it will perform similarly or even outperform it in some case.
+It also showed promise in a real world use case where it performed both well on Linux and MacOS for the genetic program.
