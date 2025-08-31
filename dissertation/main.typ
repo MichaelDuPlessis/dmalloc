@@ -104,21 +104,3 @@
 #bibliography("refs.bib", title: "References")
 
 #include "chapters/appendix.typ"
-
-
-// TODO:
-// - Break down algorithms
-// - Diagram and in depth explanation of Genetic Programming √
-// - Artificial benchmark for trees √
-// - Future work: almost no formal research into small object allocators
-// - Explain big data science √
-// - Explain system calls √
-// - Explain story page cache √
-// - Explain story of whole allocator √
-// - Chapter 3 Small object memory allocator √
-// - Benchmark against malloc both memory and time √
-
-// - Malloc in implementation √
-// - Results
-// - Write GP √ and test
-// - Fix memory benchmark
