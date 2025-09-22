@@ -5,7 +5,7 @@
 #set heading(numbering: "1.1")
 #set page(
   number-align: center,
-  numbering: "1"
+  numbering: "i"
 )
 
 // make sure you have some heading numbering set
@@ -15,18 +15,6 @@
 #show heading: i-figured.reset-counters
 #show figure: i-figured.show-figure
 
-#outline()
-
-#i-figured.outline()
-
-#heading([Abstract], numbering: none, outlined: false)
-
-This mini-dissertation introduces a small object memory allocator designed for the field of Big Data Science. The memory allocator aims to optimise runtime performance
-of Big Data science tasks that make use of small objects by reducing the execution time of a program. The allocator outperforms the default memory allocators on both Linux (Ubuntu) and MacOS in
-both artificial and real world benchmarks. The text further goes into the design of the small object allocator with its inner workings based around the unix `mmap`
-system call and delves into the need for more research into custom memory allocators for the field of Big Data Science.
-
-#pagebreak()
 
 #align(center)[
   #align(horizon)[
@@ -42,8 +30,28 @@ system call and delves into the need for more research into custom memory alloca
   ]
 ]
 
+#pagebreak()
+
+#heading([Abstract], numbering: none, outlined: false)
+
+This mini-dissertation introduces a small object memory allocator designed for the field of Big Data Science. The memory allocator aims to optimise runtime performance
+of Big Data science tasks that make use of small objects by reducing the execution time of a program. The allocator outperforms the default memory allocators on both Linux (Ubuntu) and MacOS in
+both artificial and real world benchmarks. The text further goes into the design of the small object allocator with its inner workings based around the unix `mmap`
+system call and delves into the need for more research into custom memory allocators for the field of Big Data Science.
 
 #pagebreak()
+
+#outline()
+
+#i-figured.outline()
+
+#pagebreak()
+
+#set page(
+  number-align: center,
+  numbering: "1"
+)
+#counter(page).update(1)
 
 #include "chapters/introduction.typ"
 
@@ -85,7 +93,7 @@ system call and delves into the need for more research into custom memory alloca
 #include "chapters/appendix.typ"
 
 // TODO:
-// Ordering:
+// Ordering: √
 // Title
 // Abstract
 // Acknowledgements
