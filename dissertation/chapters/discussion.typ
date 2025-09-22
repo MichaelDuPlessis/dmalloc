@@ -222,9 +222,9 @@ Benchmarks up to 2048 bytes have been run for completeness sake and can be viewe
 )
 
 Looking at the benchmarks its clear that dmalloc outperforms malloc on smaller sizes. dmalloc has a noticeable lead up to 16 bytes where it is most of the time outperforming malloc
-with some spikes where malloc will outperform it as seen in figures @linux-basic-time-1, @linux-basic-time-2, @linux-basic-time-4, @linux-basic-time-8 and @linux-basic-time-16
+with some spikes where malloc will outperform it as seen in figures @fig:linux-basic-time-1, @fig:linux-basic-time-2, @fig:linux-basic-time-4, @fig:linux-basic-time-8 and @fig:linux-basic-time-16
 but this is not the norm. Starting at 32 bytes the gap between the two allocators narrows but dmalloc is still superior in
-terms of speed for the basic allocations. As allocation sizes approach 256 bytes the gap narrows as seen in figure @linux-basic-time-256 until finally malloc is superior.
+terms of speed for the basic allocations. As allocation sizes approach 256 bytes the gap narrows as seen in figure @fig:linux-basic-time-256 until finally malloc is superior.
 When it comes to memory usage dmalloc is slightly better over malloc
 until again 256 byte sized allocations in which malloc starts to outperform dmalloc. It must be stated that dmalloc's small memory allocator is only active up until 128 bytes
 afterwards a different allocation strategy is used. The performance time wise between malloc and dmalloc is nearly identical (barring for the size class 2048 bytes) which shows when compared to the basic benchmark that
@@ -239,7 +239,7 @@ allocation strategies can be used. It is however useful to see how dmalloc would
 objects of varying sizes are too be allocated dmalloc should not be used despite it not having a much larger memory footprint. This downside can be rectified however by
 combining dmalloc with another memory allocator which is better suited to dealing with larger objects that dmallocs primitive allocation strategies do poorly in. This is
 commonly done with memory allocators where different memory allocators are used for different tasks. The genetic benchmark shows how a real world algorithm would perform.
-On linux dmalloc performs worse than malloc on all versions of the benchmark (small, large, long) @linux-genetic. The gap also
+On linux dmalloc performs worse than malloc on all versions of the benchmark (small, large, long) @fig:linux-genetic. The gap also
 grows as the number of iterations increase. This algorithm creates lots of trees and perhaps accessing the memory is slower using dmalloc when compared to malloc despite
 dmallocs cache locality advantages.
 

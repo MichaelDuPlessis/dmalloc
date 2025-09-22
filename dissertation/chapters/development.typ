@@ -84,9 +84,9 @@ Based on the allocations that occur above this is what happens to the page cache
 #figure(
   caption: [A diagram illustrating how the page cache works.],
   image("../images/example_page_cache.drawio.png"),
-)
+) <example_page_cache>
 
-The green blocks in the diagram represent memory pages that that the page cache has cached while the red represent an empty cell. The diagram has the steps with the corresponding actions that are taken.
+The green blocks in the diagram represent memory pages that that the page cache has cached while the red represent an empty cell. Diagram @fig:example_page_cache has the steps with the corresponding actions that are taken.
 
 == Bin Allocator
 

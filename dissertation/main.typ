@@ -47,19 +47,35 @@ system call and delves into the need for more research into custom memory alloca
 
 #include "chapters/introduction.typ"
 
+#pagebreak()
+
 #include "chapters/memory_allocators.typ"
+
+#pagebreak()
 
 #include "chapters/big_data_applications.typ"
 
+#pagebreak()
+
 #include "chapters/small_object_allocator.typ"
+
+#pagebreak()
 
 #include "chapters/development.typ"
 
+#pagebreak()
+
 #include "chapters/discussion.typ"
+
+#pagebreak()
 
 #include "chapters/conclusion.typ"
 
+#pagebreak()
+
 #include "chapters/future_work.typ"
+
+#pagebreak()
 
 #show bibliography: set heading(numbering: "1.")
 
@@ -79,7 +95,7 @@ system call and delves into the need for more research into custom memory alloca
 //
 // Add chapter numbers to overiew
 //
-// Don't reference diagram with locality rather do "in Figure xxx"
+// Don't reference diagram with locality rather do "in Figure xxx" √
 //
 // Add reference to overview of memory allocators also mention that heap, cache, alignment, etc is important
 //
@@ -95,11 +111,11 @@ system call and delves into the need for more research into custom memory alloca
 //
 // use uk spelling √
 //
-// begin chapters on a new page
+// begin chapters on a new page √
 //
 // do better with figures
 //
-// fix figure referencing
+// fix figure referencing √
 //
 // conclusion too short take a look at the problem statement again
 //
@@ -107,4 +123,4 @@ system call and delves into the need for more research into custom memory alloca
 //
 // just put introduction under chapter heading
 //
-// call conclusions at the end of chapter call summary what we are taking forward
+// call conclusions at the end of chapter summary and it is what we are taking forward

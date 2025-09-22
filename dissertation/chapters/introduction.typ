@@ -51,11 +51,11 @@ The mini-dissertation contains the following chapters:
 - Conclusion: This chapter contains the closing remarks.
 - Future Work: This chapter contains future work that can be built off of from this mini-dissertation.
 
-Below is a diagram showing the order in which the chapters are recommended to be read before others. An arrow leading from one bubble to another means it is recommended
+Diagram @fig:chapter shows the order in which the chapters are recommended to be read before others. An arrow leading from one bubble to another means it is recommended
 to read the chapter from which the arrow is coming from first.
 
 #figure(
   caption: [A dependency graph of the chapters in the mini-dissertation.],
   placement: none,
   image("../images/chapters.drawio.png"),
-)
+) <chapter>
