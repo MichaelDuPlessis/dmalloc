@@ -2,11 +2,11 @@
 
 == Overview of Memory Allocators
 
-Most memory allocators are known as general purpose memory allocators and are designed to be used for a wide variety of uses cases. A memory allocator is just an algorithm that decides how to manage memory. It does this by deciding when memory should be allocated and deallocated and how those operations should be done.
+Most memory allocators are known as general purpose memory allocators and are designed to be used for a wide variety of use cases. A memory allocator is an algorithm that decides how to manage memory. It does this by deciding when memory should be allocated and deallocated and how those operations should be done.
 
 == Heap
 
-Programs running on modern computers on modern operating systems have two places where they can allocate memory: the stack or the heap. Memory allocated on the heap is commonly referred to as dynamically allocated memory and is allocated at run time of the program and the exact amount of memory required does not need to be know at compile time. This is a start contrast to stack memory where the amount of memory required is always known at compile time. Memory on the heap is accessed through a pointer which is always a fixed size (64 bits on modern computers) where this pointer is stored on the stack @ferres2010memory. Stack memory is handled by the compiler by using build in instructions while heap memory has to be managed by the user known as manual memory management or automatically managed know as garbage collected but this incurs a runtime penalty. Dynamic or heap memory is what is allocated through a memory allocator and its deallocation and allocation strategies are managed by an allocator. From they programmers perspective they are just calling functions to get pointers to dynamically allocated memory and calling functions to deallocate that memory pointed to by a pointer @ArpaciDusseau23-Book @bryant2011computer @tanenbaum2015modern.
+Programs running on modern computers on modern operating systems have two places where they can allocate memory: the stack or the heap. Memory allocated on the heap is commonly referred to as dynamically allocated memory and is allocated at run time of the program and the exact amount of memory required does not need to be known at compile time. This is a stark contrast to stack memory where the amount of memory required is always known at compile time. Memory on the heap is accessed through a pointer, which is always a fixed size (64 bits on modern computers) where this pointer is stored on the stack @ferres2010memory. Stack memory is handled by the compiler by using built-in instructions while heap memory has to be managed by the user known as manual memory management or automatically managed known as garbage collected but this incurs a runtime penalty. Dynamic or heap memory is what is allocated through a memory allocator and its deallocation and allocation strategies are managed by an allocator. From the programmer's perspective they are just calling functions to get pointers to dynamically allocated memory and calling functions to deallocate that memory pointed to by a pointer @ArpaciDusseau23-Book @bryant2011computer @tanenbaum2015modern.
 
 #figure(
   caption: [How memory is allocated on the stack and heap.],
@@ -20,7 +20,7 @@ This poses a challenge since heap memory can become fragmented @ArpaciDusseau23-
 
 == Cache
 
-Assuming a common modern day computer system, cache memory is a special kind of memory that sits between a computers main memory and the CPU (central processing unit). Cache memory allows for extremely fast retrieval of data and therefore allows programs to execute faster. Cache memory is orders of magnitude faster than main memory but is usually very small relative to main memory @smith1982cache. CPU cache also tends to come in multiple levels most commonly designated as L1, L2, etc. where L1 is the smallest cache but the fastest with speeds decreasing and size increasing as the numbers go up @hennessy2011computer. Hennessy and Patterson in their book also describe the principle of locality which states that data recently used is likely to be used again as well as the data around it (around it meaning neighboring memory addresses) @hennessy2011computer. This principle is applied by the not just putting the accessed data in cache but data around it, this is known as a cache line. This implies that certain data structures have better cache locality since they are more tightly grouped together. A common example of this is a linked list vs an array.
+Assuming a common modern day computer system, cache memory is a special kind of memory that sits between a computer's main memory and the CPU (central processing unit). Cache memory allows for extremely fast retrieval of data and therefore allows programs to execute faster. Cache memory is orders of magnitude faster than main memory but is usually very small relative to main memory @smith1982cache. CPU cache also tends to come in multiple levels most commonly designated as L1, L2, etc. where L1 is the smallest cache but the fastest with speeds decreasing and size increasing as the numbers go up @hennessy2011computer. Hennessy and Patterson in their book also describe the principle of locality which states that data recently used is likely to be used again as well as the data around it (around it meaning neighboring memory addresses) @hennessy2011computer. This principle is applied by not just putting the accessed data in cache but data around it, this is known as a cache line. This implies that certain data structures have better cache locality since they are more tightly grouped together. A common example of this is a linked list vs an array.
 
 #figure(
   caption: [An example of how arrays are allocated in memory.],
@@ -29,22 +29,22 @@ Assuming a common modern day computer system, cache memory is a special kind of 
 )
 
 #figure(
-  caption: [An example of how lined lists are allocated in memory.],
+  caption: [An example of how linked lists are allocated in memory.],
   placement: none,
   image("../images/linkedlist.drawio.png"),
 )
 
 The diagram above compares how linked lists and arrays store their data in main memory. In the diagrams above grey blocks are unallocated memory while green blocks are allocated memory.
 
-As you can elements in an array are stored next to each other in main memory this means that they have a good cache locality and when one element of the array is accessed it as well as other elements in the array are likely to be cached thus allowing for faster access and a faster execution of the program. Looking at the linked list on the other hand the elements are not next to one another and therefore have a bad cache locality so if the data at address 10 is accessed it is unlikely that any other data of the array will be cached alongside which will slow down the execution of the program as whenever the another element of the linked list is fetched the CPU will first experience a cache miss and have to retrieve the data from main memory. On top of that linked list usually require more memory as every data element needs to store the data (or a pointer to the data) as well as a pointer to the next element which on 64 bit operating systems is usually 8 bytes so even if the elements were next to each other as with an array due to the increased size of each element less elements would be able to fit in the cache at once.
+As you can see, elements in an array are stored next to each other in main memory this means that they have a good cache locality and when one element of the array is accessed it as well as other elements in the array are likely to be cached thus allowing for faster access and a faster execution of the program. Looking at the linked list on the other hand the elements are not next to one another and therefore have a bad cache locality so if the data at address 10 is accessed it is unlikely that any other data of the array will be cached alongside which will slow down the execution of the program as whenever another element of the linked lists is fetched the CPU will first experience a cache miss and have to retrieve the data from main memory. On top of that linked list usually require more memory as every data element needs to store the data (or a pointer to the data) as well as a pointer to the next element which on 64 bit operating systems is usually 8 bytes so even if the elements were next to each other as with an array due to the increased size of each element less elements would be able to fit in the cache at once.
 
 This all should be kept in mind when developing a memory allocator as efficiently storing the data can lead to massive gains in performance.
 
 == Memory Alignment
 
-Alignment refers to the restriction that certain data types or memory addresses must adhere to specific boundaries, such as 4-byte or 8-byte alignments, depending on the system architecture. Memory allocators must allocate memory to specific alignment. This is done to improve performance but also because in some cases it is a requirement by the processers architecture.
+Alignment refers to the restriction that certain data types or memory addresses must adhere to specific boundaries, such as 4-byte or 8-byte alignments, depending on the system architecture. Memory allocators must allocate memory to specific alignment. This is done to improve performance but also because in some cases it is a requirement by the processor's architecture.
 
-Modern processors are designed to access memory in aligned chunks, typically corresponding to the system's word size e.g. 8 bytes on a 64 bit system. Misaligned memory access can lead to increased CPU cycles, as the processor may need to issue multiple memory requests to retrieve a single piece of data @drepper2007every. For example if an 8 byte piece of data is stored from memory address 13 to 20 in the systems memory and it is a system with an 8 byte word size the CPU will need to do two fetches, one from 8 to 15 and from 15 to 23. it will then after that need to combine the retrieved memory. This is much more expensive than just getting the data from an aligned memory address as that would only required one fetch with no data manipulation.
+Modern processors are designed to access memory in aligned chunks, typically corresponding to the system's word size e.g. 8 bytes on a 64 bit system. Misaligned memory access can lead to increased CPU cycles, as the processor may need to issue multiple memory requests to retrieve a single piece of data @drepper2007every. For example if an 8 byte piece of data is stored from memory address 13 to 20 in the system's memory and it is a system with an 8 byte word size the CPU will need to do two fetches, one from 8 to 15 and from 15 to 23. it will then after that need to combine the retrieved memory. This is much more expensive than just getting the data from an aligned memory address as that would only require one fetch with no data manipulation.
 
 #figure(
   caption: [An example of what misaligned memory looks like.],
@@ -58,13 +58,13 @@ Modern processors are designed to access memory in aligned chunks, typically cor
   image("../images/alignment_good.drawio.png"),
 )
 
-In the diagrams above the green blocks represent unused memory, the red blocks extra memory that is being fetched and the purple blocks the actual memory that we want to access. As we an see if the memory is misaligned it requires fetching extra memory whereas in the second diagram the memory that we want to fetch is aligned correctly and is therefore easy to get without any extra operations. The diagram above is not completely accurate since computers will usually fetch memory equal to their word size so on most 64 bit systems two 8 byte chunks would be retrieved on the bad alignment and one 8 byte chunk on the good alignment version.
+In the diagrams above the green blocks represent unused memory, the red blocks extra memory that is being fetched and the purple blocks the actual memory that we want to access. As we can see if the memory is misaligned it requires fetching extra memory whereas in the second diagram the memory that we want to fetch is aligned correctly and is therefore easy to get without any extra operations. The diagram above is not completely accurate since computers will usually fetch memory equal to their word size so on most 64 bit systems two 8 byte chunks would be retrieved on the bad alignment and one 8 byte chunk on the good alignment version.
 
-On some processor architectures data must be aligned to its natural boundary. A data types natural boundary is usually the smallest power of 2 that can fit the data. For example a 4 byte piece of data has a natural boundary of 4 bytes whereas a 6 byte piece of data has a natural boundary of 8 bytes @hennessy2011computer.
+On some processor architectures data must be aligned to its natural boundary. A data type's natural boundary is usually the smallest power of 2 that can fit the data. For example a 4 byte piece of data has a natural boundary of 4 bytes whereas a 6 byte piece of data has a natural boundary of 8 bytes @hennessy2011computer.
 
 == System Calls
 
-A system call is how a running program is able to communicate with the underlying operating system of the computer. System calls allow a running program to perform operating system specific tasks as many of these can only be executed in a protected mode that only the operating system has access too. System calls are operating specific but most operating systems have system calls for the following:
+A system call is how a running program is able to communicate with the underlying operating system of the computer. System calls allow a running program to perform operating system specific tasks as many of these can only be executed in a protected mode that only the operating system has access to. System calls are operating system specific but most operating systems have system calls for the following:
 - Starting a process
 - Allocating memory
 - etc
@@ -74,7 +74,7 @@ The largest concern when it comes to system calls for a memory allocator is the 
 
 === Inner Workings of a Memory Allocator
 
-A memory allocator manages a block of memory. This block of memory is also referred to as a pool of memory or a chunk of memory. This block of memory that is managed by the allocator is just a region of raw bytes. It does not matter where these raw bytes are situated, for example while memory allocators generally work with heap memory there is no reason that the memory managed by the allocator cannot sit on the stack instead. A memory allocator is further able to allocate chunks of memory of any size from this region of memory. Allocation means to return an pointer to the callee where this pointer can be assumed to point to valid memory that the callee can interact with and that is at a minimum the size that the callee requested. A memory allocator also needs to be able to deallocate memory by having the callee provide the address of previously allocated memory that was allocated by that allocator. The allocator can then mark this memory as deallocate and provide it again at a later time possibly with a different size. A memory allocator also must have a strategy for how it allocates the memory @alexandrescu2001modern.
+A memory allocator manages a block of memory. This block of memory is also referred to as a pool of memory or a chunk of memory. This block of memory that is managed by the allocator is just a region of raw bytes. It does not matter where these raw bytes are situated, for example while memory allocators generally work with heap memory there is no reason that the memory managed by the allocator cannot sit on the stack instead. A memory allocator is further able to allocate chunks of memory of any size from this region of memory. Allocation means to return a pointer to the callee where this pointer can be assumed to point to valid memory that the callee can interact with and that is at a minimum the size that the callee requested. A memory allocator also needs to be able to deallocate memory by having the callee provide the address of previously allocated memory that was allocated by that allocator. The allocator can then mark this memory as deallocate and provide it again at a later time possibly with a different size. A memory allocator also must have a strategy for how it allocates the memory @alexandrescu2001modern.
 
 #figure(
   caption: [An Example of a Callee Requesting Memory.],
@@ -82,7 +82,7 @@ A memory allocator manages a block of memory. This block of memory is also refer
   image("../images/allocrequest.drawio.png"),
 )
 
-As seen in the image above even though the callee requested 10 bytes of memory they received 12 bytes which is valid since from the callees perspective they can always assume that they received at least 10 bytes.
+As seen in the image above even though the callee requested 10 bytes of memory they received 12 bytes which is valid since from the callee's perspective they can always assume that they received at least 10 bytes.
 
 === Small Objects
 
@@ -109,7 +109,7 @@ The paper by Pastaryev et al. provides a taxonomy on memory allocators @rauchwer
 + Amount of memory used.
 + Quality of allocation.
 
-An issue with trying to optimize for these three things is that they can often times be at odds for example storing more metadata may allow for faster allocation and deallocation but this then leads to more memory being used than what was requested.
+An issue with trying to optimise for these three things is that they can often times be at odds for example storing more metadata may allow for faster allocation and deallocation but this then leads to more memory being used than what was requested.
 
 === Speed of Allocation
 
@@ -121,13 +121,13 @@ An allocator will consume memory in three main ways:
 + The memory it allocates.
 + Through internal and external fragmentation.
 + By storing metadata.
-Fragmentation as well as storing metadata causes the memory allocated to be more than the requested amount of memory to be allocated. A good allocator tries to minimize this by reducing the amount of fragmentation and only storing as much metadata as necessary. As for quality of the allocation the allocator must return an address to the requesting program and that address could be bad for a couple of reasons such as locality reasons.
+Fragmentation as well as storing metadata causes the memory allocated to be more than the requested amount of memory to be allocated. A good allocator tries to minimise this by reducing the amount of fragmentation and only storing as much metadata as necessary. As for quality of the allocation the allocator must return an address to the requesting program and that address could be bad for a couple of reasons such as locality reasons.
 
 There are two forms of fragmentation that can occur:
 + Internal fragmentation when an object is allocated that is smaller than the chunk of memory it was given.
 + External fragmentation which occurs when there is wasted space between chunks of allocated memory making it difficult at times to allocate new memory.
 
-Some important notes on the metadata stored are that the metadata is not ever visible to the end user and that some metadata will always be required. Take the example of the C standard libraries malloc and free functions @c_standard:
+Some important notes on the metadata stored are that the metadata is never visible to the end user and that some metadata will always be required. Take the example of the C standard libraries malloc and free functions @c_standard:
 
 #figure(
   [
@@ -146,9 +146,9 @@ The above is some basic C code that allocates 10 integers on the heap using the 
 
 === Quality of Allocation
 
-Quality of an allocation largely has to do with a computers cache memory. If all the allocated data is next to one another then the computers cache will most likely have the data for the other elements in it even if only one was accessed which will lead to more cache hits and an overall speed improvement. Grunwald et. al. @grunwald1993improving emphasis the importance have having memory allocators have a good allocation locality.
+Quality of an allocation largely has to do with a computers cache memory. If all the allocated data is next to one another then the computers cache will most likely have the data for the other elements in it even if only one was accessed which will lead to more cache hits and an overall speed improvement. Grunwald et. al. @grunwald1993improving emphasises the importance of having memory allocators with a good allocation locality.
 
-This is the same reason why arrays are usually preferred over linked lists since arrays have a much higher cache locality than linked lists which can have there data stored anywhere in memory and it is not guaranteed that the elements in a linked list will be local to one another.
+This is the same reason why arrays are usually preferred over linked lists since arrays have a much higher cache locality than linked lists which can have their data stored anywhere in memory and it is not guaranteed that the elements in a linked list will be local to one another.
 
 == Building Blocks of a Memory Allocator
 
@@ -158,7 +158,7 @@ A memory allocator should be designed to be composable and it consists of two ma
 
 === The Backing Allocator
 
-To create a memory allocator requires a memory allocator, this is often known as the backing allocator. The reason that a memory allocator requires a memory allocator in itself is because the memory it manages needs to come from somewhere. If one were to read about memory allocators it is common that that the underlying (also know as backing) memory allocator is left out. The reason this is done is it is simply an implementation detail and whatever appropriate memory allocator can be used. For example Bonwick's @bonwick1994slab Slab Allocator could have used malloc or any other allocator to provide it with its initial memory. A common question then is where does the backing allocator get its memory? The lowest level allocator that provides all the memory is provided by the operating system and is usually mmap or sbrk on Linux operating system @ArpaciDusseau23-Book assuming there is an operating system to begin with. 
+To create a memory allocator requires a memory allocator, this is often known as the backing allocator. The reason that a memory allocator requires a memory allocator in itself is because the memory it manages needs to come from somewhere. If one were to read about memory allocators it is common that that the underlying (also known as backing) memory allocator is left out. The reason this is done is it is simply an implementation detail and whatever appropriate memory allocator can be used. For example Bonwick's @bonwick1994slab Slab Allocator could have used malloc or any other allocator to provide it with its initial memory. A common question then is where does the backing allocator get its memory? The lowest level allocator that provides all the memory is provided by the operating system and is usually mmap or sbrk on Linux Operating System @ArpaciDusseau23-Book assuming there is an operating system to begin with. 
 
 === Memory Allocation Strategy
 
@@ -196,7 +196,7 @@ In the diagram above the red blocks are allocated memory while the green is unal
 
 The benefits of region based management are that the a large block of memory is preallocated thus reducing the number of calls to the operation system which is known to be a common bottleneck. It is very simple to implement and does not have any complex allocation strategy and so assuming that a new block does not need to be allocated the time for allocation is $O(1)$. Since all objects are store next to one another in memory there cannot be any internal fragmentation and the only possible external fragmentation that can occur is when there is not enough memory left in a region and a new one must be allocated.
 
-There is also numerous downsides to region based memory management. If the region used is very large but only a few small objects are allocated than there can be a lot of wasted memory. Since it is not possible to deallocate single objects in memory it means even if majority of the objects are no longer referenced as long as there is one object in use all the memory must sit around. Most commonly region based management is explicit in the program and does not look like a "normal" allocation. This also means that the standard form of region based memory management is user managed and this then requires users to know about the lifetime of all the objects that are allocated to the region @gay1998memory.
+There are also numerous downsides to region based memory management. If the region used is very large but only a few small objects are allocated then there can be a lot of wasted memory. Since it is not possible to deallocate single objects in memory it means even if majority of the objects are no longer referenced as long as there is one object in use all the memory must sit around. Most commonly region based management is explicit in the program and does not look like a "normal" allocation. This also means that the standard form of region based memory management is user managed and this then requires users to know about the lifetime of all the objects that are allocated to the region @gay1998memory.
 
 #figure(
   [
@@ -235,13 +235,13 @@ As seen in the diagram above the memory allocated now also contains a header. It
 
 This immediately has the benefit over region based memory management that it allows for deallocation without needing to deallocate the whole block of memory but is still limited because only data on top of the stack can be deallocated. The other benefit is that allocation is still $O(1)$ since it uses the same technique to allocate memory as the region based memory allocator. Since all the memory is close to one another there is a high cache locality which can massively improve performance. 
 
-Only being able to deallocate the memory on top of the stack leads to the problem that to efficiently use this allocator the programmer will need to be conscious of when they allocate and deallocate objects and should endevour to arrange their lifetimes in a manner that allows objects that will be deallocated first to be on the top of the stack. Arranging objects in such a manner is not always possible and thus this allocator is not optimal in such scenarios as in the best case the method call to deallocate the memory does nothing and in the worst case an error occurs as deallocating memory that is not at the top of the stack is not supported. The other drawback of this strategy is that since some metadata is required for every allocation there will be a higher memory overhead, in other words every allocation of $n$ bytes will always be larger than $n$ bytes.
+Only being able to deallocate the memory on top of the stack leads to the problem that to efficiently use this allocator the programmer will need to be conscious of when they allocate and deallocate objects and should endeavour to arrange their lifetimes in a manner that allows objects that will be deallocated first to be on the top of the stack. Arranging objects in such a manner is not always possible and thus this allocator is not optimal in such scenarios as in the best case the method call to deallocate the memory does nothing and in the worst case an error occurs as deallocating memory that is not at the top of the stack is not supported. The other drawback of this strategy is that since some metadata is required for every allocation there will be a higher memory overhead, in other words every allocation of $n$ bytes will always be larger than $n$ bytes.
 
-This kind of memory management can very useful for programming languages that utilize virtual machines as they have a virtual stack which is very often allocated on the heap @ArpaciDusseau23-Book @tanenbaum2015modern and this strategy lends its self well to how a stack works in a program running on a typical operating system.
+This kind of memory management can very useful for programming languages that utilise virtual machines as they have a virtual stack which is very often allocated on the heap @ArpaciDusseau23-Book @tanenbaum2015modern and this strategy lends its self well to how a stack works in a program running on a typical operating system.
 
 === Pool Memory Allocator <pool_allocator>
 
-The basic idea between pool allocators is that a chunk of memory (also know as a buffer) is split into smaller chunks. The allocator than keeps track of which chunks are available and when a block of memory is requested a free chunk is provided. This means that some metadata needs to be stored to make it clear which blocks of memory are free and which are not. A common approach to this is by making use of a free list which is just a linked list @cormen2022introduction of of the available chunks of memory. The head of the linked list points to the next available chunk of memory. Due to the data associated with each allocation it is possible for the pool allocator to deallocate individual objects. When an object is deallocated it is just made the new head of the free list @gay1998memory @boostpool @whyusepool.
+The basic idea between pool allocators is that a chunk of memory (also known as a buffer) is split into smaller chunks. The allocator then keeps track of which chunks are available and when a block of memory is requested a free chunk is provided. This means that some metadata needs to be stored to make it clear which blocks of memory are free and which are not. A common approach to this is by making use of a free list which is just a linked list @cormen2022introduction of the available chunks of memory. The head of the linked list points to the next available chunk of memory. Due to the data associated with each allocation it is possible for the pool allocator to deallocate individual objects. When an object is deallocated it is just made the new head of the free list @gay1998memory @boostpool @whyusepool.
 
 #figure(
   caption: [How a pool allocator looks before any allocations.],
@@ -269,7 +269,7 @@ This is a more advanced strategy and immediately has some benefits. The clearest
 
 In the diagram above the red blocks are allocated memory, the green blocks unallocated memory and the orange blocks are a region of memory that is not available to the allocator.
 
-Naturally there are downsides to this kind of allocations strategy. Every allocation requires some metadata which means that there will always be more memory used than requested. As well with that each memory block being a fixed sizes means that while there will never be any internal fragmentation two other problems can occur:
+Naturally, there are downsides to this kind of allocations strategy. Every allocation requires some metadata which means that there will always be more memory used than requested. As well with that each memory block being a fixed sizes means that while there will never be any internal fragmentation two other problems can occur:
 1. A memory request smaller than the block size can be requested which will lead to internal fragmentation.
 2. The amount of memory requested may be larger than the block size in which case the memory allocation will fail or will be deferred to the backing allocator.
 The final issue with this memory allocation strategy is that since it makes use of a linked list it naturally has poor cache locality which will be exasperated if a new buffer needs to be allocated @hennessy2011computer.
@@ -322,7 +322,7 @@ The downsides are that the deallocation can be slow if the linked list is large 
 
 === Buddy Memory Allocator
 
-The buddy memory allocator is looks to improve on the memory fragmentation issues that allocators using free lists are susceptible to. It works by recursively splitting memory a larger block of memory to fit the requested amount of memory. A block of memory in a power of two and a free list is initialized similar to what is done with a pool allocator. The free list contains one element which points to the whole block of memory. When a piece of memory is requested the free list is searched for a block of memory that will fit the requested amount than if the memory to be allocated is at least half the size of the block it is being allocated in the block is than split into two equal halves. This is done recursively until the block cannot be split in half anymore. All blocks of memory created this way are added to the free list (besides the block that the new allocation is going to be used for) @von1975simple @ginger @knowlton1965fast.
+The buddy memory allocator is looks to improve on the memory fragmentation issues that allocators using free lists are susceptible to. It works by recursively splitting memory a larger block of memory to fit the requested amount of memory. A block of memory in a power of two and a free list is initialised similar to what is done with a pool allocator. The free list contains one element which points to the whole block of memory. When a piece of memory is requested the free list is searched for a block of memory that will fit the requested amount than if the memory to be allocated is at least half the size of the block it is being allocated in the block is than split into two equal halves. This is done recursively until the block cannot be split in half anymore. All blocks of memory created this way are added to the free list (besides the block that the new allocation is going to be used for) @von1975simple @ginger @knowlton1965fast.
 
 #figure(
   caption: [How a free list looks after deallocation.],
@@ -330,15 +330,15 @@ The buddy memory allocator is looks to improve on the memory fragmentation issue
   image("../images/buddy_allocator.drawio.png"),
 )
 
-As can be seen from the diagram above the memory is recursively split until it can be not longer. This assists with minimizing fragmentation by trying to use as little memory as possible. The allocator may make blocks too small that a new piece of memory cannot be allocated when this happens blocks of memory are coalesced with one another until a block of memory large enough to fit the requested allocation is created.
+As can be seen from the diagram above the memory is recursively split until it can be not longer. This assists with minimising fragmentation by trying to use as little memory as possible. The allocator may make blocks too small that a new piece of memory cannot be allocated when this happens blocks of memory are coalesced with one another until a block of memory large enough to fit the requested allocation is created.
 
-Deallocation works just by marking the block of memory as free and adding it to the free list. This means that freeing memory is fast as it is $O(1)$. This allocator also minimizes internal fragmentation by trying to decrease the size of blocks and also decrease external fragmentation as memory blocks next to one another can be made bigger if necessary.
+Deallocation works just by marking the block of memory as free and adding it to the free list. This means that freeing memory is fast as it is $O(1)$. This allocator also minimises internal fragmentation by trying to decrease the size of blocks and also decrease external fragmentation as memory blocks next to one another can be made bigger if necessary.
 
 The downsides of this allocator is that while deallaction is fast allocation my not necessarily be since there may be any number of recursive calls involved as well as an unknown amount of memory blocks may need tobe coalesced. This means it is difficult to determine exactly how long an allocation will take as a unknown number of events may or may not occur.
 
 === Bin Memory Allocator
 
-A bin memory allocator works by organizing memory into bins of fixed sizes. A bin is simply a region of memory and an allocator will have bins of varying sizes @berger2000hoard. A bins size is the maximum size an allocation must be to be placed in that bin, for example if an allocator has bins 4 bytes, 8 bytes and 32 bytes then if a 5 byte allocation request is made it can be placed in the 8 or 32 byte bin. When a memory allocation is requested the smallest bin that can fit the requested amount of memory is used for the allocation so in the example the 8 byte bin would be used @li2018efficient. An allocator can obviously not have an infinite number of bins so if an allocation request comes in that cannot fit into any bin the backing memory allocator will be used instead. Each bin itself is divided into blocks of its respective bin size so when an allocation request comes in a free block from that bin is returned.
+A bin memory allocator works by organising memory into bins of fixed sizes. A bin is simply a region of memory and an allocator will have bins of varying sizes @berger2000hoard. A bins size is the maximum size an allocation must be to be placed in that bin, for example if an allocator has bins 4 bytes, 8 bytes and 32 bytes then if a 5 byte allocation request is made it can be placed in the 8 or 32 byte bin. When a memory allocation is requested the smallest bin that can fit the requested amount of memory is used for the allocation so in the example the 8 byte bin would be used @li2018efficient. An allocator can obviously not have an infinite number of bins so if an allocation request comes in that cannot fit into any bin the backing memory allocator will be used instead. Each bin itself is divided into blocks of its respective bin size so when an allocation request comes in a free block from that bin is returned.
 
 #figure(
   caption: [A Diagram Explaining the Concept of Bins.],
@@ -376,15 +376,15 @@ The text below discuss commonly used memory allocators.
 
 === jemalloc
 
-jemalloc is a memory allocator designed originally for the FreeBSD operation system @freebsd to make better use of multiprocessor architectures. The core concept behind jemallocs implementation are arenas which is a memory pool for specific threads. Since each thread gets its own arena it improves multiprocessor utilization by reducing contention between processors. Each arena is further divided into bins, runs and chunks.
+jemalloc is a memory allocator designed originally for the FreeBSD operation system @freebsd to make better use of multiprocessor architectures. The core concept behind jemallocs implementation are arenas which is a memory pool for specific threads. Since each thread gets its own arena it improves multiprocessor utilisation by reducing contention between processors. Each arena is further divided into bins, runs and chunks.
 - bins are used for small object allocations.
 - runs are used for medium object allocations.
 - chunks are used for large object allocations.
-jemalloc further makes use of thread-local caching to improve performance. Small objects make use of bitmaps and specialized operations to efficiently know when blocks in a bin are free @evans2006scalable.
+jemalloc further makes use of thread-local caching to improve performance. Small objects make use of bitmaps and specialised operations to efficiently know when blocks in a bin are free @evans2006scalable.
 
 === TCMalloc
 
-TCMalloc (Thread-Caching Malloc) is a memory allocator developed by Google. It is designed to optimize memory allocation and deallocation, particularly in multi-threaded applications. TCMalloc aims to achieve the following goals:
+TCMalloc (Thread-Caching Malloc) is a memory allocator developed by Google. It is designed to optimise memory allocation and deallocation, particularly in multi-threaded applications. TCMalloc aims to achieve the following goals:
 
 - Fast, uncontended allocation and deallocation for most objects.
 - Flexible use of memory.
@@ -424,7 +424,7 @@ The backend is responsible for managing large blocks of unallocated memory and i
 - When the middle-end requires more memory, it requests pages from PageHeap.
 - If memory is no longer needed, the backend can return it to the operating system using `madvise()` or `munmap()`.
 
-This structure allows TCMalloc to achieve high performance by reducing contention, efficiently managing small and large objects, and minimizing fragmentation.
+This structure allows TCMalloc to achieve high performance by reducing contention, efficiently managing small and large objects, and minimising fragmentation.
 
 === mimalloc
 
@@ -461,8 +461,8 @@ The glibc malloc was created from the pthreads malloc. This implementation is a 
 - Heap: A region of memory belonging to exactly one arena, subdivided into chunks.
 - Chunk: A block of memory that can be allocated or freed. Freed chunks can be coalesced with neighbors to form larger chunks. Each chunk belongs to exactly one heap, and thus to one arena.
 The allocator operates in a chunk-oriented fashion. A heap is divided into smaller chunks, each of which stores its size and status (allocated or free). When freed, chunks enter a free list. Glibc maintains multiple arenas, allowing multiple threads to allocate memory in parallel. While mutexes are still used to guard arena access, threads can try different arenas to reduce contention. Glibc malloc maintains several types of free lists:
-- Fast Bins: Store small, fixed-size chunks in size-specific singly-linked lists. Chunks are not coalesced on free to maximize speed and may be migrated to other bins later.
-- Unsorted Bin: Freed chunks are first placed here, deferring sorting until allocation time. This centralizes sorting logic and allows quick reuse of recent frees.
+- Fast Bins: Store small, fixed-size chunks in size-specific singly-linked lists. Chunks are not coalesced on free to maximise speed and may be migrated to other bins later.
+- Unsorted Bin: Freed chunks are first placed here, deferring sorting until allocation time. This centralises sorting logic and allows quick reuse of recent frees.
 - Small Bins: Manage fixed-size chunks, coalescing adjacent free chunks to form larger regions. Small bins use doubly-linked lists for efficient removal and insertion.
 - Large Bins: Handle variable-size chunks. Allocation requires finding the best-fit chunk, potentially splitting larger chunks to satisfy requests.
 Additionally, glibc uses:

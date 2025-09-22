@@ -8,7 +8,7 @@
 
   #figure(
     image("../results/linux/time/basic_size_"+size+".0.png"),
-    caption: "Basic benchark for size: "+ size
+    caption: "Basic benchmark for size: "+ size
   )
 ]
 
@@ -20,7 +20,7 @@
 
   #figure(
     image("../results/linux/time/sporadic_size_"+size+".0.png"),
-    caption: "Sporadic benchark for size: "+ size
+    caption: "Sporadic benchmark for size: "+ size
   )
 ]
 
@@ -42,14 +42,14 @@
 #for size in ("1", "2", "4", "8", "16", "32", "64", "128", "256", "512", "1024", "2048") [
   #figure(
     image("../results/macos/time/basic_size_"+size+".0.png"),
-    caption: "Basic benchark for size: "+ size
+    caption: "Basic benchmark for size: "+ size
   )
 ]
 
 #for size in ("1", "2", "4", "8", "16", "32", "64", "128", "256", "512", "1024", "2048") [
   #figure(
     image("../results/macos/time/sporadic_size_"+size+".0.png"),
-    caption: "Sporadic benchark for size: "+ size
+    caption: "Sporadic benchmark for size: "+ size
   )
 ]
 

@@ -1,54 +1,3 @@
-// add date
-// submitted in partial fulfilment of the requirements for the MIT (Big Data Science) in the Department of Computer Science, University of Pretoria
-
-// Introduction 1
-// Why am I doing this study
-// What is the gap
-// Mention problem statement
-// Discuss my research questions
-// Methodology
-// Roadmap to the rest of the document
-
-// Title 2
-// Small Memory ....
-
-// Memory allocators 3
-// What they are
-// How they work
-// Why they are important
-
-// Big data science applications 4
-// Why small memory allocators are necessary
-
-// Development of a small memory allocator 5
-
-// Application of small memory allocator 6
-
-// Expiriments 7
-// - Artificial benchmarks (time and memory used)
-// - Actual application of the memory allocator (time and memory used)
-
-// Discussion 8
-
-// Conclusion 9
-
-// Future Work 10
-
-// #let chapter(chapter_name, introduction, summary, filename) = {
-//   let heading_level = 1
-  
-//   heading(level: heading_level)[#chapter_name]
-
-//   heading(level: heading_level + 1)[Introduction]
-//   par()[#introduction]
-
-//   include filename
-
-//   heading(level: heading_level + 1)[Summary]
-//   par()[#summary]
-// }
-
-
 #import "@preview/i-figured:0.2.4"
 
 // setting layout
@@ -70,7 +19,12 @@
 
 #i-figured.outline()
 
-#include "chapters/introduction.typ"
+#heading([Abstract], numbering: none, outlined: false)
+
+This mini-dissertation introduces a small object memory allocator designed for the field of Big Data Science. The memory allocator aims to optimise runtime performance
+of Big Data science tasks that make use of small objects by reducing the execution time of a program. The allocator outperforms the default memory allocators on both Linux (Ubuntu) and MacOS in
+both artificial and real world benchmarks. The text further goes into the design of the small object allocator with its inner workings based around the unix `mmap`
+system call and delves into the need for more research into custom memory allocators for the field of Big Data Science.
 
 #pagebreak()
 
@@ -81,10 +35,17 @@
     #text(size: 30pt)[Author: Michael du Plessis]
 
     #text(size: 30pt)[Supervisor: Professor Linda Marshall]
+
+    2025-10-31
+
+    Submitted in partial fulfilment of the requirements for the MIT (Big Data Science) in the Department of Computer Science, University of Pretoria
   ]
 ]
 
+
 #pagebreak()
+
+#include "chapters/introduction.typ"
 
 #include "chapters/memory_allocators.typ"
 
@@ -100,7 +61,50 @@
 
 #include "chapters/future_work.typ"
 
+#show bibliography: set heading(numbering: "1.")
+
 // references
 #bibliography("refs.bib", title: "References")
 
 #include "chapters/appendix.typ"
+
+// TODO:
+// Ordering:
+// Title
+// Abstract
+// Acknowledgements
+// Table of Contents
+// Before introuction roman numerals
+// Introduction
+//
+// Add chapter numbers to overiew
+//
+// Don't reference diagram with locality rather do "in Figure xxx"
+//
+// Add reference to overview of memory allocators also mention that heap, cache, alignment, etc is important
+//
+// summerise in all chapters that are missing it
+//
+// overview of memory allocators specify that preallocting is described in later chapter
+//
+// remove small object allocator definition from data science chapter as well as general purpose memory allocators
+//
+// put chapter 4 into chapter 2.9
+//
+// split chapter 2 at 2.9 with Overview of Memory Allocators and Application of Memory Allocators
+//
+// use uk spelling √
+//
+// begin chapters on a new page
+//
+// do better with figures
+//
+// fix figure referencing
+//
+// conclusion too short take a look at the problem statement again
+//
+// make sure you state why figures in appendix exist
+//
+// just put introduction under chapter heading
+//
+// call conclusions at the end of chapter call summary what we are taking forward

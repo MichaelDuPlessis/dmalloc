@@ -18,4 +18,4 @@ Large amounts of memory is preallocated by the allocator and smaller chunks with
 
 == Conclusion
 
-A small object memory allocator is a memory allocator that utilizes specific techniques to optimize the allocation and deallocation of small objects. They often use one or more techniques to achieve this goal. They are an extension on top of already existing memory allocators.
+A small object memory allocator is a memory allocator that utilises specific techniques to optimise the allocation and deallocation of small objects. They often use one or more techniques to achieve this goal. They are an extension on top of already existing memory allocators.

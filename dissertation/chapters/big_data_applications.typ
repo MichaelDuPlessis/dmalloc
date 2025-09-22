@@ -14,11 +14,11 @@ A small object allocator is a memory management technique that is specifically d
 
 This is especially important for machine learning algorithms such as Random Forests, K-Means clustering, or Expectation-Maximization (EM), all of which allocate many temporary objects during training or inference. For example, a decision tree will repeatedly allocate memory for new nodes while it is being built, and a clustering algorithm may create temporary cluster assignments in each iteration. Having a fast and efficient allocator for these small objects can significantly improve performance.
 
-Text processing also benefits from small object allocators. Tokenization, for instance, involves splitting text into many small strings or objects which are used briefly and then discarded. A general-purpose allocator will struggle to keep up with this allocation pattern, while a small object allocator can handle it efficiently by reusing memory from a fixed-size pool.
+Text processing also benefits from small object allocators. Tokenisation, for instance, involves splitting text into many small strings or objects which are used briefly and then discarded. A general-purpose allocator will struggle to keep up with this allocation pattern, while a small object allocator can handle it efficiently by reusing memory from a fixed-size pool.
 
 == Big Data Science
 
-Big data science is the field that involves extracting meaningful insights, patterns, and knowledge from very large and complex datasets. The data being processed is commonly too large or fast moving for traditional data processing software to handle. It combines elements of computer science, statistics, and domain expertise to make sense of massive volumes of data. Techniques such as machine learning, data mining, distributed computing, and cloud platforms to analyze data from sources like social media, sensors, transactions, and logs. Big data science is applied in fields such as finance, healthcare, marketing, cybersecurity, and urban planning @brady2019challenge @song2016big.
+Big data science is the field that involves extracting meaningful insights, patterns, and knowledge from very large and complex datasets. The data being processed is commonly too large or fast moving for traditional data processing software to handle. It combines elements of computer science, statistics, and domain expertise to make sense of massive volumes of data. Techniques such as machine learning, data mining, distributed computing, and cloud platforms to analyse data from sources like social media, sensors, transactions, and logs. Big data science is applied in fields such as finance, healthcare, marketing, cybersecurity, and urban planning @brady2019challenge @song2016big.
 
 == Pre-allocating
 
@@ -75,7 +75,7 @@ So if the amount of needed cannot be guessed with some degree of precision the f
 
 == Applications
 
-Many algorithms and applications used in data science and machine learning require allocating dynamic memory during their execution. Usually these allocations are for small objects—such as nodes, tuples, or temporary results that are created and destroyed many times. In situations like this performance can be drastically improved by an allocator that specializes in allocating and deallocating small objects.
+Many algorithms and applications used in data science and machine learning require allocating dynamic memory during their execution. Usually these allocations are for small objects—such as nodes, tuples, or temporary results that are created and destroyed many times. In situations like this performance can be drastically improved by an allocator that specialises in allocating and deallocating small objects.
 
 === Random Forest
 
@@ -91,11 +91,11 @@ Many graph algorithms such as PageRank, Dijkstra’s algorithm, or community det
 
 === Text Processing
 
-Text processing and NLP pipelines are another area where small object allocation patterns emerge. For example, during tokenization, stemming, or parsing, millions of short strings or metadata objects may be created and discarded. Efficiently managing memory for these transient objects improves the performance of data ingestion and preprocessing pipelines.
+Text processing and NLP pipelines are another area where small object allocation patterns emerge. For example, during tokenisation, stemming, or parsing, millions of short strings or metadata objects may be created and discarded. Efficiently managing memory for these transient objects improves the performance of data ingestion and preprocessing pipelines.
 
 === Genetic Programming
 
-Genetic programming @koza1994genetic is a technique where trees are generated which represent a program that is used to solve a problem. It is a evolutionary algorithm and can be applied to variety of scenarios. The algorithm consists of many trees where the size and shape of each tree is unknown and arbitrary. This kind of problem is perfect for a small object allocator since each tree's size is unknown the amount of memory required cannot be pre-allocated but the nodes in a tree are still relatively small. Since generating these trees consists of a lot of small memory allocations a small object memory allocator can have substitutional performance benefits.
+Genetic programming @koza1994genetic is a technique where trees are generated which represent a program that is used to solve a problem. It is a evolutionary algorithm and can be applied to variety of scenarios. The algorithm consists of many trees where the size and shape of each tree is unknown and arbitrary. This kind of problem is perfect for a small object allocator since each tree's size is unknown the amount of memory required cannot be pre-allocated but the nodes in a tree are still relatively small. Since generating these trees consists of a lot of small memory allocations a small object memory allocator can have substantial performance benefits.
 
 === Data Science Specific Programming Languages
 
@@ -123,7 +123,7 @@ A GP will generate many of these trees randomly and then following a process of 
 
 === Use of a Small Object Memory Allocator
 
-The reason why a small object memory allocator would come in hand is since the trees are generated randomly the size of a tree cannot be known beforehand. Furthermore the nodes of a tree themselves usually have a very small memory footprints this means that these tiny objects are allocated thousands or even millions of time when a genetic program is run. This is ripe optimization for a small object memory allocator.
+The reason why a small object memory allocator would come in hand is since the trees are generated randomly the size of a tree cannot be known beforehand. Furthermore the nodes of a tree themselves usually have a very small memory footprints this means that these tiny objects are allocated thousands or even millions of time when a genetic program is run. This is ripe optimisation for a small object memory allocator.
 
 == Conclusion
 

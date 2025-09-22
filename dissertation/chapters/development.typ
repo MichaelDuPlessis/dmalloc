@@ -1,6 +1,6 @@
 #import "../lib.typ": code_block
 
-= Development of a Small Memory Allocator
+= Development of a Small Object Memory Allocator
 
 == Introduction
 
@@ -43,11 +43,11 @@ Allocating and deallocating memory pages is a slow operation as it requires a sy
   image("../images/allocator_process_flow.drawio.png"),
 )
 
-It may appear that the allocator leaks memory since it is never stated what it does with the cached memory pages when the programme terminates but this is dealt with by the operating system as the OS will automatically clean up any memory pages allocated to the programme on programme termination.
+It may appear that the allocator leaks memory since it is never stated what it does with the cached memory pages when the program terminates but this is dealt with by the operating system as the OS will automatically clean up any memory pages allocated to the program on program termination.
 
 === Example
 
-This is a rundown of how the page cache works. In this example the allocators are called in the following order:
+In this example the allocators are called in the following order:
 1. The bin allocator is used to allocate 1 object.
 2. The free list allocator is used to allocate 3 objects.
 3. The The bin allocator allocates all its memory.
@@ -114,13 +114,13 @@ A bitset is an extension of a bitmask that allows for $K$ flags to set. A bitmas
 - Time to find first free bit: $O(M N)$
 - Time to mark a bit: $O(1)$
 - Time to clear bitmask: $(M)$
-Marking a bit takes the same amount of time because if a the $n$th bit needs to be marked the bitmask and bit in the bitmask can be easily derived since the size of the bitset is known. There are some optimizations that can be made it improve the speed of searching through the bitset to find the first free bit which is the main use case of the allocator. The first easy optimization to do is to keep track of the last bit or bitmask with a free bit. This when when trying to find a free bit the whole bitset does not need to be searched every time. A typical manner to implement this is that when a bit is unmarked set the index to that bitmasks index. The other optimization which is not always available is to use builtin functions such as `__builtin_ctzl` which counts trailing zeroes of a number and it will usually compile down to a single instruction if the processor supports it. This is unfortunately not available on all processors and compilers but if it is available it is much faster than checking each bit individually of a bitmask. This means the new time complexity for finding the first free bit is $O(M)$ since finding the first free bit in a bitmask is constant.
+Marking a bit takes the same amount of time because if a the $n$th bit needs to be marked the bitmask and bit in the bitmask can be easily derived since the size of the bitset is known. There are some optimisations that can be made it improve the speed of searching through the bitset to find the first free bit which is the main use case of the allocator. The first easy optimisation to do is to keep track of the last bit or bitmask with a free bit. This when when trying to find a free bit the whole bitset does not need to be searched every time. A typical manner to implement this is that when a bit is unmarked set the index to that bitmasks index. The other optimisation which is not always available is to use builtin functions such as `__builtin_ctzl` which counts trailing zeroes of a number and it will usually compile down to a single instruction if the processor supports it. This is unfortunately not available on all processors and compilers but if it is available it is much faster than checking each bit individually of a bitmask. This means the new time complexity for finding the first free bit is $O(M)$ since finding the first free bit in a bitmask is constant.
 
-I make use of these optimizations in the bitset to ensure fast lookup time.
+I make use of these optimisations in the bitset to ensure fast lookup time.
 
 === Implementation
 
-The bin allocator works using a bitset as described above to keep track of what blocks are free so that allocation is fast. When a block is free the bit is unmarked so that future allocations can use that block. Further another optimization that was implemented is that a last free bit index is not used in the same way as described above. Instead this index is only updated if the free block of memory is at a lower address than what this index points to. This means that the memory allocator guarantees that forever where that index is there will only be free blocks of memory at a higher memory address and never lower. Let the index be $I$ and have it bounded as such $0 <= I < M$ then the new time complexity for finding the first free bit is $O(M - I)$.
+The bin allocator works using a bitset as described above to keep track of what blocks are free so that allocation is fast. When a block is free the bit is unmarked so that future allocations can use that block. Further another optimisation that was implemented is that a last free bit index is not used in the same way as described above. Instead this index is only updated if the free block of memory is at a lower address than what this index points to. This means that the memory allocator guarantees that forever where that index is there will only be free blocks of memory at a higher memory address and never lower. Let the index be $I$ and have it bounded as such $0 <= I < M$ then the new time complexity for finding the first free bit is $O(M - I)$.
 
 Each bin size consists of multiple bins connected through a linked list. When allocating the bins are search consecutively until a bin with a free block is found. If no free block is found a new bin is created, the memory allocated and then made the head of the linked list to ensure that next time an allocation happens it does not search through all the bins and has the highest chance of finding a free bin early.
 
@@ -304,7 +304,7 @@ Unlike the other allocators page allocations are not linked to one another in an
 
 == Allocator with Malloc
 
-An alternative implementation of the memory allocator is possible where a combination of the bin allocator and the default malloc allocator is used. In this scenario the small object memory allocator is used as it previously was but when a memory allocation which exceeds the size class of the bin allocator is requested the default malloc implementation is used instead. In other words malloc takes the place of the free list and page allocator. This is useful to do if one if only specializing in some types of allocations.
+An alternative implementation of the memory allocator is possible where a combination of the bin allocator and the default malloc allocator is used. In this scenario the small object memory allocator is used as it previously was but when a memory allocation which exceeds the size class of the bin allocator is requested the default malloc implementation is used instead. In other words malloc takes the place of the free list and page allocator. This is useful to do if one if only specialising in some types of allocations.
 
 This way of allocating memory was also tested and will be used when benchmarking and comparing.
 
@@ -350,7 +350,7 @@ These are some optimisations that were made that are not memory allocator specif
 
 === Using pointer arithmatic over array indexing
 
-Since there is not repeated arithmetic to derive the value's address this can lead to significant speadups as there a pointer addition is a single operation whereas array indexing
+Since there is not repeated arithmetic to derive the value's address this can lead to significant speedups as there a pointer addition is a single operation whereas array indexing
 often requires a multiplication and an addition.
 
 #code_block(
@@ -382,12 +382,12 @@ intrinsic `__builtin_prefetch`.
 
 === Branch Prediction
 
-Modern CPU's make use of pipelineing to fetch multiple instructions in parallel. For example while the cpu is executing the current instruction it can fetch the next one
+Modern CPU's make use of pipelining to fetch multiple instructions in parallel. For example while the cpu is executing the current instruction it can fetch the next one
 but `if` statements in programming present a problem as it is not known what branch of the `if` statement will execute at runtime and while modern processors do have
 sophisticated branch prediction algorithms they can be wrong in which case a cache miss occurs and the data has too be fetched a second time.
 
-Using the compiler builtin `__builtin_expect` it is possilbe to tell the CPU what branch it can expect to execute next. This is not a silver bullet however as this only leads
-to performance increases if one branch of the `if` statement is selected disproportionately to the other, in scenarious where each branch is evaluated more or less the same
+Using the compiler builtin `__builtin_expect` it is possible to tell the CPU what branch it can expect to execute next. This is not a silver bullet however as this only leads
+to performance increases if one branch of the `if` statement is selected disproportionately to the other, in scenarios where each branch is evaluated more or less the same
 amount using `__builtin_expect` can degrade performance. Branch prediction is used in the memory allocator in places where there are outlier cases, for example:
 
 #code_block("An example of where branch prediction is used.")[

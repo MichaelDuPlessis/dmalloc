@@ -3,7 +3,7 @@
 = Discussion
 
 The following section discusses the results of the benchmarks on the memory allocator. The benchmarks were run both on a Linux system and a MacOS system to identify
-how the allocator performed on different operating systems. The specifications of the machiens tested are listed below. The Clang compiler was used for both operating systems.
+how the allocator performed on different operating systems. The specifications of the machines tested are listed below. The Clang compiler was used for both operating systems.
 
 #figure(
   caption: [Specifications of the machines on which the benchmarks were run.],
@@ -11,16 +11,17 @@ how the allocator performed on different operating systems. The specifications o
     columns: 3,
     [*Operating System*], [Ubuntu 24.0.4.3 (Linux)], [MacOS 15.6 Sequoia],
     [*Architecture*], [x86], [Arm],
-    [*CPU*], [Ryzen 5600x 6 cores \@3.7 GHz max clock, 12 threads], [M3 4 performance cores \@4.05 Ghz max clock, 4 efficeincy cores \@2.75 GHz max clock, 8 threads],
+    [*CPU*], [Ryzen 5600x 6 cores \@3.7 GHz max clock, 12 threads], [M3 4 performance cores \@4.05 Ghz max clock, 4 efficiency cores \@2.75 GHz max clock, 8 threads],
     [*Total CPU Cache*], [35 MB], [20 MB],
     [*RAM*], [32 GB \@3600 MHz], [16 GB \@6400 MHz],
     [*Page Size*], [4 KB], [16 KB],
-    [*Malloc Implmentation*], [glibc malloc], [magazine malloc],
+    [*Malloc Implementation*], [glibc malloc], [magazine malloc],
   )
 )
 
-For the purposes of these results the default memory allocator used by the operationg system will be known as `malloc` while the newly developed implementation
-will be known as `dmalloc`.
+For the purposes of these results the default memory allocator used by the operating system will be known as `malloc` while the newly developed implementation
+will be known as `dmalloc`. While benchmarks were run for sizes greater then what is considered small objects for the implemented allocator they should not be the main
+focus and are instead included for completeness sake.
 
 == Benchmarks
 
@@ -30,7 +31,7 @@ A various number of benchmarks were run to compare the performance of the the al
 
 All benchmarks are seeded so that they can be replicated. The benchmarks are performed as follows:
 
-=== Linear Allocation, Reallocation and Deallocation
+=== Linear Allocation, Re-allocation and Deallocation
 
 1. This benchmark first allocates an $N$ number of $S$ sized objects
 2. It then deallocates all the objects
@@ -88,7 +89,7 @@ The range for $R$ is $[1-4096]$ bytes.
 
 === Genetic Program
 
-The internal workings of genetic programs have already been explained. The exact hyperparemetrs of this genetic program will be discussed below.
+The internal workings of genetic programs have already been explained. The exact hyperparemeters of this genetic program will be discussed below.
 
 The genetic program was run 3 times each time with an increasing number of individuals in the population while keeping the number of generations the same. The goal the genetic algorithms was to approximate the following equation:
 
@@ -146,6 +147,8 @@ All in all the node structure is 25 bytes but due to how C's padding in structs 
 
 A genetic program was chosen since it is a real world optimisation algorithm and can show what real would performance would be like for the differenet memory allocators. The exact
 goal of the algorithm or whether it achieved the desired output is not important since this is a performance test focusing mainly on execution time but also memory usage.
+The genetic algorithm was run three times each time with 50 individuals in the population but each run had increasing number of generatons. The number of generations were
+50, 100 and 1000.
 
 == Memory Allocator Benchmark Results
 
@@ -153,7 +156,7 @@ goal of the algorithm or whether it achieved the desired output is not important
 #let num_columns = 3
 
 The results discussed below will be focusing on the small object memory allocator implmentation which means most results will be discussed focusing on 128 bytes and lower.
-Benchmarks up to 2048 bytes have been run for completenetss sake and can be viewed in the appendix but will not be the main focus of this paper. 
+Benchmarks up to 2048 bytes have been run for completeness sake and can be viewed in the appendix but will not be the main focus of this paper. 
 
 === Linux
 
@@ -218,7 +221,7 @@ Benchmarks up to 2048 bytes have been run for completenetss sake and can be view
   ) <linux-genetic>]
 )
 
-Looking at the benchmarks its clear that dmalloc outperforms malloc on smaller sizes. dmalloc has a noticable lead up to 16 bytes where it is most of the time outperforming malloc
+Looking at the benchmarks its clear that dmalloc outperforms malloc on smaller sizes. dmalloc has a noticeable lead up to 16 bytes where it is most of the time outperforming malloc
 with some spikes where malloc will outperform it as seen in figures @linux-basic-time-1, @linux-basic-time-2, @linux-basic-time-4, @linux-basic-time-8 and @linux-basic-time-16
 but this is not the norm. Starting at 32 bytes the gap between the two allocators narrows but dmalloc is still superior in
 terms of speed for the basic allocations. As allocation sizes approach 256 bytes the gap narrows as seen in figure @linux-basic-time-256 until finally malloc is superior.
@@ -234,7 +237,7 @@ to be good enough in most use cases.
 The varying benchmark is biased against dmalloc as dmalloc focuses on small objects while varying allocates objects of many different sizes which can mean that other weaker
 allocation strategies can be used. It is however useful to see how dmalloc would perform if just arbitraly used instead of focusing on its strongs points and it is clear that if many
 objects of varying sizes are too be allocated dmalloc should not be used despite it not having a much larger memory footprint. This downside can be rectified however by
-combining dmalloc with another memory allocator which is better suited to dealing with larger objects that dmallocs primative allocation strategies do poorely in. This is
+combining dmalloc with another memory allocator which is better suited to dealing with larger objects that dmallocs primitive allocation strategies do poorly in. This is
 commonly done with memory allocators where different memory allocators are used for different tasks. The genetic benchmark shows how a real world algorithm would perform.
 On linux dmalloc performs worse than malloc on all versions of the benchmark (small, large, long) @linux-genetic. The gap also
 grows as the number of iterations increase. This algorithm creates lots of trees and perhaps accessing the memory is slower using dmalloc when compared to malloc despite
@@ -293,7 +296,7 @@ view memory consumption on MacOS as it is on Linux so there are no result for me
 == Conclusion
 
 Overall looking at all the benchmarks above it is clear that there is merit in the design of dmalloc. It is also interesting to see how dmalloc performs better on MacOS
-when compared to linux. This is most likley due to the larger page size that MacOS has by default allowing for more allocations to occur before a system call needs to be made.
+when compared to linux. This is most likely due to the larger page size that MacOS has by default allowing for more allocations to occur before a system call needs to be made.
 The larger page size also means that there is a lower level of internal fragmentation percentage wise. Both glibc malloc and magazine malloc have optimisations in place for
 small object allocation, this shows that dmalloc is competative with other state of the art memory allocators where it will perform similarly or even outperform it in some case.
 It also showed promise in a real world use case where it performed both well on Linux and MacOS for the genetic program showing that a there is performance gains that can
