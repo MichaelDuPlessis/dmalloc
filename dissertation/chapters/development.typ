@@ -2,8 +2,6 @@
 
 = Development of a Small Object Memory Allocator
 
-== Introduction
-
 Below the implementation of the small memory allocator is described. The allocator makes use of three other separate allocators each specialized for different tasks. The three allocators are as follows:
 1. A bin allocator for small objects.
 2. A free list allocator for medium objects.

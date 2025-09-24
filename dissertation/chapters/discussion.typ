@@ -2,7 +2,7 @@
 
 = Discussion
 
-The following section discusses the results of the benchmarks on the memory allocator. The benchmarks were run both on a Linux system and a MacOS system to identify
+The following section discusses the results of the benchmarks on the memory allocator. The benchmarks were run both on a Linux system and a MacOS systems to identify
 how the allocator performed on different operating systems. The specifications of the machines tested are listed below. The Clang compiler was used for both operating systems.
 
 #figure(
@@ -156,7 +156,7 @@ The genetic algorithm was run three times each time with 50 individuals in the p
 #let num_columns = 3
 
 The results discussed below will be focusing on the small object memory allocator implmentation which means most results will be discussed focusing on 128 bytes and lower.
-Benchmarks up to 2048 bytes have been run for completeness sake and can be viewed in the appendix but will not be the main focus of this paper. 
+Benchmarks up to 2048 bytes have been run for completeness sake and can be viewed in the appendix but are not be the main focus of this paper.
 
 === Linux
 
@@ -293,7 +293,7 @@ overall and is a suitable replacement for general purpose allocations but more i
 genetic program benchmark also widens as the number of iterations increase showing that the speedup is more significant the longer the program runs. It is not possible to
 view memory consumption on MacOS as it is on Linux so there are no result for memory.
 
-== Conclusion
+== Summary
 
 Overall looking at all the benchmarks above it is clear that there is merit in the design of dmalloc. It is also interesting to see how dmalloc performs better on MacOS
 when compared to linux. This is most likely due to the larger page size that MacOS has by default allowing for more allocations to occur before a system call needs to be made.

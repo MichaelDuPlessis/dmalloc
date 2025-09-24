@@ -57,15 +57,15 @@ system call and delves into the need for more research into custom memory alloca
 
 #pagebreak()
 
-#include "chapters/memory_allocators.typ"
+#include "chapters/overview_memory_allocators.typ"
+
+#pagebreak()
+
+#include "chapters/application_memory_allocators.typ"
 
 #pagebreak()
 
 #include "chapters/big_data_applications.typ"
-
-#pagebreak()
-
-#include "chapters/small_object_allocator.typ"
 
 #pagebreak()
 
@@ -107,15 +107,15 @@ system call and delves into the need for more research into custom memory alloca
 //
 // Add reference to overview of memory allocators also mention that heap, cache, alignment, etc is important
 //
-// summerise in all chapters that are missing it
+// summerise in all chapters that are missing it √
 //
 // overview of memory allocators specify that preallocting is described in later chapter
 //
-// remove small object allocator definition from data science chapter as well as general purpose memory allocators
+// remove small object allocator definition from data science chapter as well as general purpose memory allocators √
 //
-// put chapter 4 into chapter 2.9
+// put chapter 4 into chapter 2.9 √
 //
-// split chapter 2 at 2.9 with Overview of Memory Allocators and Application of Memory Allocators
+// split chapter 2 at 2.9 with Overview of Memory Allocators and Application of Memory Allocators √
 //
 // use uk spelling √
 //
@@ -127,8 +127,8 @@ system call and delves into the need for more research into custom memory alloca
 //
 // conclusion too short take a look at the problem statement again
 //
-// make sure you state why figures in appendix exist
+// make sure you state why figures in appendix exist √
 //
-// just put introduction under chapter heading
+// just put introduction text under chapter heading no need for a seperate heading √
 //
-// call conclusions at the end of chapter summary and it is what we are taking forward
+// rename conclusion at the end of chapter summary instead and it is what we are taking forward √

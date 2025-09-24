@@ -4,21 +4,16 @@
 
 = Big Data Science Applications of Small Object Memory Allocators
 
-== Introduction
-
-Many data science applications involve repeatedly creating and destroying large numbers of small objects. These could be tokens during text processing, individual entries in a sparse matrix, or nodes in a tree or graph structure. In most cases, these objects are only a few bytes in size and may be allocated millions of times during the lifetime of a program. If memory for these objects is not managed efficiently, it can quickly become a performance bottleneck.
-
-General-purpose memory allocators are designed to be flexible and support many allocation patterns, but they are not always optimal when it comes to small objects. They often introduce overhead, can lead to memory fragmentation, and may result in poor cache locality. This becomes especially problematic in data science workflows that involve iterative computations, real-time data processing, or the use of interpreted languages like Python, which typically allocate all their data on the heap.
-
-A small object allocator is a memory management technique that is specifically designed to handle allocations of small, fixed-size objects. Instead of requesting memory from the operating system for each object individually, the allocator maintains pools of memory blocks that can be reused. This leads to faster allocation and deallocation, reduced memory fragmentation, and better use of the CPU cache.
-
-This is especially important for machine learning algorithms such as Random Forests, K-Means clustering, or Expectation-Maximization (EM), all of which allocate many temporary objects during training or inference. For example, a decision tree will repeatedly allocate memory for new nodes while it is being built, and a clustering algorithm may create temporary cluster assignments in each iteration. Having a fast and efficient allocator for these small objects can significantly improve performance.
-
-Text processing also benefits from small object allocators. Tokenisation, for instance, involves splitting text into many small strings or objects which are used briefly and then discarded. A general-purpose allocator will struggle to keep up with this allocation pattern, while a small object allocator can handle it efficiently by reusing memory from a fixed-size pool.
+This section of the mini dissertation describes what big data science is and the different algorithms in the field of study and how they can benefit from a small object memory
+allocator with special attention paid to the genetic programming algorithm in which it is explained in great detail. Further this chapter will explain what pre-allocating is,
+when it can be used.
 
 == Big Data Science
 
 Big data science is the field that involves extracting meaningful insights, patterns, and knowledge from very large and complex datasets. The data being processed is commonly too large or fast moving for traditional data processing software to handle. It combines elements of computer science, statistics, and domain expertise to make sense of massive volumes of data. Techniques such as machine learning, data mining, distributed computing, and cloud platforms to analyse data from sources like social media, sensors, transactions, and logs. Big data science is applied in fields such as finance, healthcare, marketing, cybersecurity, and urban planning @brady2019challenge @song2016big.
+Many data science applications involve repeatedly creating and destroying large numbers of small objects. These could be tokens during text processing, individual entries in a sparse matrix, or nodes in a tree or graph structure. In most cases, these objects are only a few bytes in size and may be allocated millions of times during the lifetime of a program. If memory for these objects is not managed efficiently, it can quickly become a performance bottleneck.
+This is especially important for machine learning algorithms such as Random Forests, K-Means clustering, or Expectation-Maximization (EM), all of which allocate many temporary objects during training or inference. For example, a decision tree will repeatedly allocate memory for new nodes while it is being built, and a clustering algorithm may create temporary cluster assignments in each iteration. Having a fast and efficient allocator for these small objects can significantly improve performance.
+Text processing also benefits from small object allocators. Tokenisation, for instance, involves splitting text into many small strings or objects which are used briefly and then discarded. A general-purpose allocator will struggle to keep up with this allocation pattern, while a small object allocator can handle it efficiently by reusing memory from a fixed-size pool.
 
 == Pre-allocating
 
@@ -125,8 +120,13 @@ A GP will generate many of these trees randomly and then following a process of 
 
 The reason why a small object memory allocator would come in hand is since the trees are generated randomly the size of a tree cannot be known beforehand. Furthermore the nodes of a tree themselves usually have a very small memory footprints this means that these tiny objects are allocated thousands or even millions of time when a genetic program is run. This is ripe optimisation for a small object memory allocator.
 
-== Conclusion
+== Summary
 
-It is always better to pre-allocate the required memory as that is guaranteed to only ever be one allocation but it is not always possible to identify the amount of memory required in big data science applications and many applications need to allocate memory on the fly and in these scenarios using a small object memory allocator can greatly benefit the performance of an algorithm or program.
+It is always better to pre-allocate the required memory as that is guaranteed to only ever be one allocation and the memory will be contigous which will improve cache locality
+but it is not always possible to identify the amount of memory required in big data science applications and many applications need to allocate memory on the fly and in these
+scenarios using a small object memory allocator can greatly benefit the performance of an algorithm or program.
+
+What is important to take forward from this chapter is the explanation of the genetic program algorithm as this algorithm will be used to evaluate the memory proposed small
+object memory allocator
 
 // table algorithms where preallocating will not work
