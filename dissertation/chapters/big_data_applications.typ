@@ -111,7 +111,10 @@ Could be modeled with the following tree:
 
 #figure(
   caption: [Example of how the equation could be represented as a tree.],
-  image("../images/gp_tree_example.drawio.png"),
+  image(
+    "../images/gp_tree_example.drawio.png",
+    width: 70%,
+  ),
 )
 
 A GP will generate many of these trees randomly and then following a process of natural selection will create new trees from the old trees and so on. This is done many times over until a stopping criteria is met.

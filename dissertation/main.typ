@@ -7,6 +7,7 @@
   number-align: center,
   numbering: "i"
 )
+#set figure(placement: auto)
 
 // make sure you have some heading numbering set
 #set heading(numbering: "1.")
@@ -105,7 +106,7 @@ system call and delves into the need for more research into custom memory alloca
 //
 // Don't reference diagram with locality rather do "in Figure xxx" √
 //
-// Add reference to overview of memory allocators also mention that heap, cache, alignment, etc is important
+// Add reference to overview of memory allocators also mention that heap, cache, alignment, etc is important √
 //
 // summerise in all chapters that are missing it √
 //
@@ -121,7 +122,7 @@ system call and delves into the need for more research into custom memory alloca
 //
 // begin chapters on a new page √
 //
-// do better with figures
+// do better with figures √
 //
 // fix figure referencing √
 //

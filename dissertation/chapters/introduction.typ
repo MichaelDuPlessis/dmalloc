@@ -43,13 +43,13 @@ based on total memory usage as well as program runtime.
 == Overview of Chapters
 
 The mini-dissertation contains the following chapters:
-- Memory Allocators: This chapter gives an overview of memory allocators as well as different allocation strategies.
-- Big Data Science Applications of Small Object Memory Allocators: This chapter explains the need and usefulness of small object memory allocators for use in the field of Big Data Science.
-- Small Object Memory Allocator: This chapter expands on what a small object memory allocator is.
-- Development of a Small Object Memory Allocator: This chapter discusses the implementation and the design of the small object memory allocator presented in this paper.
-- Discussion: This chapter goes over the results of the benchmark and comparisons of the different memory allocators.
-- Conclusion: This chapter contains the closing remarks.
-- Future Work: This chapter contains future work that can be built off of from this mini-dissertation.
+1. Overview of Memory Allocators: This chapter gives an overview of all the theory required to understand memory allocators.
+2. Application of Memory Allocators: This chapter continues from the chapter 1 and gives examples of memory allocation strategies as well as the designs of already implemented memory allocators.
+3. Big Data Science Applications of Small Object Memory Allocators: This chapter explains the need and usefulness of small object memory allocators for use in the field of Big Data Science.
+4. Development of a Small Object Memory Allocator: This chapter discusses the implementation and the design of the small object memory allocator presented in this paper.
+5. Discussion: This chapter goes over the results of the benchmark and comparisons of the different memory allocators.
+6. Conclusion: This chapter contains the closing remarks.
+7. Future Work: This chapter contains future work that can be built off of from this mini-dissertation.
 
 @fig:chapter shows the order in which the chapters are recommended to be read before others. An arrow leading from one bubble to another means it is recommended
 to read the chapter from which the arrow is coming from first.

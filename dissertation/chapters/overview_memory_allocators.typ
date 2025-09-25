@@ -21,7 +21,7 @@ Programs running on modern computers on modern operating systems have two places
   placement: none,
   image(
     "../images/stackheap.drawio.png",
-    width: 75%,
+    width: 45%,
     // height: 75%,
   ),
 ) <stack_and_heap>

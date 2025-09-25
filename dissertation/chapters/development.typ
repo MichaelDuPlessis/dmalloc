@@ -24,7 +24,10 @@ The general process for deallocating memory is as follows:
 #figure(
   caption: [The general structure of how memory is laid out for every allocator per memory page.],
   placement: none,
-  image("../images/page_header.drawio.png"),
+  image(
+    "../images/page_header.drawio.png",
+    height: 50%,
+  ),
 )
 
 == Page Cache
@@ -456,6 +459,12 @@ The implementation of the allocator has the following limitations:
 - It only works on UNIX based operating systems.
 - It currently does not support multithreaded environments.
 
-== Conclusion
+== Summary
 
-Overall the implementation of the allocator consists of three sub allocator implementations each for a different size class, small, medium and large. The allocator is also completely page oriented only relying on the `mmap` system call for allocating memory. The allocator also has makes use of a page cache to avoid unnecessary system calls.
+Overall the implementation of the allocator consists of three sub allocator implementations each for a different size class, small, medium and large. The allocator
+is also completely page oriented only relying on the `mmap` system call for allocating memory. The allocator also has makes use of a page cache to avoid unnecessary system calls.
+The important take aways from this chapter is the overall design of the small object memory allocator, this includes:
+- How the bin allocator works.
+- The page cache.
+- How `mmap` pages are used.
+- All optimisations made such as prefetching and CPU specific instructions such as `__builtin_ctzl`.
