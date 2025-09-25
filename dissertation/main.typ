@@ -125,7 +125,7 @@ system call and delves into the need for more research into custom memory alloca
 //
 // fix figure referencing √
 //
-// conclusion too short take a look at the problem statement again
+// conclusion too short take a look at the problem statement again √
 //
 // make sure you state why figures in appendix exist √
 //

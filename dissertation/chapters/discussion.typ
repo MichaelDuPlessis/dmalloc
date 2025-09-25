@@ -31,7 +31,7 @@ A various number of benchmarks were run to compare the performance of the the al
 
 All benchmarks are seeded so that they can be replicated. The benchmarks are performed as follows:
 
-=== Linear Allocation, Re-allocation and Deallocation
+=== Linear Allocation, Re-allocation and Deallocation <basic-bench>
 
 1. This benchmark first allocates an $N$ number of $S$ sized objects
 2. It then deallocates all the objects
@@ -54,7 +54,7 @@ The values for $S$ in bytes are:
   )
 )
 
-=== Sporadic Allocation and Deallocation
+=== Sporadic Allocation and Deallocation <sporadic-bench>
 
 This benchmark will randomly perform $N$ allocations and deallocations at random of size $S$ bytes.
 The values of $N$ are as follows:
@@ -74,7 +74,7 @@ The values for $S$ in bytes are:
   )
 )
 
-=== Varying Allocation and Deallocation
+=== Varying Allocation and Deallocation <varying-bench>
 
 This benchmark will randomly perform $N$ allocations and deallocations at random where the size of the allocation is chosen from range $R$ bytes.
 The values of $N$ are as follows:
@@ -87,7 +87,7 @@ The values of $N$ are as follows:
 )
 The range for $R$ is $[1-4096]$ bytes.
 
-=== Genetic Program
+=== Genetic Program <genetic-bench>
 
 The internal workings of genetic programs have already been explained. The exact hyperparemeters of this genetic program will be discussed below.
 
@@ -153,7 +153,7 @@ The genetic algorithm was run three times each time with 50 individuals in the p
 == Memory Allocator Benchmark Results
 
 #let sizes = ("1", "2", "4", "8", "16", "32", "64", "128", "256")
-#let num_columns = 3
+#let num_columns = 2
 
 The results discussed below will be focusing on the small object memory allocator implmentation which means most results will be discussed focusing on 128 bytes and lower.
 Benchmarks up to 2048 bytes have been run for completeness sake and can be viewed in the appendix but are not be the main focus of this paper.
@@ -171,6 +171,10 @@ Benchmarks up to 2048 bytes have been run for completeness sake and can be viewe
   ])
 )
 
+@fig:linux-basic-time-1 to @fig:linux-basic-time-256 shows the benchmark results for the runtime performance on Linux for the linear allocation, reallocation and deallocation
+benchmark for the sizes 1-256 bytes. The blue line is the proposed memory allocator while the orange line is the default system memory allocator. The x-axis has the range
+specified in @basic-bench and the y-axis is the measured mean time in seconds.
+
 #grid(
   columns: num_columns,
   gutter: 1em,
@@ -181,6 +185,10 @@ Benchmarks up to 2048 bytes have been run for completeness sake and can be viewe
     ) #label("linux-basic-mem-" + size)
   ])
 )
+
+@fig:linux-basic-mem-1 to @fig:linux-basic-mem-256 shows the benchmark results for the memory performance on Linux for the linear allocation, reallocation and deallocation
+benchmark for the sizes 1-256 bytes. The blue line is the proposed memory allocator while the orange line is the default system memory allocator. The x-axis has the range
+specified in @basic-bench and the y-axis is the measured megabytes.
 
 #grid(
   columns: num_columns,
@@ -193,6 +201,10 @@ Benchmarks up to 2048 bytes have been run for completeness sake and can be viewe
   ])
 )
 
+@fig:linux-sporadic-time-1 to @fig:linux-sporadic-time-256 shows the benchmark results for the runtime performance on Linux for the sporadic allocation and deallocation
+benchmark for the sizes 1-256 bytes. The blue line is the proposed memory allocator while the orange line is the default system memory allocator. The x-axis has the range
+specified in @sporadic-bench and the y-axis is the measured mean time in seconds.
+
 #grid(
   columns: num_columns,
   gutter: 1em,
@@ -204,8 +216,12 @@ Benchmarks up to 2048 bytes have been run for completeness sake and can be viewe
   ])
 )
 
+@fig:linux-sporadic-mem-1 to @fig:linux-sporadic-mem-256 shows the benchmark results for the memory performance on Linux for the sporadic allocation and deallocation
+benchmark for the sizes 1-256 bytes. The blue line is the proposed memory allocator while the orange line is the default system memory allocator. The x-axis has the range
+specified in @sporadic-bench and the y-axis is the measured megabytes.
+
 #grid(
-  columns: 3,
+  columns: 2,
   gutter: 1em,
   [#figure(
     image("../results/linux/time/varying_size_varying.png"),
@@ -215,11 +231,22 @@ Benchmarks up to 2048 bytes have been run for completeness sake and can be viewe
     image("../results/linux/memory/varying_size_0_memory.png"),
     caption: "Varying memory usage"
   ) <linux-varying-mem>],
-  [#figure(
-    image("../results/linux/genetic/genetic_benchmark_mean_time.png"),
-    caption: "Genetic program mean time"
-  ) <linux-genetic>]
 )
+
+@fig:linux-varying-time shows the benchmark results for the runtime performance on Linux for the varying sized allocation and deallocation
+benchmark for the sizes 1-4096 bytes. The blue line is the proposed memory allocator while the orange line is the default system memory allocator. The x-axis has the range
+specified in @varying-bench and the y-axis is the measured mean time in seconds.
+@fig:linux-varying-mem shows the benchmark results for the memory performance on Linux for the varyign sized allocation and deallocation
+benchmark for the sizes 1-256 bytes. The blue line is the proposed memory allocator while the orange line is the default system memory allocator. The x-axis has the range
+specified in @varying-bench and the y-axis is the measured megabytes.
+
+#figure(
+  image("../results/linux/genetic/genetic_benchmark_mean_time.png"),
+  caption: "Genetic program mean time"
+) <linux-genetic>
+
+@fig:linux-genetic shows the benchmark results for the runtime performance for the real world benchmark using the genetic programming algorithm the parameters of the genetic
+program have already been stated at @genetic-bench. The x-axis is text which maps to a population size and the y-axis is the measured mean time in seconds.
 
 Looking at the benchmarks its clear that dmalloc outperforms malloc on smaller sizes. dmalloc has a noticeable lead up to 16 bytes where it is most of the time outperforming malloc
 with some spikes where malloc will outperform it as seen in figures @fig:linux-basic-time-1, @fig:linux-basic-time-2, @fig:linux-basic-time-4, @fig:linux-basic-time-8 and @fig:linux-basic-time-16
@@ -256,6 +283,10 @@ dmallocs cache locality advantages.
   ])
 )
 
+@fig:macos-basic-time-1 to @fig:macos-basic-time-256 shows the benchmark results for the runtime performance on Linux for the linear allocation, reallocation and deallocation
+benchmark for the sizes 1-256 bytes. The blue line is the proposed memory allocator while the orange line is the default system memory allocator. The x-axis has the range
+specified in @basic-bench and the y-axis is the measured mean time in seconds.
+
 #grid(
   columns: num_columns,
   gutter: 1em,
@@ -267,18 +298,22 @@ dmallocs cache locality advantages.
   ])
 )
 
-#grid(
-  columns: 2,
-  gutter: 1em,
-  [#figure(
-    image("../results/macos/time/varying_size_varying.png"),
-    caption: "Varying time usage"
-  ) <macos-varying-time>],
-  [#figure(
-    image("../results/macos/genetic/genetic_benchmark_mean_time.png"),
-    caption: "Genetic program mean time"
-  ) <macos-genetic>]
-)
+#figure(
+  image("../results/macos/time/varying_size_varying.png"),
+  caption: "Varying time usage"
+) <macos-varying-time>
+
+@fig:macos-sporadic-time-1 to @fig:macos-sporadic-time-256 shows the benchmark results for the runtime performance on Linux for the sporadic allocation and deallocation
+benchmark for the sizes 1-256 bytes. The blue line is the proposed memory allocator while the orange line is the default system memory allocator. The x-axis has the range
+specified in @sporadic-bench and the y-axis is the measured mean time in seconds.
+
+#figure(
+  image("../results/macos/genetic/genetic_benchmark_mean_time.png"),
+  caption: "Genetic program mean time"
+) <macos-genetic>
+
+@fig:macos-genetic shows the benchmark results for the runtime performance for the real world benchmark using the genetic programming algorithm the parameters of the genetic
+program have already been stated at @genetic-bench. The x-axis is text which maps to a population size and the y-axis is the measured mean time in seconds.
 
 The same that was said about the Linux benchmark could be mentioned here except that the graphs do appear to be more sporadic this is maybe due to how MacOS schedules
 processing time when compared to Linux or could be due to the difference in architecture (x86 vs ARM). A strong possiblity for the odd spikes could be due to MacOS moving
