@@ -14,7 +14,7 @@ Region based memory management works by putting every allocated object into a re
   image("../images/regionallocator.drawio.png"),
 ) <regionallocator>
 
-Diagram @fig:regionallocator the red blocks are allocated memory while the green is unallocated memory. Notice how there is a pointer to the next free spot in memory where the next allocation will take place.
+@fig:regionallocator the red blocks are allocated memory while the green is unallocated memory. Notice how there is a pointer to the next free spot in memory where the next allocation will take place.
 
 The benefits of region based management are that the a large block of memory is preallocated thus reducing the number of calls to the operation system which is known to be a common bottleneck. It is very simple to implement and does not have any complex allocation strategy and so assuming that a new block does not need to be allocated the time for allocation is $O(1)$. Since all objects are store next to one another in memory there cannot be any internal fragmentation and the only possible external fragmentation that can occur is when there is not enough memory left in a region and a new one must be allocated.
 
@@ -53,7 +53,7 @@ The reason it is called a stack like allocator is because it allocates memory li
   image("../images/stackallocator.drawio.png"),
 ) <stackallocator>
 
-As seen in diagram @fig:stackallocator the memory allocated now also contains a header. It can also be seen where the next address for free memory is before and after the allocation of new memory.
+As seen in @fig:stackallocator the memory allocated now also contains a header. It can also be seen where the next address for free memory is before and after the allocation of new memory.
 
 This immediately has the benefit over region based memory management that it allows for deallocation without needing to deallocate the whole block of memory but is still limited because only data on top of the stack can be deallocated. The other benefit is that allocation is still $O(1)$ since it uses the same technique to allocate memory as the region based memory allocator. Since all the memory is close to one another there is a high cache locality which can massively improve performance. 
 
@@ -81,7 +81,7 @@ As seen above the pool allocator appears just like a normal linked list.
 
 Due to the ability for individual objects to be deallocated the free memory can no longer be next to one another as seen with the allocators in @stack_allocator or the @region_allocator. This means that the while the pointers will always start pointing to neighboring memory blocks as time goes on this will not always happen.
 
-This is a more advanced strategy and immediately has some benefits. The clearest being that it is not possible to deallocate any individual object in memory and the memory is deallocated in constant ($O(1)$) time. The memory can also be allocated in constant time as the head of the linked list just needs to be popped off and updated. The other major benefit is that if the original buffer of memory becomes full it is relatively easy to allocate a new buffer and having it link to the existing buffer assuming allocating a new buffer is possible. A new buffer just needs to be updated and the linked list just needs to point to it as depicted in diagram @fig:poolallocator_extended.
+This is a more advanced strategy and immediately has some benefits. The clearest being that it is not possible to deallocate any individual object in memory and the memory is deallocated in constant ($O(1)$) time. The memory can also be allocated in constant time as the head of the linked list just needs to be popped off and updated. The other major benefit is that if the original buffer of memory becomes full it is relatively easy to allocate a new buffer and having it link to the existing buffer assuming allocating a new buffer is possible. A new buffer just needs to be updated and the linked list just needs to point to it as depicted in @fig:poolallocator_extended.
 
 #figure(
   caption: [How more buffers can easily be added to a pool allocator.],
@@ -89,7 +89,7 @@ This is a more advanced strategy and immediately has some benefits. The clearest
   image("../images/poolallocator_extended.drawio.png"),
 ) <poolallocator_extended>
 
-In diagram @fig:poolallocator_extended the red blocks are allocated memory, the green blocks unallocated memory and the orange blocks are a region of memory that is not available to the allocator.
+In @fig:poolallocator_extended the red blocks are allocated memory, the green blocks unallocated memory and the orange blocks are a region of memory that is not available to the allocator.
 
 Naturally, there are downsides to this kind of allocations strategy. Every allocation requires some metadata which means that there will always be more memory used than requested. As well with that each memory block being a fixed sizes means that while there will never be any internal fragmentation two other problems can occur:
 1. A memory request smaller than the block size can be requested which will lead to internal fragmentation.
@@ -110,7 +110,7 @@ A linked list is used to store the blocks of memory that are free along with the
   image("../images/freelist_allocator_linkedlist.drawio.png"),
 )
 
-Allocation works by finding a free block in memory based on some strategy such as first fit, best fit and so on. Once a suitable location has been found a header is placed with the information on how large the allocated block is and the new links for the linked list is made. Diagrams @fig:freelist_before and @fig:freelist_after depict what it looks like when allocating memory to a free list. The purple block is the memory that is too be allocated and in this example first fit is being used so the head of the linked list is chosen to allocate the memory too.
+Allocation works by finding a free block in memory based on some strategy such as first fit, best fit and so on. Once a suitable location has been found a header is placed with the information on how large the allocated block is and the new links for the linked list is made. @fig:freelist_before and @fig:freelist_after depict what it looks like when allocating memory to a free list. The purple block is the memory that is too be allocated and in this example first fit is being used so the head of the linked list is chosen to allocate the memory too.
 
 #figure(
   caption: [How a free list looks before allocation.],
@@ -152,7 +152,7 @@ The buddy memory allocator is looks to improve on the memory fragmentation issue
   image("../images/buddy_allocator.drawio.png"),
 ) <buddy_allocator>
 
-As can be seen from diagram @fig:buddy_allocator the memory is recursively split until it can be not longer. This assists with minimising fragmentation by trying to use as little memory as possible. The allocator may make blocks too small that a new piece of memory cannot be allocated when this happens blocks of memory are coalesced with one another until a block of memory large enough to fit the requested allocation is created.
+As can be seen from @fig:buddy_allocator the memory is recursively split until it can be not longer. This assists with minimising fragmentation by trying to use as little memory as possible. The allocator may make blocks too small that a new piece of memory cannot be allocated when this happens blocks of memory are coalesced with one another until a block of memory large enough to fit the requested allocation is created.
 
 Deallocation works just by marking the block of memory as free and adding it to the free list. This means that freeing memory is fast as it is $O(1)$. This allocator also minimises internal fragmentation by trying to decrease the size of blocks and also decrease external fragmentation as memory blocks next to one another can be made bigger if necessary.
 
@@ -174,7 +174,7 @@ A bin memory allocator works by organising memory into bins of fixed sizes. A bi
   image("../images/binallocator.drawio.png"),
 ) <binallocator>
 
-Diagram @fig:binallocator depicts a typical bin allocator with 3 bins. The green blocks is unallocated memory, the red blocks allocated memory and the orange blocks wasted memory (fragmentation).
+@fig:binallocator depicts a typical bin allocator with 3 bins. The green blocks is unallocated memory, the red blocks allocated memory and the orange blocks wasted memory (fragmentation).
 
 The bin memory allocator tries to reduce fragmentation in an efficient way. While the buddy allocator may still perform better in terms of decreased fragmentation it has the downside of needing to use recursion which increase allocation and deallocation times.
 

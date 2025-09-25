@@ -19,10 +19,14 @@ Programs running on modern computers on modern operating systems have two places
 #figure(
   caption: [How memory is allocated on the stack and heap.],
   placement: none,
-  image("../images/stackheap.drawio.png"),
+  image(
+    "../images/stackheap.drawio.png",
+    width: 75%,
+    // height: 75%,
+  ),
 ) <stack_and_heap>
 
-In diagram @fig:stack_and_heap the grey blocks are unallocated memory, the green blocks are memory allocated on the stack and the blue blocks are memory allocated on the heap. Notice how stack memory is always next to one another while heap memory can have gaps between allocated blocks. Stack memory also has the property that the allocated memory is ordered so that memory allocated later is closer to the bottom of the stack. So if `int a` is allocated before `int b` then `int a` will be above `int b` on the stack. This time series kind of allocation does not apply to heap memory.
+In @fig:stack_and_heap the grey blocks are unallocated memory, the green blocks are memory allocated on the stack and the blue blocks are memory allocated on the heap. Notice how stack memory is always next to one another while heap memory can have gaps between allocated blocks. Stack memory also has the property that the allocated memory is ordered so that memory allocated later is closer to the bottom of the stack. So if `int a` is allocated before `int b` then `int a` will be above `int b` on the stack. This time series kind of allocation does not apply to heap memory.
 
 This poses a challenge since heap memory can become fragmented @ArpaciDusseau23-Book and this must be managed. The reason for these differences is because stack memory allocation can be calculated at compile time while heap memory is allocated at runtime in a seemingly random manner.
 
@@ -42,7 +46,7 @@ Assuming a common modern day computer system, cache memory is a special kind of 
   image("../images/linkedlist.drawio.png"),
 ) <linkedlist>
 
-Diagrams @fig:array and @fig:linkedlist compares how linked lists and arrays store their data in main memory. In the diagrams above grey blocks are unallocated memory while green blocks are allocated memory.
+@fig:array and @fig:linkedlist compares how linked lists and arrays store their data in main memory. In the figures grey blocks are unallocated memory while green blocks are allocated memory.
 
 As you can see, elements in an array are stored next to each other in main memory this means that they have a good cache locality and when one element of the array is accessed it as well as other elements in the array are likely to be cached thus allowing for faster access and a faster execution of the program. Looking at the linked list on the other hand the elements are not next to one another and therefore have a bad cache locality so if the data at address 10 is accessed it is unlikely that any other data of the array will be cached alongside which will slow down the execution of the program as whenever another element of the linked lists is fetched the CPU will first experience a cache miss and have to retrieve the data from main memory. On top of that linked list usually require more memory as every data element needs to store the data (or a pointer to the data) as well as a pointer to the next element which on 64 bit operating systems is usually 8 bytes so even if the elements were next to each other as with an array due to the increased size of each element less elements would be able to fit in the cache at once.
 
@@ -66,7 +70,7 @@ Modern processors are designed to access memory in aligned chunks, typically cor
   image("../images/alignment_good.drawio.png"),
 ) <alignment_bad>
 
-The diagrams @fig:alignment_good and @fig:alignment_bad the green blocks represent unused memory, the red blocks extra memory that is being fetched and the purple blocks the actual memory that we want to access. As we can see if the memory is misaligned it requires fetching extra memory whereas in the second diagram the memory that we want to fetch is aligned correctly and is therefore easy to get without any extra operations. The diagram above is not completely accurate since computers will usually fetch memory equal to their word size so on most 64 bit systems two 8 byte chunks would be retrieved on the bad alignment and one 8 byte chunk on the good alignment version.
+The @fig:alignment_good and @fig:alignment_bad the green blocks represent unused memory, the red blocks extra memory that is being fetched and the purple blocks the actual memory that we want to access. As we can see if the memory is misaligned it requires fetching extra memory whereas in the second figure the memory that we want to fetch is aligned correctly and is therefore easy to get without any extra operations. The figure is not completely accurate since computers will usually fetch memory equal to their word size so on most 64 bit systems two 8 byte chunks would be retrieved on the bad alignment and one 8 byte chunk on the good alignment version.
 
 On some processor architectures data must be aligned to its natural boundary. A data type's natural boundary is usually the smallest power of 2 that can fit the data. For example a 4 byte piece of data has a natural boundary of 4 bytes whereas a 6 byte piece of data has a natural boundary of 8 bytes @hennessy2011computer.
 
@@ -117,7 +121,7 @@ What this means is that memory allocators should be able to be chained together 
   image("../images/composableallocator.drawio.png"),
 ) <composable>
 
-In the diagram @fig:composable allocator *A* uses allocator *B* as a backing allocator. Allocator *B* in turn uses allocators *C*, *D* and *E* as backing allocators and chooses between them given some heuristic. Allocator *C* and *D* use *F* as their backing allocator while allocator *E* uses *G* which in turn uses *F*. This shows how allocators are built off one another and while a design does not necessarily require this many separate allocators it indicates the power of decomposability that memory allocators should have.
+In the @fig:composable allocator *A* uses allocator *B* as a backing allocator. Allocator *B* in turn uses allocators *C*, *D* and *E* as backing allocators and chooses between them given some heuristic. Allocator *C* and *D* use *F* as their backing allocator while allocator *E* uses *G* which in turn uses *F*. This shows how allocators are built off one another and while a design does not necessarily require this many separate allocators it indicates the power of decomposability that memory allocators should have.
 
 == Building Blocks of a Memory Allocator
 
