@@ -9,7 +9,7 @@ of a memory allocator and what must be considered, this includes an:
 - An explanation of what memory alignment is.
 - How memory is requested from the operating system using system calls (syscalls).
 
-The chapter further disucess the main components and theory behind building memory allocators such as the inner workings of a memory allocator, what composability is and small
+The chapter further discusess the main components and theory behind building memory allocators such as the inner workings of a memory allocator, what composability is and small
 objects are defined. The chapter then ends off by explaining how memory allocators are evaluated and their effectiveness determined compared to other memory allocators.
 
 == Heap
