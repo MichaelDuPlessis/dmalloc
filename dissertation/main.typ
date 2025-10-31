@@ -35,10 +35,12 @@
 
 #heading([Abstract], numbering: none, outlined: false)
 
-This mini-dissertation introduces a small object memory allocator designed for the field of Big Data Science. The memory allocator aims to optimise runtime performance
-of Big Data science tasks that make use of small objects by reducing the execution time of a program. The allocator outperforms the default memory allocators on both Linux (Ubuntu) and MacOS in
-both artificial and real world benchmarks. The text further goes into the design of the small object allocator with its inner workings based around the unix `mmap`
-system call and delves into the need for more research into custom memory allocators for the field of Big Data Science.
+The field of big data science continues to evolve, driving the need for increasingly complex and resource intensive algorithms that have increasingly longer runtimes.
+While custom memory allocators have long existed, none have been specifically designed for big data applications. This mini-dissertation presents a small object memory
+allocator tailored for big data workloads. The allocator optimises runtime performance by improving the allocation, deallocation, and management of small objects compared to
+default system allocators. Benchmarking on Linux (Ubuntu) and macOS systems shows that the proposed allocator consistently outperforms the default system allocators in both
+artificial and real world benchmarks. The dissertation also details the allocator's design, built around the Unix mmap system call, and highlights the broader potential for
+research into custom memory allocators in big data systems.
 
 #pagebreak()
 
