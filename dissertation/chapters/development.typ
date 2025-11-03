@@ -2,7 +2,7 @@
 
 = Development of a Small Object Memory Allocator
 
-Below the implementation of the small memory allocator is described. The allocator makes use of three other separate allocators each specialized for different tasks. The three allocators are as follows:
+Below, the implementation of the proposed small memory allocator is described. The allocator makes use of three other separate sub-allocators each specialized for different tasks. The three allocators are as follows:
 1. A bin allocator for small objects.
 2. A free list allocator for medium objects.
 3. A page allocator for large objects.
@@ -225,7 +225,7 @@ The free list allocator allocates memory using a first fit algorithm. When memor
 
 ==== Deallocation
 
-Deallocation works by taking the pointer address of the memory that needs to be deallocated and then calculating the address of the page start of the memory page that the address belongs to. Once we have the page start the the necessary metadata can be derived such as the head of the free list. Next the free list block before and after the address to be deallocated is found if a before and after free block exists since the address may be at the beginning or end of the valid memory range. Once this is done the metadata of the allocated block is retrieved since it just lies before the pointer pointing to the memory to be deallocated. Now we have three components: the first free memory block before the pointer to be deallocated, the first free memory block after the pointer to be deallocated and the size of the allocation. Using this information one of 4 things can happen:
+Deallocation works by taking the pointer address of the memory that needs to be deallocated and then calculating the address of the page start of the memory page that the address belongs to. Once we have the page start the the necessary metadata can be derived such as the head of the free list. Next the free list block before and after the address to be deallocated is found if a before and after free block exists since the address may be at the beginning or end of the valid memory range. Once this is done the metadata of the allocated block is retrieved since it just lies before the pointer pointing to the memory to be deallocated. Now we have three components: the first free memory block before the pointer to be deallocated, the first free memory block after the pointer to be deallocated and the size of the allocation. Using this information one of 4 outcomes can happen:
 1. A free block is inserted between the previous and next free block with all pointers updated. If there is not a before or after only the relevant blocks are update and the new free block is inserted before or after.
 2. The previous free block is continuos to the memory to be freed and the blocks are coalesced into a bigger block.
 3. The next free block is continuos to the memory to be freed and the blocks are coalesced into a bigger block

@@ -9,12 +9,12 @@ of a memory allocator and what must be considered, this includes an:
 - An explanation of what memory alignment is.
 - How memory is requested from the operating system using system calls (syscalls).
 
-The chapter further discusess the main components and theory behind building memory allocators such as the inner workings of a memory allocator, what composability is and small
+The chapter further discusses the main components and theory behind building memory allocators such as the inner workings of a memory allocator, what composability is and small
 objects are defined. The chapter then ends off by explaining how memory allocators are evaluated and their effectiveness determined compared to other memory allocators.
 
 == Heap
 
-Programs running on modern computers on modern operating systems have two places where they can allocate memory: the stack or the heap. Memory allocated on the heap is commonly referred to as dynamically allocated memory and is allocated at run time of the program and the exact amount of memory required does not need to be known at compile time. This is a stark contrast to stack memory where the amount of memory required is always known at compile time. Memory on the heap is accessed through a pointer, which is always a fixed size (64 bits on modern computers) where this pointer is stored on the stack @ferres2010memory. Stack memory is handled by the compiler by using built-in instructions while heap memory has to be managed by the user known as manual memory management or automatically managed known as garbage collected but this incurs a runtime penalty. Dynamic or heap memory is what is allocated through a memory allocator and its deallocation and allocation strategies are managed by an allocator. From the programmer's perspective they are just calling functions to get pointers to dynamically allocated memory and calling functions to deallocate that memory pointed to by a pointer @ArpaciDusseau23-Book @bryant2011computer @tanenbaum2015modern.
+Programs running on modern computers on modern operating systems have two places where they can allocate memory: the stack or the heap. Memory allocated on the heap is commonly referred to as dynamically allocated memory and is allocated at run time of the program and the exact amount of memory required does not need to be known at compile time. This is a stark contrast to stack memory where the amount of memory required is always known at compile time. Memory on the heap is accessed through a pointer, which is always a fixed size (64 bits on modern 64 bit computers), the pointer it is accessed through is stored on the stack @ferres2010memory. Stack memory is handled by the compiler by using built-in instructions while heap memory has to be managed by the user known as manual memory management or automatically managed known as garbage collected but this incurs a runtime penalty. Dynamic or heap memory is what is allocated through a memory allocator and its deallocation and allocation strategies are managed by an allocator. From the programmer's perspective they are just calling functions to get pointers to dynamically allocated memory and calling functions to deallocate that memory pointed to by a pointer @ArpaciDusseau23-Book @bryant2011computer @tanenbaum2015modern.
 
 #figure(
   caption: [How memory is allocated on the stack and heap.],
@@ -158,7 +158,7 @@ The paper by Pastaryev et al. provides a taxonomy on memory allocators @rauchwer
 + Amount of memory used.
 + Quality of allocation.
 
-An issue with trying to optimise for these three things is that they can often times be at odds for example storing more metadata may allow for faster allocation and deallocation but this then leads to more memory being used than what was requested.
+An issue with trying to optimise for these three metrics is that they can often times be at odds for example storing more metadata may allow for faster allocation and deallocation but this then leads to more memory being used than what was requested.
 
 === Speed of Allocation
 

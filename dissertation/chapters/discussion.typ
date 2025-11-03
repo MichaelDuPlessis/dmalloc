@@ -318,7 +318,7 @@ program have already been stated at @genetic-bench. The x-axis is text which map
 The same that was said about the Linux benchmark could be mentioned here except that the graphs do appear to be more sporadic this is maybe due to how MacOS schedules
 processing time when compared to Linux or could be due to the difference in architecture (x86 vs ARM). A strong possiblity for the odd spikes could be due to MacOS moving
 the application between performance and efficiency cores. Both dmalloc and malloc have these fluctuations so the cause does not appear
-to be with the implementation of either allocator. Overall dmalloc is faster. The same thing occurs after 128 bytes where dmalloc starts slowing down when compared to malloc
+to be with the implementation of either allocator. Overall dmalloc is faster. The same occurs after 128 bytes where dmalloc starts slowing down when compared to malloc
 but again this is due to the subpar allocation strategy which is used after the small object boundry has been crossed. Both dmalloc and malloc are mirror images of one another and
 there is no significant difference between the two for all sizes and for sporadic allocations either allocator could be used. The varying benchmark has the same results as it did
 on Linux and what was stated there can be applied exactly here. Looking a the genetic benchmark this is where the results get interesting as now the reverse of what happened on Linux is happening here. Now dmalloc is the superior memory allocator with a growing

@@ -93,6 +93,8 @@ research into custom memory allocators in big data systems.
 // references
 #bibliography("refs.bib", title: "References")
 
+#pagebreak()
+
 #include "chapters/appendix.typ"
 
 // TODO:
