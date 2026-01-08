@@ -6,7 +6,7 @@ This chapter will cover common memory allocation algorithms, strategies and type
 
 === Region Based Memory Management <region_allocator>
 
-Region based memory management works by putting every allocated object into a region of a memory. Objects can only be deallocated by freeing the entire region @gay1998memory @grossman2002region @tofte1997region @tofte2004retrospective. Region based memory allocation works by first allocating a sufficiently large amount of memory known as an area and having a pointer point to the next free spot in the block of memory (in the beginning this will be the the beginning of the first allocated memory block). When the program requests memory it is then giving to the pointer to the next free spot in memory and the pointer is moved forward to directly after the allocation. If the region becomes full or there is not enough space left in the region to fulfill the requested allocation a new block of memory is allocated and is used for further allocations @gay1998memory and are linked together using a linked list. It is not possible to deallocate single objects in memory and instead the entire block needs to be deallocated.
+Region based memory management works by putting every allocated object into a region of a memory. Objects can only be deallocated by freeing the entire region @gay1998memory @grossman2002region @tofte1997region @tofte2004retrospective. Region based memory allocation works by first allocating a sufficiently large amount of memory known as an area and having a pointer point to the next free spot in the block of memory (in the beginning this will be the beginning of the first allocated memory block). When the program requests memory it is then giving to the pointer to the next free spot in memory and the pointer is moved forward to directly after the allocation. If the region becomes full or there is not enough space left in the region to fulfill the requested allocation a new block of memory is allocated and is used for further allocations @gay1998memory and are linked together using a linked list. It is not possible to deallocate single objects in memory and instead the entire block needs to be deallocated.
 
 #figure(
   caption: [How the memory looks for a region based memory allocator.],
@@ -41,7 +41,7 @@ freeRegion(region);
   caption: [An example of how region based memory management would look in C.]
 )<region_code>
 
-@fig:region_code code snippet shows an example of how a region could be created in C @c_standard and then allocated to. Notice how this does not use `malloc` and `free` and it requires the programmer to know the lifetime of the memory and deallocate themselves. Region allocators are also known as Arena or Linear allocators.
+@lst:region_code is a code snippet shows an example of how a region could be created in C @c_standard and then allocated to. Notice how this does not use `malloc` and `free` and it requires the programmer to know the lifetime of the memory and deallocate themselves. Region allocators are also known as Arena or Linear allocators.
 
 === Stack-Like Allocator <stack_allocator>
 
@@ -124,7 +124,7 @@ Allocation works by finding a free block in memory based on some strategy such a
   image("../images/freelist_allocator_linkedlist_after_allocation.drawio.png"),
 ) <freelist_after>
 
-Deallocation is a bit more complex as the linked list needs to be repaired after deaollocation. To do this the linked list is iterated over until the unallocated memory just before the memory wishing to be free is found. Once it is found its next pointer can be updated to point to the newly freed memory and the newly free memory next pointer can be updated to point the the old next pointer of the previous unallocated memory block. The process is not dissimilar to inserting into sorted linked list. This means that deallocation has time complexity $O(n)$. During this whole process if the free memory caused unallocated blocks to be contagious they are then merged into one larger block. An example of the process is depicted in @fig:freelist_allocator_linkedlist_before_deallocation.
+Deallocation is a bit more complex as the linked list needs to be repaired after deaollocation. To do this the linked list is iterated over until the unallocated memory just before the memory wishing to be free is found. Once it is found its next pointer can be updated to point to the newly freed memory and the newly free memory next pointer can be updated to point the old next pointer of the previous unallocated memory block. The process is not dissimilar to inserting into sorted linked list. This means that deallocation has time complexity $O(n)$. During this whole process if the free memory caused unallocated blocks to be contagious they are then merged into one larger block. An example of the process is depicted in @fig:freelist_allocator_linkedlist_before_deallocation.
 
 #figure(
   caption: [How a free list looks before deallocation.],

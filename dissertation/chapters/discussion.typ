@@ -25,7 +25,7 @@ focus and are instead included for completeness sake.
 
 == Benchmarks
 
-A various number of benchmarks were run to compare the performance of the the allocators. The allocators that were used were as follows:
+A various number of benchmarks were run to compare the performance of the allocators. The allocators that were used were as follows:
 - dmalloc vs malloc
 - dmalloc + malloc vs malloc
 

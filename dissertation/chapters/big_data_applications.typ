@@ -38,7 +38,7 @@ for i in 0..1000 {
 ```
 ]<preallocate>
 
-In @fig:nopreallocate code snippet creates an array with 1000 integers but does not pre-allocate while code in @fig:preallocate makes use of pre-allocation. This small change can lead to massive performance improvements because memory only needs to be requested once. In the first example the program will need to many times request more memory from the allocator and copy the existing data over which will be noticeably slower than if the memory was only ever allocated once and never needed to be copied
+In @lst:nopreallocate code snippet creates an array with 1000 integers but does not pre-allocate while code in @lst:preallocate makes use of pre-allocation. This small change can lead to massive performance improvements because memory only needs to be requested once. In the first example the program will need to many times request more memory from the allocator and copy the existing data over which will be noticeably slower than if the memory was only ever allocated once and never needed to be copied
 however pre-allocating only works if the amount of memory required is known before hand.
 
 #code_block(
@@ -56,7 +56,7 @@ while keep_allocating() {
 ```
 ]<allocateunknown>
 
-Examining @fig:allocateunknown it is unknown when the function ```rust keep_allocating()``` will stop the loop so the amount of memory required cannot be pre-allocated. The only solution to allocate memory when the amount is not known beforehand is to allocate on demand as the code above does or guess how much will be needed and pre-allocate.
+Examining @lst:allocateunknown it is unknown when the function ```rust keep_allocating()``` will stop the loop so the amount of memory required cannot be pre-allocated. The only solution to allocate memory when the amount is not known beforehand is to allocate on demand as the code in @lst:allocateunknown does or guess how much will be needed and pre-allocate.
 However second option encounters issues such if the guess was too small more memory will need to be allocated and if it is too large memory is then wasted.
 If the amount of needed memory cannot be determined with some degree of precision the first option will be used and this is the scenario where a fast and efficient memory
 allocator will make a difference. This scenario does also apply in real world scenarios, for example when reading a CSV file the amount of memory required to store every data point in the file or even only some of the columns is not known before it is read.
@@ -91,7 +91,7 @@ Most data science tasks are put together using interpreted programming languages
 
 == Example
 
-To further expand the significance of where a small object memory allocator would be useful take the Genetic Programming algorithm as mentioned above.
+To further expand the significance of where a small object memory allocator would be useful take the Genetic Programming algorithm as mentioned previously.
 
 === Overview
 

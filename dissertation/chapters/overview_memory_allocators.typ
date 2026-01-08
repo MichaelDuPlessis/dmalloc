@@ -1,3 +1,4 @@
+#import "../lib.typ": code_block
 
 = Overview of Memory Allocators
 
@@ -88,7 +89,7 @@ Fundamentally a memory allocator manages a block of memory. This block of memory
   image("../images/allocrequest.drawio.png"),
 ) <memory_request>
 
-As seen in @fig:memory_request above even though the callee requested 10 bytes of memory they received 12 bytes which is valid since from the callee's perspective they can always assume that they received at least 10 bytes.
+As seen in @fig:memory_request even though the callee requested 10 bytes of memory they received 12 bytes which is valid since from the callee's perspective they can always assume that they received at least 10 bytes.
 
 === Small Objects
 
@@ -167,8 +168,7 @@ Fragmentation as well as storing metadata causes the memory allocated to be more
 A good allocator tries to minimise this by reducing the amount of fragmentation and only storing as much metadata as necessary.
 Metadata is never visible to the end user and that some metadata will always be required. Take the example of the C standard libraries malloc and free functions @c_standard:
 
-#figure(
-  [
+#code_block([An example of a C program that allocates 10 integers and then deallocates them.])[
 ```C
 int* x = (int*)malloc(sizeof(int) * 10);
 
@@ -176,11 +176,9 @@ int* x = (int*)malloc(sizeof(int) * 10);
 
 free(x);
 ```
-  ],
-  caption: [An example of a C program that allocates 10 integers and then deallocates them.]
-)<c_allocation>
+] <c_allocation>
 
-@fig:allocation C code that allocates 10 integers on the heap using the inbuilt malloc but if you take a look at the corresponding free function to deallocate the memory you will notice the amount of memory to deallocate is not specified which means that the memory allocator needs to store some metadata about each allocation so that it can later be deallocated.
+@lst:c_allocation shows C code that allocates 10 integers on the heap using the inbuilt malloc but if you take a look at the corresponding free function to deallocate the memory you will notice the amount of memory to deallocate is not specified which means that the memory allocator needs to store some metadata about each allocation so that it can later be deallocated.
 
 // === Quality of Allocation
 
