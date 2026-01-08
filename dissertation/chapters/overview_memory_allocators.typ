@@ -48,15 +48,15 @@ Assuming a common modern day computer system, cache memory is a special kind of 
 
 @fig:array and @fig:linkedlist compares how linked lists and arrays store their data in main memory. In the figures grey blocks are unallocated memory while green blocks are allocated memory.
 
-As you can see, elements in an array are stored next to each other in main memory this means that they have a good cache locality and when one element of the array is accessed it as well as other elements in the array are likely to be cached thus allowing for faster access and a faster execution of the program. Looking at the linked list on the other hand the elements are not next to one another and therefore have a bad cache locality so if the data at address 10 is accessed it is unlikely that any other data of the array will be cached alongside which will slow down the execution of the program as whenever another element of the linked lists is fetched the CPU will first experience a cache miss and have to retrieve the data from main memory. On top of that linked list usually require more memory as every data element needs to store the data (or a pointer to the data) as well as a pointer to the next element which on 64 bit operating systems is usually 8 bytes so even if the elements were next to each other as with an array due to the increased size of each element less elements would be able to fit in the cache at once.
+As you can see, elements in an array are stored next to each other in main memory this means that they have a good cache locality and when one element of the array is accessed it, as well as other elements, in the array are likely to be cached thus allowing for faster access and a faster execution of the program. Looking at the linked list on the other hand the elements are not next to one another and therefore have a bad cache locality so if the data at address 10 is accessed it is unlikely that any other data of the array will be cached alongside which will slow down the execution of the program as whenever another element of the linked lists is fetched the CPU will first experience a cache miss and have to retrieve the data from main memory. On top of that linked lists usually require more memory as every data element needs to store the data (or a pointer to the data) as well as a pointer to the next element which on 64 bit operating systems is usually 8 bytes so even if the elements were next to each other as with an array due to the increased size of each element fewer elements would be able to fit in the cache at once.
 
-This all should be kept in mind when developing a memory allocator as efficiently storing the data can lead to massive gains in performance.
+This all should be kept in mind when developing a memory allocator as efficiently storing the data can lead to significant gains in performance.
 
 == Memory Alignment
 
-Alignment refers to the restriction that certain data types or memory addresses must adhere to specific boundaries, such as 4-byte or 8-byte alignments, depending on the system architecture. Memory allocators must allocate memory to specific alignment. This is done to improve performance but also because in some cases it is a requirement by the processor's architecture.
+Alignment refers to the restriction that certain data types or memory addresses must adhere to specific boundaries, such as 4-byte or 8-byte alignments, depending on the system architecture. Memory allocators must allocate memory with a specific alignment. This is done to improve performance but also because in some cases it is a requirement by the processor's architecture.
 
-Modern processors are designed to access memory in aligned chunks, typically corresponding to the system's word size e.g. 8 bytes on a 64 bit system. Misaligned memory access can lead to increased CPU cycles, as the processor may need to issue multiple memory requests to retrieve a single piece of data @drepper2007every. For example if an 8 byte piece of data is stored from memory address 13 to 20 in the system's memory and it is a system with an 8 byte word size the CPU will need to do two fetches, one from 8 to 15 and from 15 to 23. it will then after that need to combine the retrieved memory. This is much more expensive than just getting the data from an aligned memory address as that would only require one fetch with no data manipulation.
+Modern processors are designed to access memory in aligned chunks, typically corresponding to the system's word size e.g. 8 bytes on a 64 bit system. Misaligned memory access can lead to increased CPU cycles, as the processor may need to issue multiple memory requests to retrieve a single piece of data @drepper2007every. For example if an 8 byte piece of data is stored from memory address 13 to 20 in the system's memory and it is a system with an 8 byte word size the CPU will need to do two fetches, one from 8 to 15 and from 15 to 23. it will then need to combine the retrieved memory. This is much more expensive than just getting the data from an aligned memory address as that would only require one fetch with no data manipulation.
 
 #figure(
   caption: [An example of what misaligned memory looks like.],
@@ -70,7 +70,7 @@ Modern processors are designed to access memory in aligned chunks, typically cor
   image("../images/alignment_good.drawio.png"),
 ) <alignment_bad>
 
-The @fig:alignment_good and @fig:alignment_bad the green blocks represent unused memory, the red blocks extra memory that is being fetched and the purple blocks the actual memory that we want to access. As we can see if the memory is misaligned it requires fetching extra memory whereas in the second figure the memory that we want to fetch is aligned correctly and is therefore easy to get without any extra operations. The figure is not completely accurate since computers will usually fetch memory equal to their word size so on most 64 bit systems two 8 byte chunks would be retrieved on the bad alignment and one 8 byte chunk on the good alignment version.
+In @fig:alignment_good and @fig:alignment_bad the green blocks represent unused memory, the red blocks extra memory that is being fetched and the purple blocks the actual memory that we want to access. As we can see if the memory is misaligned it requires fetching extra memory whereas in the second figure the memory that we want to fetch is aligned correctly and is therefore easy to get without any extra operations. The figure is not completely accurate since computers will usually fetch memory equal to their word size so on most 64 bit systems two 8 byte chunks would be retrieved on the bad alignment and one 8 byte chunk on the good alignment version.
 
 On some processor architectures data must be aligned to its natural boundary. A data type's natural boundary is usually the smallest power of 2 that can fit the data. For example a 4 byte piece of data has a natural boundary of 4 bytes whereas a 6 byte piece of data has a natural boundary of 8 bytes @hennessy2011computer.
 
@@ -108,7 +108,7 @@ While all memory allocators can allocate small objects a small object allocator 
 purpose allocators tend to perform poorly when given the task of allocating small objects. A small object memory allocator likewise can more often then not allocate non-small
 objects. A small object memory allocator does not need to be seperate allocator but can be an allocation strategy for an allocator. This ties into the composability of memory
 allocators. There are various techniques used when allocating small objects such as:
-- Size Classes: Objects are stored based on their size class and objects within the same size class are stored with one another. This allows for techniques where the allocator can be optimized for the specific size classes instead of being made more general purpose. A bin memory allocator is a common and popular implementation of this.
+- Size Classes: Objects are stored based on their size class and objects within the same size class are stored with one another. This allows for techniques where the allocator can be optimised for the specific size classes instead of being made more general purpose. A bin memory allocator is a common and popular implementation of this.
 - Memory Pooling: Large amounts of memory is preallocated by the allocator and smaller chunks within the pool of memory is then returned to the caller. This minimises the number of calls to the backing memory allocator to allocate memory (which could include a system call).
 
 === Composability
@@ -125,7 +125,7 @@ In the @fig:composable allocator *A* uses allocator *B* as a backing allocator. 
 
 == Building Blocks of a Memory Allocator
 
-A memory allocator should be designed to be composable and it consists of two mains parts:
+A memory allocator should be designed to be composable and it consists of two main parts:
 + The backing allocator.
 + The memory allocation strategy.
 
@@ -201,5 +201,5 @@ This is the same reason why arrays are usually preferred over linked lists since
 
 == Summary
 
-This chapter discusses the important theoretical concepts of memory allocator and serves as a good introcution. The most important aspects to take forward from this chapter
-is the definition of small objects, the building blocks of a memory allocaor and the different aspects in which a memory allocator can be evaluated. 
+This chapter discusses the important theoretical concepts of memory allocator and serves as a good introduction. The most important aspects to take forward from this chapter
+is the definition of small objects, the building blocks of a memory allocator and the different aspects in which a memory allocator can be evaluated. 

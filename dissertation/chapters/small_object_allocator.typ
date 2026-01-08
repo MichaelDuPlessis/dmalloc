@@ -10,7 +10,7 @@ The following techniques are commonly used by small object allocators:
 
 === Size Classes
 
-Objects are stored based on their size class and objects within the same size class are stored with one another. This allows for techniques where the allocator can be optimized for the specific size classes instead of being made more general purpose. A bin memory allocator is a common and popular implementation of this.
+Objects are stored based on their size class and objects within the same size class are stored with one another. This allows for techniques where the allocator can be optimised for the specific size classes instead of being made more general purpose. A bin memory allocator is a common and popular implementation of this.
 
 === Memory Pooling
 

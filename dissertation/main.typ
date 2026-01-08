@@ -19,7 +19,7 @@
 
 #align(center)[
   #align(horizon)[
-    #text(size: 50pt)[Developing a Small Object Memory Allocator For Big Data Science]
+    #text(size: 50pt)[Developing a Small Object Memory Allocator for Big Data Science]
     
     #text(size: 30pt)[Author: Michael du Plessis]
 

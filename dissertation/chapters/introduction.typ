@@ -11,7 +11,7 @@ Most programmers regardless of field do not worry or even think about the memory
 programming language they are using @grunwald1993improving. While the default memory allocator is often good enough the way that memory is allocated can be improved by
 using a memory allocator that is more purpose fit for the problem. Therefore it is common practice for programmers who want to achieve as much performance as possible to
 make use of custom memory allocators for their specific task @berger2002reconsidering. Most general purpose allocators tend to have worse performance compared to allocators
-that are designed for a specific task. The field of data science and big data is no longer niche and therefore the need for an allocator designed for specific use in the field
+that are designed for a specific task. The field of data science and big data are no longer niche and therefore the need for an allocator designed for specific use in the field
 of data science becomes more and more necessary. There is a history of applications utilising purpose built allocators to increase performance of the intended task
 including databases, operating systems and webservers but there has not yet been a published design or implementation of a purpose built allocator for data science related
 tasks despite the recent explosion in the field's popularity. This mini-dissertation aims to introduce a memory allocator purpose built for data science tasks and the
@@ -22,14 +22,13 @@ allocating small objects @bonwick1994slab.
 
 // no windows
 // why we want fast small object memory allocators
-An important aspect in the field of data science and big data is not just data collection and data analysis but also running various algorithms on the collected data
+An important aspect in the field of data science and big data are not just data collection and data analysis but also running various algorithms on the collected data
 to derive results for various use cases such as prediction tasks. Many of these algorithms take significant time to run and/or train, thus optimising the runtime of these algorithms
 can be beneficial. Naturally these algorithms can be improved on a case by case basis but all these algorithms will make use of dynamic memory allocation, so improving this
 can lead to performance increases across the board instead of using the default memory allocator as is often the case by most programmers.
 
 Custom memory allocators are not a new concept but there is little to no research in developing memory allocators specifically for the field of big data science. This mini-dissertation
-aims to remedy this by proposing a small object memory allocator for the specific purpose of running optimisation algorithms faster than the default memory allocator for a
-system. Searching for papers containing the terms "small object memory allocator", "memory allocator" and "memory allocator for big data science" returned few results.
+aims to address this by proposing a small object memory allocator for the specific purpose of running optimisation algorithms faster than the default memory allocator for of a system. Searching for papers containing the terms "small object memory allocator", "memory allocator" and "memory allocator for big data science" returned few results.
 The returned outputs only partly related to the topic.
 
 == Methodology

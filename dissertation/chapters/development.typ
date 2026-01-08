@@ -2,7 +2,7 @@
 
 = Development of a Small Object Memory Allocator
 
-Below, the implementation of the proposed small memory allocator is described. The allocator makes use of three other separate sub-allocators each specialized for different tasks. The three allocators are as follows:
+The implementation of the small memory allocator is described below. The allocator makes use of three other separate sub-allocators each specialised for different tasks. The three allocators are as follows:
 1. A bin allocator for small objects.
 2. A free list allocator for medium objects.
 3. A page allocator for large objects.

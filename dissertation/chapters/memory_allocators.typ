@@ -38,7 +38,7 @@ Assuming a common modern day computer system, cache memory is a special kind of 
 
 As you can see, elements in an array are stored next to each other in main memory this means that they have a good cache locality and when one element of the array is accessed it as well as other elements in the array are likely to be cached thus allowing for faster access and a faster execution of the program. Looking at the linked list on the other hand the elements are not next to one another and therefore have a bad cache locality so if the data at address 10 is accessed it is unlikely that any other data of the array will be cached alongside which will slow down the execution of the program as whenever another element of the linked lists is fetched the CPU will first experience a cache miss and have to retrieve the data from main memory. On top of that linked list usually require more memory as every data element needs to store the data (or a pointer to the data) as well as a pointer to the next element which on 64 bit operating systems is usually 8 bytes so even if the elements were next to each other as with an array due to the increased size of each element less elements would be able to fit in the cache at once.
 
-This all should be kept in mind when developing a memory allocator as efficiently storing the data can lead to massive gains in performance.
+This all should be kept in mind when developing a memory allocator as efficiently storing the data can lead to significant gains in performance.
 
 == Memory Alignment
 
@@ -152,7 +152,7 @@ This is the same reason why arrays are usually preferred over linked lists since
 
 == Building Blocks of a Memory Allocator
 
-A memory allocator should be designed to be composable and it consists of two mains parts:
+A memory allocator should be designed to be composable and it consists of two main parts:
 + The backing allocator.
 + The memory allocation strategy.
 

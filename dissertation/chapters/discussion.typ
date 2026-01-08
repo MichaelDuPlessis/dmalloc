@@ -2,7 +2,7 @@
 
 = Discussion
 
-The following section discusses the results of the benchmarks on the memory allocator. The benchmarks were run both on a Linux system and a MacOS systems to identify
+This section discusses the results of the benchmarks on the memory allocator. The benchmarks were run both on a Linux and a MacOS systems to identify
 how the allocator performed on different operating systems. The specifications of the machines tested are listed below. The Clang compiler was used for both operating systems.
 
 #figure(
