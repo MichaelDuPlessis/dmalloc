@@ -94,7 +94,7 @@ In @fig:poolallocator_extended the red blocks are allocated memory, the green bl
 Naturally, there are downsides to this kind of allocations strategy. Every allocation requires some metadata which means that there will always be more memory used than requested. As well with that each memory block being a fixed sizes means that while there will never be any internal fragmentation two other problems can occur:
 1. A memory request smaller than the block size can be requested which will lead to internal fragmentation.
 2. The amount of memory requested may be larger than the block size in which case the memory allocation will fail or will be deferred to the backing allocator.
-The final issue with this memory allocation strategy is that since it makes use of a linked list it naturally has poor cache locality which will be exasperated if a new buffer needs to be allocated @hennessy2011computer.
+The final issue with this memory allocation strategy is that since it makes use of a linked list it naturally has poor cache locality which will be exacerbated if a new buffer needs to be allocated @hennessy2011computer.
 
 An optimisation technique can be employed to determine what chunks of memory is free by making use of a bit mask. For example if a 32 bit integer is use than each bit corresponds to a chunk of memory and if the value of the corresponding bit is 1 than the chunk is available otherwise it is not or vice versa. This method has the benefit that a header does not need to be stored with every block of allocated memory but has the downside that the number of chunks in your buffer of memory is limited by the size of the integer you use. Allocating a new buffer of memory would require a list of these bitmasks to be kept.
 
@@ -110,7 +110,7 @@ A linked list is used to store the blocks of memory that are free along with the
   image("../images/freelist_allocator_linkedlist.drawio.png"),
 ) <freelist_allocator_linkedlist>
 
-Allocation works by finding a free block in memory based on some strategy such as first fit, best fit and so on. Once a suitable location has been found a header is placed with the information on how large the allocated block is and the new links for the linked list is made. @fig:freelist_before and @fig:freelist_after depict what it looks like when allocating memory to a free list. The purple block in @fig:freelist_before is the memory that is too be allocated and in this example first fit is being used so the head of the linked list is chosen to allocate the memory too.
+Allocation works by finding a free block in memory based on some strategy such as first fit, best fit and so on. Once a suitable location has been found a header is placed with the information on how large the allocated block is and the new links for the linked list is made. @fig:freelist_before and @fig:freelist_after depict what it looks like when allocating memory to a free list. The purple block in @fig:freelist_before is the memory that is to be allocated and in this example first fit is being used so the head of the linked list is chosen to allocate the memory too.
 
 #figure(
   caption: [How a free list looks before allocation.],
@@ -144,7 +144,7 @@ The downsides are that the deallocation can be slow if the linked list is large 
 
 === Buddy Memory Allocator
 
-The buddy memory allocator is looks to improve on the memory fragmentation issues that allocators using free lists are susceptible to. It works by recursively memory a larger block of memory to fit the requested amount of memory. A block of memory in a power of two is allocated and a free list is initialised similar to what is done with a pool allocator. The free list contains one element which points to the whole block of memory. When a piece of memory is requested the free list is searched for a block of memory that will fit the requested amount than if the memory to be allocated is at least half the size of the block it is being allocated in the block is than split into two equal halves. This is done recursively until the block cannot be split in half anymore. All blocks of memory created this way are added to the free list (besides the block that the new allocation is going to be used for) @von1975simple @ginger @knowlton1965fast.
+The buddy memory allocator looks to improve on the memory fragmentation issues that allocators using free lists are susceptible to. It works by recursively memory a larger block of memory to fit the requested amount of memory. A block of memory in a power of two is allocated and a free list is initialised similar to what is done with a pool allocator. The free list contains one element which points to the whole block of memory. When a piece of memory is requested the free list is searched for a block of memory that will fit the requested amount than if the memory to be allocated is at least half the size of the block it is being allocated in the block is than split into two equal halves. This is done recursively until the block cannot be split in half anymore. All blocks of memory created this way are added to the free list (besides the block that the new allocation is going to be used for) @von1975simple @ginger @knowlton1965fast.
 
 #figure(
   caption: [How a free list looks after deallocation.],
@@ -160,7 +160,7 @@ The downsides of this allocator is that while deallaction is fast, allocation my
 
 === Bin Memory Allocator
 
-A bin memory allocator works by organising memory into bins of fixed sizes. A bin is a region of memory and an allocator will have bins of varying sizes @berger2000hoard. A bins size is the maximum size an allocation must be to be placed in that bin, for example if an allocator has bins 4 bytes, 8 bytes and 32 bytes then if a 5 byte allocation request is made it can be placed in the 8 or 32 byte bin. When a memory allocation is requested the smallest bin that can fit the requested amount of memory is used for the allocation so in the example the 8 byte bin would be used @li2018efficient. An allocator can obviously not have an infinite number of bins so if an allocation request comes in that cannot fit into any bin the backing memory allocator will be used instead. Each bin itself is divided into blocks of its respective bin size so when an allocation request comes in a free block from that bin is returned.
+A bin memory allocator works by organising memory into bins of fixed sizes. A bin is a region of memory and an allocator will have bins of varying sizes @berger2000hoard. A bins size is the maximum size an allocation must be to be placed in that bin; for example if an allocator has bins 4 bytes, 8 bytes and 32 bytes then if a 5 byte allocation request is made it can be placed in the 8 or 32 byte bin. When a memory allocation is requested the smallest bin that can fit the requested amount of memory is used for the allocation so in the example the 8 byte bin would be used @li2018efficient. An allocator can obviously not have an infinite number of bins so if an allocation request comes in that cannot fit into any bin the backing memory allocator will be used instead. Each bin itself is divided into blocks of its respective bin size so when an allocation request comes in a free block from that bin is returned.
 
 #figure(
   caption: [A Diagram Explaining the Concept of Bins.],
@@ -218,7 +218,7 @@ TCMalloc is divided into three main parts.
   image("../images/tcmalloc.drawio.png"),
 )
 
-==== Frontend
+// ==== Frontend
 
 The frontend handles memory allocations of small objects using thread-local caches. Each thread has a private cache that can only be accessed by that thread, eliminating the need for locks and improving allocation and deallocation performance.
 
@@ -226,7 +226,7 @@ The frontend handles memory allocations of small objects using thread-local cach
 - If the frontend cannot satisfy an allocation request, it fetches memory from the middle-end to refill the cache.
 - When an object is deallocated, it is placed back into the frontend cache if there is space. Otherwise, it is returned to the backend (PageHeap) for reuse.
 
-==== Middle-End
+// ==== Middle-End
 
 The middle-end is built from a CentralFreeList and a TransferCache.
 
@@ -235,7 +235,7 @@ The middle-end is built from a CentralFreeList and a TransferCache.
 - If an allocation request is too large for the frontend, or if the middle-end runs out of memory, the backend (PageHeap) handles the request.
 - The middle-end provides memory to the frontend and returns unused memory to the backend as needed.
 
-==== Backend (PageHeap)
+// ==== Backend (PageHeap)
 
 The backend is responsible for managing large blocks of unallocated memory and interacting with the operating system to request or release memory.
 
@@ -254,7 +254,7 @@ Mimalloc is a memory allocator created by Microsoft @leijen2019mimalloc. This me
 - There are no locks used only atomic operations.
 An important note is that when referring to "pages" with regards to mimalloc it is not referencing memory pages as an OS would but closer to a superblock @berger2000hoard.
 
-==== Free List Sharding
+// ==== Free List Sharding
 
 Free lists have the inherent issue of having bad locality due to the fact that objects can be scattered across many places in the heap. Mimalloc attempts to negate this by making use of free list sharding. The heap is subdivided into smaller sections called a page and each page has its own free list per size class. This greatly improves cache locality allowing for less time to be spent fetching data from main memory.
 
@@ -264,11 +264,11 @@ Free lists have the inherent issue of having bad locality due to the fact that o
   image("../images/mimalloc_free_list_sharding.drawio.png"),
 )
 
-==== Local Free List
+// ==== Local Free List
 
 Mimalloc makes use of a local free list when deallocating memory. When memory is freed it is not added back to the free list where it was taken off from instead it is placed on a separate free list. When the free list use for allocations runs out of memory to allocate which will now happen after a set number of allocations memory is then freed from the local free list. This means that the allocator will wait to free memory until a later time and allows for the possibility that new memory does not need to be allocated if there is enough memory on the local free list.
 
-==== Thread Free List
+// ==== Thread Free List
 
 Mimalloc pages are also in a thread local heap which means that no locks are needed when allocating memory since each thread has its own region of memory. A thread can still however free memory on another thread to make this still efficient mimalloc employees a thread free list per page.
 

@@ -16,3 +16,16 @@ which are most often used.
 
 Further this mini-dissertation assists in addressing the issue pertaining to the lack of formal research on the topics of "Small Object Memory Allocators" as well as
 "Custom Memory Allocators for the Field of Big Data Science".
+
+Currently the allocator only works on Unix based systems, this is due to its reliance on the `mmap` system call. The Windows operating system does have a `mmap`
+equivalent so this support can be trivially implemented using conditional compilation. Once this has been done the benchmark tests will need to be rerun to
+determine how the allocator performs on Windows.
+The allocator will not work in multithreaded environments as there is no protection against concurrent memory access on allocated pages. A solution to fix this
+in a non-blocking manner would be to have each page have a lock on it, or an atomic boolean as locks slow code down. Then when a thread tries to allocate
+memory it can check if another thread is currently using that page. If that page is currently in use the current thread can either use a different page or allocate
+a new one. This way when, allocating memory, there will be no waiting by any thread. Reading can happen at any time since it is a non-destructive operation.
+Further benchmarks as well as comparisons to other state of the art memory allocators can yield further insights into how beneficial this research is.
+
+Overall this mini-dissertation clearly shows the importance of designing and building specialised tools for specific fields as well as the importance of memory allocators and
+the usefullness of custom memory allocation techniques over using the defualt memory allocator. It further goes on to show how a custom memory allocator can be applied to
+a common algorithm in the field of big data science and what performance improvements it can bring.

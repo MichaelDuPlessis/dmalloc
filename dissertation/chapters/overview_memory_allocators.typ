@@ -79,9 +79,9 @@ The largest concern when it comes to system calls for a memory allocator is the 
 
 == Concepts Behind Memory Allocators
 
-=== Inner Workings of a Memory Allocator
+// === Inner Workings of a Memory Allocator
 
-Fundamentally a memory allocator manages a block of memory. This block of memory is also referred to as a pool of memory or a chunk of memory. This block of memory that is managed by the allocator is just a region of raw bytes. It does not matter where these raw bytes are situated, for example while memory allocators generally work with heap memory there is no reason that the memory managed by the allocator cannot sit on the stack instead. A memory allocator is further able to allocate chunks of memory of any size from this region of memory as long as the requested block of memory is smaller than the total amount of free memory in the region. Allocation means to return a pointer to the callee where this pointer can be assumed to point to valid memory that the callee can interact with and that is at a minimum the size that the callee requested. A memory allocator also needs to be able to deallocate memory by having the callee provide the address of previously allocated memory that was allocated by that allocator, the allocator can then mark this memory as deallocated and provide it again at a later time possibly with a different size of requested memory. A memory allocator also must have a strategy for how it allocates the memory @alexandrescu2001modern.
+Fundamentally a memory allocator manages a block of memory. This block of memory is also referred to as a pool of memory or a chunk of memory. This block of memory that is managed by the allocator is just a region of raw bytes. It does not matter where these raw bytes are situated; for example while memory allocators generally work with heap memory there is no reason that the memory managed by the allocator cannot sit on the stack instead. A memory allocator is further able to allocate chunks of memory of any size from this region of memory as long as the requested block of memory is smaller than the total amount of free memory in the region. Allocation means to return a pointer to the callee where this pointer can be assumed to point to valid memory that the callee can interact with and that is at a minimum the size that the callee requested. A memory allocator also needs to be able to deallocate memory by having the callee provide the address of previously allocated memory that was allocated by that allocator, the allocator can then mark this memory as deallocated and provide it again at a later time possibly with a different size of requested memory. A memory allocator also must have a strategy for how it allocates the memory @alexandrescu2001modern.
 
 #figure(
   caption: [An Example of a Callee Requesting Memory.],
@@ -91,12 +91,12 @@ Fundamentally a memory allocator manages a block of memory. This block of memory
 
 As seen in @fig:memory_request even though the callee requested 10 bytes of memory they received 12 bytes which is valid since from the callee's perspective they can always assume that they received at least 10 bytes.
 
-=== Small Objects
+// === Small Objects
 
-Small objects do not have a strong definition and is usually left to the implementor what they define as a small object for example the Python programming language has
+Small objects do not have a strong definition and is usually left to the implementor what they define as a small object; for example the Python programming language has
 its own allocator for small objects and defines small objects as an object whose size is less than 512 bytes @pythonmemory while the paper by Klein et al @klein2014memory
 defines small objects of having a size of 16-64 bytes. A small object allocator is an allocator that focuses on the efficient allocation and deallocation of objects with
-a small memory footprint typically only a number of bytes in size. Small objects are used in various places for example Schußler and Gruber create a small
+a small memory footprint typically only a number of bytes in size. Small objects are used in various places such as by Schußler and Gruber create a small
 object allocator to allocate and deallocate millions of mesh primitives @schuessler2016traversable. Memory allocators usually have a method to deal with small
 objects but once an object is no longer considered small a different allocation strategy will be used as seen with the Slab Allocator @bonwick1994slab.
 While all memory allocators can allocate small objects a small object allocator is designed to efficiently allocate and manage small data allocations as general
@@ -106,7 +106,7 @@ allocators. There are various techniques used when allocating small objects such
 - Size Classes: Objects are stored based on their size class and objects within the same size class are stored with one another. This allows for techniques where the allocator can be optimised for the specific size classes instead of being made more general purpose. A bin memory allocator is a common and popular implementation of this.
 - Memory Pooling: Large amounts of memory is preallocated by the allocator and smaller chunks within the pool of memory is then returned to the caller. This minimises the number of calls to the backing memory allocator to allocate memory (which could include a system call).
 
-=== Composability
+// === Composability
 
 Composability is the property of memory allocators that allow them to be chained together and built off one another. For example if I have a memory allocator that can allocate
 arbitrary sizes of memory then I can naturally use this memory allocator to build another memory allocator that requests its memory from this allocator before handing it to
@@ -122,17 +122,17 @@ In the @fig:composable allocator *A* uses allocator *B* as a backing allocator. 
 
 == Building Blocks of a Memory Allocator
 
-Every memory allocator requires a backing memory allocator as well as an allocation strategy and memory allocators should be designed to be composable which is done by ensuring every allocator conforms to the same interface.
+Every memory allocator requires a backing memory allocator as well as an allocation strategy. Memory allocators should be designed to be composable which is done by ensuring every allocator conforms to the same interface.
 
-=== The Backing Allocator
+// === The Backing Allocator
 
 To create a memory allocator requires a memory allocator, this is often known as the backing allocator. The reason that a memory allocator requires a memory allocator is due to the fact that the memory an allocator manages needs to come from somewhere. If one were to read about memory allocators it is common that the underlying (also known as backing) memory allocator is left out. The reason this is done is because it is simply an implementation detail and whatever appropriate memory allocator can be used as the backing memory allocator. For example Bonwick's @bonwick1994slab Slab Allocator could have used malloc or any other allocator to provide it with its initial memory. A common question then is where does the backing allocator get its memory? The lowest level allocator that provides all the memory is provided by the operating system and is usually mmap or sbrk on Linux Operating System @ArpaciDusseau23-Book assuming there is an operating system to begin with. 
 
-=== Memory Allocation Strategy
+// === Memory Allocation Strategy
 
 The memory allocation strategy is the heart of the allocator and it encompasses all the logic of the memory allocator. It is responsible for deciding when to request additional memory from the backing allocator and if the memory should really be de-allocated when a de-allocation request occurs. The memory allocation strategy is also responsible for dealing with both internal and external fragmentation and if the requested object to be allocated should rather be passed onto a different allocator.
 
-=== Fragmentation
+// === Fragmentation
 
 Internal fragmentation occurs when more memory is allocated than what is necessary. For example if 1 byte of memory is requested but the allocator slots it into a slot of size 2 bytes than 1 byte of memory is wasted. External fragmentation occurs when there is wasted memory between allocated blocks @balabhadra2015data.
 
@@ -159,7 +159,7 @@ When trying to optimise for these three metrics it is often the case that improv
 
 // === Speed of Allocation
 
-The speed of allocation is just how long it takes for the allocator to return a block of memory to the callee. This time taken can be influenced by a number of factors. For example when a callee requests memory the allocator may need to first request more memory from its backing allocator which will take time and is subject to the very same considerations as the calling allocator. Another important consideration is that even if there is enough memory for the requested amount finding a suitable block can take some time. If the allocator where to for example manage its memory as a linear array then it may need to iterate through the array to find a block of memory large enough to for the requested amount. In the described scenario it can largely be improved by storing the next free block of memory internally but this will increase the overall memory footprint of the allocator.
+The speed of allocation is just how long it takes for the allocator to return a block of memory to the callee. This time taken can be influenced by a number of factors. For example when a callee requests memory the allocator may need to first request more memory from its backing allocator which will take time and is subject to the very same considerations as the calling allocator. Another important consideration is that even if there is enough memory for the requested amount finding a suitable block can take some time. If the allocator where to manage its memory as a linear array then it may need to iterate through the array to find a block of memory large enough to for the requested amount. In the described scenario it can largely be improved by storing the next free block of memory internally but this will increase the overall memory footprint of the allocator.
 
 // === Amount of Memory Used
 

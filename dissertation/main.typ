@@ -38,7 +38,7 @@
 The field of big data science continues to evolve, driving the need for increasingly complex and resource intensive algorithms that have increasingly longer runtimes.
 While custom memory allocators have long existed, none have been specifically designed for big data applications. This mini-dissertation presents a small object memory
 allocator tailored for big data workloads. The allocator optimises runtime performance by improving the allocation, deallocation, and management of small objects compared to
-default system allocators. Benchmarking on Linux (Ubuntu) and macOS systems shows that the proposed allocator consistently outperforms the default system allocators in both
+default system allocators. Benchmarking on Linux (Ubuntu) and macOS systems shows that the proposed allocator provides some improvement to the default system allocators in both
 artificial and real world benchmarks. The dissertation also details the allocator's design, built around the Unix mmap system call, and highlights the broader potential for
 research into custom memory allocators in big data systems.
 
@@ -84,9 +84,9 @@ research into custom memory allocators in big data systems.
 
 #pagebreak()
 
-#include "chapters/future_work.typ"
+// #include "chapters/future_work.typ"
 
-#pagebreak()
+// #pagebreak()
 
 #show bibliography: set heading(numbering: "1.")
 

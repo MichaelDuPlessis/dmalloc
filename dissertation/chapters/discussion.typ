@@ -263,7 +263,7 @@ as dmalloc is designed for big data science applications which very rarely if ev
 to be good enough in most use cases.
 The varying benchmark is biased against dmalloc as dmalloc focuses on small objects while varying allocates objects of many different sizes which can mean that other weaker
 allocation strategies can be used. It is however useful to see how dmalloc would perform if just arbitraly used instead of focusing on its strongs points and it is clear that if many
-objects of varying sizes are too be allocated dmalloc should not be used despite it not having a much larger memory footprint. This downside can be rectified however by
+objects of varying sizes are to be allocated dmalloc should not be used despite it not having a much larger memory footprint. This downside can be rectified however by
 combining dmalloc with another memory allocator which is better suited to dealing with larger objects that dmallocs primitive allocation strategies do poorly in. This is
 commonly done with memory allocators where different memory allocators are used for different tasks. The genetic benchmark shows how a real world algorithm would perform.
 On linux dmalloc performs worse than malloc on all versions of the benchmark (small, large, long) @fig:linux-genetic. The gap also

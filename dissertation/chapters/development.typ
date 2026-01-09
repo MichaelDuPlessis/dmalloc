@@ -94,7 +94,7 @@ The green blocks in the @example_page_cache represent memory pages that that the
 == Bin Allocator
 
 The bin allocator is used to store small objects. Small objects for my implementation of an allocator is anything less than or equal to 8 bytes. The allocator works by dividing a region of memory into fixed sized blocks all of the same size. There is a bin for each possible block size so that different block sizes don't exist in the same bin. Since memory alignment is very important to computers it does not make sense to have bins with a size that are not a power of two otherwise the memory will become unaligned or padding to reach alignment will need to be inserted. This means having non standard bins sizes (sizes that are not powers of 2) will either lead to degraded performance or guaranteed fragmentation on every allocation. For this reason bins are always a power of two and this means that the allocator has 4 bins: a 1 byte bin, a 2 byte bin, a 4 byte bin and an 8 byte bin.
-Following the decision decision that all sub-allocators use a page as their smallest unit of measurement it also means that each bin will be at least one page. If more memory is needed (the bin has been filled) a new page is allocated and the pages are linked together using a linked list.
+Following the decision that all sub-allocators use a page as their smallest unit of measurement it also means that each bin will be at least one page. If more memory is needed (the bin has been filled) a new page is allocated and the pages are linked together using a linked list.
 Searching for a free block in a bin can be very inefficient as depending on the page size and block size there can be thousands of free blocks that need to be search through. A common approach to speed this process up is to make use of a bitmask to mark blocks as free or in use.
 
 === Bitmask
@@ -157,11 +157,11 @@ static size_t calculate_bitset_size(size_t block_size) {
 ```]<bitset_size>
 
 
-==== Allocation
+// ==== Allocation
 
 Allocation works by first determining what the linked list of bins contains the size class that best fits the amount of memory that is going to be allocated. The linked list is than searched until a bin with a free spot in memory is found. If no bin has any free memory a new bin is allocated and made the head of the linked list and the memory is allocated. The function `find_first_unmarked_bit` is used to find the first free index in a bin, if the function returns -1 then there is no free memory left in the bin. Once a free spot is found the corresponding block of memory is calculated by `index * size class`, the bit is marked to indicate the memory is in use and the ptr to the block of memory is returned.
 
-==== Deallocation
+// ==== Deallocation
 
 Deallocation works by deriving the index of the bit that indicates the memory is in use and un-marking it. If after a free the bin is empty (no more memory is allocated) the bin is returned to the page store.
 
@@ -213,11 +213,11 @@ The free list contains two other constructs within it:
 
 The free list is made up of `Blocks` which are pieces of free memory that can be split and allocated and these make up the actual free list. As well as `AllocHeaders` which are metadata about an actual allocation and are stored before the pointer returned to the user. 
 
-==== Allocation
+// ==== Allocation
 
 The free list allocator allocates memory using a first fit algorithm. When memory is requested from the allocator it iterates over all the free lists and within each free list to find the first free block of memory that can fit the requested amount and the header information for the requested block. Once a suitable free block of memory is found it splits the block if the block is large enough to to accommodate another future allocation. For example if splitting the block results in a 1 byte block then it is not worth splitting the block since no memory can be allocated there. If all the free lists have been searched through and there was not a sufficiently large block a new memory page is requested using `mmap` and a free list is created, the memory allocated and the free list is then made the head of the free list linked list.
 
-==== Deallocation
+// ==== Deallocation
 
 Deallocation works by taking the pointer address of the memory that needs to be deallocated and then calculating the address of the page start of the memory page that the address belongs to. Once we have the page start the necessary metadata can be derived such as the head of the free list. Next the free list block before and after the address to be deallocated is found if a before and after free block exists since the address may be at the beginning or end of the valid memory range. Once this is done the metadata of the allocated block is retrieved since it just lies before the pointer pointing to the memory to be deallocated. Now we have three components: the first free memory block before the pointer to be deallocated, the first free memory block after the pointer to be deallocated and the size of the allocation. Using this information one of 4 outcomes can happen:
 1. A free block is inserted between the previous and next free block with all pointers updated. If there is not a before or after only the relevant blocks are update and the new free block is inserted before or after.
@@ -335,7 +335,7 @@ To further this example use the same allocations as before but have the followin
 - Deallocate the 3 objects allocated to the free list in step 2 between steps 3 and 4.
 - After step 6 dealloacte the allocation made in step one.
 
-Now after step 3 all the memory allocated to the free list allocator is deallocate but more importantly the memory page where the objects were allocated too no longer has any memory allocated to it so when the last 247b object is deallocated the page is returned to the page cache and since the page cache won't be full because in the previous step the bin allocator took a page the page is stored for later use. When the free list allocator is used again to allocate the object in step 5 a new memory page will be requested from the page cache. When deallocating the object allocated in step 1 a simple call to `munmap` is made since the page allocator does not interface with the page cache.
+Now after step 3 all the memory allocated to the free list allocator is deallocate but more importantly the memory page where the objects were allocated to no longer has any memory allocated to it so when the last 247b object is deallocated the page is returned to the page cache and since the page cache won't be full because in the previous step the bin allocator took a page the page is stored for later use. When the free list allocator is used again to allocate the object in step 5 a new memory page will be requested from the page cache. When deallocating the object allocated in step 1 a simple call to `munmap` is made since the page allocator does not interface with the page cache.
 
 == Optimisations
 
@@ -375,13 +375,13 @@ intrinsic `__builtin_prefetch`.
 
 // === Branch Prediction
 
-Modern CPU's make use of pipelining to fetch multiple instructions in parallel. For example while the cpu is executing the current instruction it can fetch the next one
+Modern CPU's make use of pipelining to fetch multiple instructions in parallel. For example while the CPU is executing the current instruction it can fetch the next one
 but `if` statements in programming present a problem as it is not known what branch of the `if` statement will execute at runtime and while modern processors do have
-sophisticated branch prediction algorithms they can be wrong in which case a cache miss occurs and the data has too be fetched a second time.
+sophisticated branch prediction algorithms they can be wrong in which case a cache miss occurs and the data has to be fetched a second time.
 
 Using the compiler builtin `__builtin_expect` it is possible to tell the CPU what branch it can expect to execute next. This is not a silver bullet however as this only leads
 to performance increases if one branch of the `if` statement is selected disproportionately to the other, in scenarios where each branch is evaluated more or less the same
-amount using `__builtin_expect` can degrade performance. Branch prediction is used in the memory allocator in places where there are outlier cases, for example:
+amount using `__builtin_expect` can degrade performance. Branch prediction is used in the memory allocator in places where there are outlier cases; for example:
 
 #code_block("An example of where branch prediction is used.")[
   ```c
@@ -440,8 +440,7 @@ first evaluate what would be the first element in the loop and only if that is f
 ]
 
 Assuming for this workload we know that for `num` we are checking it frequently appears as the first element in the array then unrolling the loop can speed up the code. This
-can then further be extended by checkin the 2nd, 3rd, .., nth element. This optimisation only works if you understand your workload and shouldn't be blindly used as it bloats
-the final binary and larger binaries are also bad for program speed.
+can then further be extended by checkin the 2nd, 3rd, .., nth element.
 
 The implementation of the memory allocator uses this technique in the `find_first_unmarked_bit` function as frequently the first word checked will have an unmarked bit.
 

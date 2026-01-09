@@ -12,6 +12,11 @@ Many data science applications involve repeatedly creating and destroying large 
 This is especially important for machine learning algorithms such as Random Forests, K-Means clustering, or Expectation-Maximization (EM), all of which allocate many temporary objects during training or inference. For example, a decision tree will repeatedly allocate memory for new nodes while it is being built, and a clustering algorithm may create temporary cluster assignments in each iteration. Having a fast and efficient allocator for these small objects can significantly improve performance.
 Text processing also benefits from small object allocators. Tokenisation, for instance, involves splitting text into many small strings or objects which are used briefly and then discarded. A general-purpose allocator will struggle to keep up with this allocation pattern, while a small object allocator can handle it efficiently by reusing memory from a fixed-size pool.
 
+While this mini-dissertation proposes a custom memory allocator for non-gpu tasks custom memory allocators for GPU based workloads can also provide improvement. A common barrier to entry
+for machine learning applications that require GPU's is the lack of VRAM on consumer GPU's. A more efficient memory allocator could better utilise the available memory on the GPU and lower
+the barrier to entry. Further any improvement in performance due to better allocation strategies would allow more complex models to be trained on GPU's and also decrease the training
+time on existing models. The paper by Isaac Gelado and Michael Garland @gelado2019throughput propose a memory allocator for a GPU to improve throughput.
+
 == Pre-allocating
 
 Big data science applications make extensive use of dynamically allocated memory be that when reading data, performing transformations or when various algorithms are run. Memory for all these applications need to be provided in some manner and many times the exact amount of memory is required is unknown. Furthermore many data science applications make extensive use of interpreted programming languages which store all of their data on the heap.
@@ -59,33 +64,33 @@ while keep_allocating() {
 Examining @lst:allocateunknown it is unknown when the function ```rust keep_allocating()``` will stop the loop so the amount of memory required cannot be pre-allocated. The only solution to allocate memory when the amount is not known beforehand is to allocate on demand as the code in @lst:allocateunknown does or guess how much will be needed and pre-allocate.
 However second option encounters issues such if the guess was too small more memory will need to be allocated and if it is too large memory is then wasted.
 If the amount of needed memory cannot be determined with some degree of precision the first option will be used and this is the scenario where a fast and efficient memory
-allocator will make a difference. This scenario does also apply in real world scenarios, for example when reading a CSV file the amount of memory required to store every data point in the file or even only some of the columns is not known before it is read.
+allocator will make a difference. This scenario does also apply in real world scenarios; for example when reading a CSV file the amount of memory required to store every data point in the file or even only some of the columns is not known before it is read.
 
 == Applications
 
 Many algorithms and applications used in data science and machine learning require allocating dynamic memory during their execution. Usually these allocations are for small objects—such as nodes, tuples, or temporary results that are created and destroyed many times. In situations like this performance can be drastically improved by an allocator that specialises in allocating and deallocating small objects.
 
-=== Random Forest
+// === Random Forest
 
 In the Random Forest @rigatti2017random algorithm when building decision trees new nodes are allocated for each split in the data. Since a random forest can build hundreds or thousands of trees in a single run, the number of small node allocations can easily reach into the millions. Using a small object allocator can reduce memory overhead and accelerate training.
 
-=== K-Means Clustering
+// === K-Means Clustering
 
 K-Means Clustering @burkardt2009k is another algorithm that can benefit. In each iteration every data point is assigned to a cluster. These assignments are stored temporarily and updated repeatedly. The data points often times are very small.
 
-=== Graph Algorithms
+// === Graph Algorithms
 
 Many graph algorithms such as PageRank, Dijkstra’s algorithm, or community detection, many graph nodes and edges are represented as small structs/objects with a few fields. As the graph is traversed, updated, or built, thousands or millions of small allocations may be required. A small object allocator ensures that these operations remain fast and memory efficient.
 
-=== Text Processing
+// === Text Processing
 
 Text processing and NLP pipelines are another area where small object allocation patterns emerge. For example, during tokenisation, stemming, or parsing, millions of short strings or metadata objects may be created and discarded. Efficiently managing memory for these transient objects improves the performance of data ingestion and preprocessing pipelines.
 
-=== Genetic Programming
+// === Genetic Programming
 
 Genetic programming @koza1994genetic is a technique where trees are generated which represent a program that is used to solve a problem. It is a evolutionary algorithm and can be applied to variety of scenarios. The algorithm consists of many trees where the size and shape of each tree is unknown and arbitrary. This kind of problem is perfect for a small object allocator since each tree's size is unknown the amount of memory required cannot be pre-allocated but the nodes in a tree are still relatively small. Since generating these trees consists of a lot of small memory allocations a small object memory allocator can have substantial performance benefits.
 
-=== Data Science Specific Programming Languages
+// === Data Science Specific Programming Languages
 
 Most data science tasks are put together using interpreted programming languages that heavily abstract away from the bare metal hardware that they run on. Even though the underlying algorithms are run using a more performant programming language most of the glue to put everything together is done in a high level programming language such as Python @python. Python already does use a custom memory allocator catered for small objects.
 
@@ -93,7 +98,7 @@ Most data science tasks are put together using interpreted programming languages
 
 To further expand the significance of where a small object memory allocator would be useful take the Genetic Programming algorithm as mentioned previously.
 
-=== Overview
+// === Overview
 
 Genetic programming (GP) is an evolutionary algorithm designed with the goal of creating a program to solve a problem, this could be a regression, classification or any other kind of problem. The algorithm works by generating trees where each node may or may not have children nodes. For example if the goal was to find a mathematical function to model some data (a regression problem) the GP could be provided with nodes for addition, subtraction, multiplication, division and then the inputs to the function. A tree could be generated that represents this function or program. For example:
 $
@@ -112,7 +117,7 @@ Could be modeled with the following tree:
 
 A GP will generate many of these trees randomly and then following a process of natural selection will create new trees from the old trees and so on. This is done many times over until a stopping criteria is met.
 
-=== Use of a Small Object Memory Allocator
+// === Use of a Small Object Memory Allocator
 
 The reason why a small object memory allocator would come in hand is since the trees are generated randomly the size of a tree cannot be known beforehand. Furthermore the nodes of a tree themselves usually have a very small memory footprints this means that these tiny objects are allocated thousands or even millions of time when a genetic program is run. This is ripe optimisation for a small object memory allocator.
 
