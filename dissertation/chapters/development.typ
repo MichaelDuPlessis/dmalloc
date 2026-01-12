@@ -30,6 +30,13 @@ The general process for deallocating memory is as follows:
   ),
 )
 
+The reason why a bin allocator was chosen for allocating small objects is due to its inherent performance traits when comes to small objects as it minimises internal fragmentation while maintaining speed.
+It is also combined with a bitset to achieve high throughput through a low algorithmic complexity. As the proposed allocators main purpose is to allocate many small objects effciently it is a natural choice
+due to its strong pairing with a bitset as will be discussed. The reasons for choosing a free list and page allocator as the next two sub allocators is for completeness. Without the other two allocators
+the proposed allocator could not be considered finished but they are however not the main focus of this mini-dissertation. The choice to use `mmap` as the backing allocator over
+the older `sbrk` is due to the fact that `sbrk` cannot always easily return memory to the operating system and this causes a problem with the page cache optimisation that is used
+to preallocate pages of memory to reduce the overhead of system calls.
+
 == Page Cache
 
 Allocating and deallocating memory pages is a slow operation as it requires a system call. To mitigate this issue the bin and free list allocators receive their memory pages from a page store which acts like a cache of memory pages. When a memory page is requested the page store will try to find a free page in its cache, if no pages are available pages are allocated using `mmap` to fill up the cache with an extra page being allocated which is then returned to the allocator requesting the memory. When an allocator returns memory to the page store the store will keep hold of the page so that it can be given to another allocator at a later time if the buffer holding the free pages is not full. If the buffer is full the page is returned to the operating system. The default number of pages that the store keeps cached is 4 but this can be modified using at compile time using the macro `STORE_SIZE`. The memory allocator that makes use of the page cache is responsible for assigning its metadata to the page returned. The page cache is just a drop in replacement for the `mmap` system call. When the program starts the page cache is initially empty.
@@ -45,6 +52,34 @@ Allocating and deallocating memory pages is a slow operation as it requires a sy
   placement: none,
   image("../images/allocator_process_flow.drawio.png"),
 )
+
+#code_block([Pseudo code for the page cache component of the proposed allocator.])[
+  ```
+  function allocate_pages() {
+    for i in range(pages.capacity()) {
+      pages[i] = mmap()
+    }
+  }
+
+  function request_page() {
+    if pages.is_empty() {
+      allocate_pages()  
+
+      return mmap()
+    } else {
+      return pages.pop()
+    }
+  }
+
+  function return_page(page) {
+    if pages.is_full() {
+      munmap(page)
+    } else {
+      pages.append(page)
+    }
+  }
+  ```
+]
 
 It may appear that the allocator leaks memory since it is never stated what it does with the cached memory pages when the program terminates but this is dealt with by the operating system as the OS will automatically clean up any memory pages allocated to the program on program termination.
 
