@@ -32,7 +32,7 @@
   [Added pseudocode.],
   [More descriptive figure captions.],
   [Figures are referenced from the text where a detailed discussion for the figure is given],
-  [Performing the expiriments again but with the inclusion of the number of system calls would be useful.],
+  [Performing the experiments again but with the inclusion of the number of system calls would be useful.],
   [This is out of the scope of the project and this has now been added to the future work section.],
   [Different page sizes should be tested.],
   [This is out of scope as the memory allocator is designed for "out of the box usage" and this is not mentioned in the problem statement.],
@@ -41,5 +41,5 @@
   [I believe this is because I failed to mention that each experiment was done over a number of independent runs which has now been recitified],
   [I disagree with this comment as Figure 6.60 shows the results of a real world algorithm whereas previous figures give results of synthetic benchmarks.
   You should use both synthetic and real-world benchmarks because they measure different aspects of performance. Synthetic benchmarks test specific components under controlled, ideal conditions and help identify theoretical limits, while real-world benchmarks measure how the software performs under realistic workloads with factors like caching, concurrency, I/O, and system interactions. The results can differ because synthetic tests simplify or isolate conditions, whereas real-world usage introduces variability and resource contention that affect actual performance.],
-  
+ 
 )

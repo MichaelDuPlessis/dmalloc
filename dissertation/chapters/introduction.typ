@@ -25,7 +25,8 @@ allocating small objects @bonwick1994slab.
 An important aspect in the field of data science and big data are not just data collection and data analysis but also running various algorithms on the collected data
 to derive results for various use cases such as prediction tasks. Many of these algorithms take significant time to run and train, thus optimising the runtime of these algorithms
 can be beneficial. Naturally these algorithms can be improved on a case by case basis but all these algorithms will make use of dynamic memory allocation, so improving this
-can lead to performance increases across the board instead of using the default memory allocator as is often the case by most programmers.
+can lead to performance increases across the board instead of using the default memory allocator as is often the case by most programmers. An out-of-the-box memory allocator
+designed for standard operating systems for the field of big data science is not easily found.
 
 There is little to no research in building custom memory allocators for the field of big data science. This mini-dissertation
 aims to address this by proposing a small object memory allocator for the specific purpose of running optimisation algorithms faster than the default memory allocator

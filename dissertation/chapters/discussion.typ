@@ -343,7 +343,7 @@ on Linux and what was stated there can be applied exactly here.
 @fig:macos-genetic shows the benchmark results for the runtime performance for the real world benchmark using the genetic programming algorithm the parameters of the genetic
 program have already been stated at @genetic-bench. The x-axis is text which maps to a population size and the y-axis is the measured mean time in seconds.
 Looking at the genetic benchmark the results are now the reverse of what happened on Linux. Now dmalloc is the superior memory allocator with a growing
-lead as the number of iterations increase. This is most likely due to the increased page size which is four times what it is on linux. Other factors may include a weaker memory
+lead as the number of iterations increase. This is most likely due to the increased page size which is four times what it is on Linux. Other factors may include a weaker memory
 allocator when compared to Linux but this unlikely as the artificial benchmarks are similar. Overall the benchmark on MacOS showed promising results performing better then malloc
 overall and is a suitable replacement for general purpose allocations but more importantly outperforms malloc in a real test when it comes to an optimisation problem. The gap in the
 genetic program benchmark also widens as the number of iterations increase showing that the speedup is more significant the longer the program runs. It is not possible to
@@ -356,7 +356,7 @@ of times that it is being requested is minimal. This means that the same number 
 == Summary
 
 Overall looking at all the benchmarks it is clear that there is merit in the design of dmalloc. It is also interesting to see how dmalloc performs better on MacOS
-when compared to linux. This is most likely due to the larger page size that MacOS has by default allowing for more allocations to occur before a system call needs to be made.
+when compared to Linux. This is most likely due to the larger page size that MacOS has by default allowing for more allocations to occur before a system call needs to be made.
 The larger page size also means that there is a lower level of internal fragmentation percentage wise. Both glibc malloc and magazine malloc have optimisations in place for
 small object allocation, this shows that dmalloc is competative with other state of the art memory allocators where it will perform similarly or even outperform it in some case.
 It also showed promise in a real world use case where it performed both well on Linux and MacOS for the genetic program showing that a there is performance gains that can

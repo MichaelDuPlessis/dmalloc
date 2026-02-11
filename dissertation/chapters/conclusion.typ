@@ -25,7 +25,9 @@ in a non-blocking manner would be to have each page have a lock on it, or an ato
 memory it can check if another thread is currently using that page. If that page is currently in use the current thread can either use a different page or allocate
 a new one. This way when, allocating memory, there will be no waiting by any thread. Reading can happen at any time since it is a non-destructive operation.
 Further benchmarks as well as comparisons to other state of the art memory allocators can yield further insights into how beneficial this research is. It would be interesting
-to examine how many system calls are made by each allocator to try and determine if that is the cause of the increased performance.
+to examine how many system calls are made by each allocator to try and determine if that is the cause of the increased performance. Further a current limitation is how the
+experiments performed do not measure the number of system calls made and a separate study should be conducted to find the best method to measure this. Increasing the page size
+by recompiling the Linux kernel can lead to valuable insights on the exact effects of page size and should be done in some future work.
 
 Overall this mini-dissertation clearly shows the importance of designing and building specialised tools for specific fields as well as the importance of memory allocators and
 the usefullness of custom memory allocation techniques over using the defualt memory allocator. It further goes on to show how a custom memory allocator can be applied to
